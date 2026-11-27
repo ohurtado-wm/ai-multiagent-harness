@@ -264,6 +264,14 @@
   .why-cut > p { color: var(--gray-dark); margin: 0 0 20px; max-width: 900px; }
   @media (prefers-reduced-motion: reduce) { .grow { transform: none; } }
 
+  .calibrate { margin-top: 22px; display: grid; grid-template-columns: 1.1fr 2fr; gap: 24px; align-items: stretch; background: var(--white); border: 2px dashed var(--magenta); border-radius: 20px; padding: 26px 28px; }
+  .calibrate h4 { margin: 0 0 8px; font-size: 22px; letter-spacing: -.01em; }
+  .calibrate > div > p { margin: 0; color: var(--gray-dark); font-size: 16px; }
+  .calibrate ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: c; }
+  .calibrate li { counter-increment: c; background: var(--canvas); border-radius: 14px; padding: 16px; font-size: 15px; color: var(--gray-dark); position: relative; padding-top: 50px; }
+  .calibrate li::before { content: counter(c); position: absolute; top: 14px; left: 16px; width: 28px; height: 28px; border-radius: 50%; background: var(--magenta); color: var(--white); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .calibrate li b { color: var(--navy); }
+
   /* Lifecycle */
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
   .steps::before { content: ""; position: absolute; top: 34px; left: 8%; right: 8%; height: 3px; background: var(--gray-mid); }
@@ -890,7 +898,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
     </div>
     <div class="why-cut" id="why-cut">
       <h3 class="reveal">Why cut at 250k tokens or 5 PRs?</h3>
-      <p class="reveal">Measured on four real sessions of the loop. The context window is not the limit; the <b>cost of re-reading it on every turn</b> is.</p>
+      <p class="reveal">Measured on four real sessions of the loop in one project. The context window is not the limit; the <b>cost of re-reading it on every turn</b> is. The numbers are a starting point: calibrate them for your repository.</p>
       <div class="diagram reveal">
         <svg viewBox="0 0 1200 430" role="img" aria-label="Tokens re-read per issue grew from 14.5 million to 28 million; a session starts at about 85 thousand tokens and is cut at 250 thousand">
           <!-- chart 1: tokens re-read per issue -->
@@ -939,6 +947,17 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <text x="24" y="389" font-size="17" font-weight="700" fill="#fff">Cutting resets the cost: a fresh session starts again at ~85k. In the terminal (no usage tool) the cut is every 3 PRs.</text>
         </svg>
 
+      </div>
+      <div class="calibrate reveal">
+        <div>
+          <h4>Calibrate it for your project</h4>
+          <p>These limits were measured on <b>one</b> repository. The starting context is mostly the harness itself, but what each issue adds depends on your code: diff size, test output, reports. In a small project each issue adds less, so <b>many more PRs fit</b> before the cut; in a large one, fewer.</p>
+        </div>
+        <ol>
+          <li><b>Measure the start:</b> the context of a fresh session before the first issue.</li>
+          <li><b>Measure each issue:</b> how much the context grows from one issue to the next, over a few runs.</li>
+          <li><b>Set the cut</b> where a turn still costs what you accept, and the PR cap a little above the issues that fit. Change both in <code>resolve-issues</code> («Cut», step 5).</li>
+        </ol>
       </div>
     </div>
   </div>

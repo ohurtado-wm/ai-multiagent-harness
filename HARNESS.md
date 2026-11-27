@@ -375,6 +375,8 @@ stateDiagram-v2
 
 The window is not the limit; **the cost of re-reading the whole context on every turn is**, and it grows with the session, not with the size of the issue. At 45–50k per issue, 4 or 5 issues fit between the ~85k start and 250k, so the context cut is the main rule and the 5-PR cap is the backstop for unusually small issues. A fresh session starts again at ~85k. In a terminal, where the loop cannot read its own context size, it cuts every 3 merged PRs (an issue with a plan counts as two).
 
+**Calibrate it per project.** These numbers were measured on one repository. The starting context is mostly the harness itself, but what each issue adds depends on the codebase: diff sizes, test output, subagent reports. In a small project each issue adds less and many more PRs fit before the cut; in a large one, fewer. To calibrate: note the context of a fresh session, note how much it grows per issue over a few runs, set the token cut where a turn still costs what you accept, and set the PR cap a little above the number of issues that fit. Both values live in the `resolve-issues` skill («Cut», step 5).
+
 ## 8. Where humans decide
 
 | Moment | Who | How |
@@ -410,7 +412,7 @@ No single layer is trusted on its own:
 5. **Folder rules:** rewrite each folder's `AGENTS.md` and its «Code Review Rules» for your stack. Add or remove folders and the matching `coder-*` names in `coder.md` and `orchestrate-team`.
 6. **Generated files:** list them in `CONFIG` of `.claude/hooks/generated-guard.mjs`.
 7. **Regression and platform rules:** name your slow scripts `scripts/e2e-*.sh`, `scripts/integration-*.sh` or `scripts/regression-*.sh` (or change the pattern in `team-guard.mjs`); adjust the mobile toolchain list if you have other heavy platforms.
-8. **Onboarding:** add your toolchain to the table in `onboarding/SKILL.md` and to `onboarding/scripts/check.sh`.
+8. **Onboarding:** add your toolchain to the table in `onboarding/SKILL.md` and to `onboarding/scripts/check.sh`. After a few runs of the issue loop, calibrate its cut (250k tokens / 5 PRs) for your repository (section 7).
 9. **Codex (optional):** install the Codex CLI and the `codex@openai-codex` plugin for Claude Code. Without it, coders implement directly and say so; the rest of the harness is unchanged. The Codex model and effort are set in `coder.md` and `briefs.md`.
 10. **Check the harness:** `npm run test:harness` and `scripts/verify.sh docs`.
 

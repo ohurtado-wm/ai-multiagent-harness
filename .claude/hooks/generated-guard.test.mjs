@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { CONFIG, evaluate } from "./generated-guard.mjs";
 
 const ROOT = "/repo";
@@ -50,4 +52,31 @@ test("CLI: exit code 2 with a message, and broken JSON does not block", () => {
   assert.equal(bad.status, 2);
   assert.match(bad.stderr, /npm run tokens/);
   assert.equal(run("not json").status, 0);
+});
+
+test("Codex hooks in a trusted project check shell commands and whole generated files", () => {
+  const directory = new URL("../../packages/ui/", import.meta.url);
+  const config = JSON.parse(readFileSync(new URL("../../.codex/hooks.json", import.meta.url), "utf8"));
+  const run = (tool, command) => {
+    const entry = config.hooks.PreToolUse.find(({ matcher }) => new RegExp(matcher).test(tool));
+    assert.ok(entry, tool);
+    return spawnSync("sh", ["-c", entry.hooks[0].command], {
+      cwd: directory,
+      input: JSON.stringify({ cwd: fileURLToPath(directory), tool_name: tool, tool_input: { command } }),
+      encoding: "utf8",
+    });
+  };
+
+  assert.equal(run("Bash", "git status --short").status, 0);
+  const push = run("Bash", "git push origin dev");
+  assert.equal(push.status, 2);
+  assert.match(push.stderr, /no push to|do not push|push.*dev/i);
+
+  const edit = run("apply_patch", "*** Begin Patch\n*** Update File: src/tokens.css\n@@\n-old\n+new\n*** End Patch");
+  assert.equal(edit.status, 2);
+  assert.match(edit.stderr, /npm run tokens/);
+
+  const move = run("apply_patch", "*** Begin Patch\n*** Update File: README.md\n*** Move to: src/tokens.css\n@@\n-old\n+new\n*** End Patch");
+  assert.equal(move.status, 2);
+  assert.equal(run("apply_patch", "*** Begin Patch\n*** Add File: src/index.ts\n+export {};\n*** End Patch").status, 0);
 });

@@ -52,6 +52,7 @@ test("several areas at once, documentation included", () => {
 
 test("harness configuration, CI and setup scripts → docs", () => {
   assert.deepEqual(areasFor([".claude/hooks/git-guard.mjs"]), ["docs"]);
+  assert.deepEqual(areasFor([".codex/hooks.json", ".codex/agents/coder.toml"]), ["docs"]);
   assert.deepEqual(areasFor([".github/workflows/plan.yml"]), ["docs"]);
   assert.deepEqual(areasFor(["scripts/set-codeowners.mjs", "scripts/setup-new-repo.sh", "scripts/setup-github-labels.sh"]), ["docs"]);
 });

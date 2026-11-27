@@ -5,7 +5,7 @@
 // a hand-written file, for example fixtures embedded in a SQL test) when a new generator appears.
 import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const CONFIG = {
   // Whole generated files.
@@ -62,13 +62,25 @@ export function evaluate(tool, input, root, read = (p) => (existsSync(p) ? readF
   return null;
 }
 
+// Codex apply_patch supplies one patch for potentially several source and destination paths.
+function evaluatePatch(patch, root, cwd) {
+  if (typeof patch !== "string") return null;
+  for (const [, file] of patch.matchAll(/^\*\*\* (?:Add File:|Update File:|Delete File:|Move to:) (.+)$/gm)) {
+    const warning = evaluate("apply_patch", { file_path: resolve(cwd, file) }, root);
+    if (warning) return warning;
+  }
+  return null;
+}
+
 async function main() {
   let text = "";
   for await (const chunk of process.stdin) text += chunk;
   try {
     const data = JSON.parse(text);
     const root = process.env.CLAUDE_PROJECT_DIR ?? data.cwd ?? process.cwd();
-    const warning = evaluate(data.tool_name, data.tool_input, root);
+    const warning = data.tool_name === "apply_patch"
+      ? evaluatePatch(data.tool_input?.command, fileURLToPath(new URL("../..", import.meta.url)), data.cwd ?? process.cwd())
+      : evaluate(data.tool_name, data.tool_input, root);
     if (warning) {
       console.error(`Blocked by .claude/hooks/generated-guard.mjs. ${warning}`);
       process.exit(2);

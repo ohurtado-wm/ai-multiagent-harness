@@ -6,5 +6,10 @@
 /shared/schemas/ @ohurtado-wm
 /.github/ @ohurtado-wm
 /.claude/ @ohurtado-wm
+/.agents/ @ohurtado-wm
+/.codex/ @ohurtado-wm
+/docs/guides/TEAM_WORKFLOW.md @ohurtado-wm
+/docs/guides/TEAM_BRIEFS.md @ohurtado-wm
+/docs/guides/CONFIGURE_AGENTS.md @ohurtado-wm
 /AGENTS.md @ohurtado-wm
 /CLAUDE.md @ohurtado-wm

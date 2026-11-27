@@ -69,7 +69,7 @@ Reviewers are read-only: whoever coordinates or closes the work creates the issu
 
 ## 4. Review threads are the record
 
-Every inline finding on a PR gets its own reply with the fixing commit and is resolved; a general comment does not replace that. The coordinator lists the open threads with a GraphQL query, replies (`gh api …/pulls/<n>/comments/<id>/replies`) and resolves (`resolveReviewThread`); exact commands in [`orchestrate-team`](../../.claude/skills/orchestrate-team/SKILL.md) («Fixing PR findings»). At the end, the list of open threads must be empty, except those the owner chose to leave open.
+Every inline finding on a PR gets its own reply with the fixing commit and is resolved; a general comment does not replace that. The coordinator lists the open threads with a GraphQL query, replies (`gh api …/pulls/<n>/comments/<id>/replies`) and resolves (`resolveReviewThread`); exact commands in [the team workflow](TEAM_WORKFLOW.md#fixing-pr-findings-reviewer-codex-on-github-or-the-person) («Fixing PR findings»). At the end, the list of open threads must be empty, except those the owner chose to leave open.
 
 ## 5. Issues as an agent work queue
 

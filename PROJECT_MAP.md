@@ -11,7 +11,9 @@
 | `shared/` | Design tokens (`design/`), contracts between apps (`schemas/`) and shared fixtures (`fixtures/`). |
 | `docs/` | Plans (`plans/`), status per area (`status/`), guides (`guides/`) and architecture (`architecture/`). |
 | `scripts/` | Validation and harness scripts: `verify.sh`, `plan-status.mjs`, `pr-check-plan.mjs`, `check-links.mjs`, `check-json.mjs`, `build-tokens.mjs`, `setup-github-labels.sh` (labels for the GitHub Issues integration), `setup-new-repo.sh` and `set-codeowners.mjs` (one-time setup of a repository created from the template). |
-| `.claude/` | The agent harness: `settings.json`, `hooks/`, `agents/`, `skills/`, `launch.json`. Explained in [`HARNESS.md`](HARNESS.md). |
+| `.claude/` | Claude Code configuration: `settings.json`, `hooks/`, `agents/`, `skills/`, `launch.json`. Explained in [`HARNESS.md`](HARNESS.md). |
+| `.agents/skills/` | Codex entry points for team orchestration and model configuration. |
+| `.codex/` | Codex role definitions and local hooks. |
 | `.github/` | CI (`workflows/ci.yml`), plan check (`workflows/plan.yml`), PR template, `finding` issue template and `CODEOWNERS`. |
 
 The implementation status (summary in [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md), detail per area in `docs/status/`) is not mandatory reading: open it only if you need to know what is done in an area.
@@ -28,7 +30,7 @@ Each area runs the same commands as CI. If a tool or script is missing, the chec
 
 | Area | What it runs | Triggered by changes in |
 |---|---|---|
-| `docs` | Markdown links, hook tests, plan table, harness script tests | `*.md`, `.claude/`, `.github/`, harness scripts |
+| `docs` | Markdown links, hook tests, plan table, harness script tests | `*.md`, `.claude/`, `.agents/`, `.codex/`, `.github/`, harness scripts |
 | `contracts` | JSON well-formedness of `shared/`; `npm run contracts:check` if defined | `shared/schemas/`, `shared/fixtures/`, `backend/migrations/` |
 | `web` | Tokens up to date; `typecheck`, `lint`, `test`, `build` of `apps/web` and `packages/ui` if defined | `apps/web/`, `packages/`, `shared/design/` |
 | `backend` | `npm test` (or your DB test runner) in `backend/` | `backend/`, `shared/` |

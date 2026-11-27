@@ -4,12 +4,12 @@
 //
 // Usage in CI: PR_BRANCH=<branch> PR_BODY=<description> node scripts/pr-check-plan.mjs <changed files…>
 //   or:        node scripts/pr-check-plan.mjs --branch X --body "text" file1 file2…
-// Exit code 1 if the plan is missing. It only applies to feature/, fix/ and chore/ branches;
+// Exit code 1 if the plan is missing. It only applies to feature/, fix/, chore/ and codex/ branches;
 // docs/ branches and dev → main PRs are not checked.
 import { pathToFileURL } from "node:url";
 
-const PREFIXES = ["feature/", "fix/", "chore/"];
-const CODE = ["apps/", "backend/", "packages/", "scripts/", ".claude/"];
+const PREFIXES = ["feature/", "fix/", "chore/", "codex/"];
+const CODE = ["apps/", "backend/", "packages/", "scripts/", ".claude/", ".agents/", ".codex/"];
 
 // Returns { ok, reason }. `files` are paths relative to the root, with "/".
 export function check({ branch = "", files = [], body = "" }) {

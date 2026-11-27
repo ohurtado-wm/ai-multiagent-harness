@@ -2,9 +2,10 @@
 
 Real status of the agent harness, newest first. How it works: [`HARNESS.md`](../../HARNESS.md).
 
-## Presentation slides
+## Presentation site
 
-- [`docs/site/index.html`](../site/index.html): a self-contained slide deck (15 slides, 1600×900 scaled to the screen) that summarizes `HARNESS.md` with diagrams, in the brand palette. Keyboard navigation, full screen and print to PDF; no external dependencies. Also served by the `harness-slides` entry in `.claude/launch.json`.
+- [`docs/site/index.html`](../site/index.html): landing page that explains the whole harness (`HARNESS.md`) with animated diagrams, a tabbed explorer of the building blocks and links to the deck.
+- [`docs/site/presentation.html`](../site/presentation.html): a self-contained slide deck (15 slides, 1600×900 scaled to the screen) that summarizes `HARNESS.md` with diagrams, in the brand palette. Keyboard navigation, full screen and print to PDF; no external dependencies. Both pages are served by the `harness-site` entry in `.claude/launch.json` (port 3400).
 - Checked on desktop at 1600×900; mobile layouts are out of scope.
 
 ## Hardening after the review against the official docs

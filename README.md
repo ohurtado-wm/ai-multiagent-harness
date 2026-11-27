@@ -3,7 +3,7 @@
 A ready-to-use **harness for orchestrating AI coding agents** (Claude Code as coordinator and reviewer, Codex as code writer) on top of a basic monorepo skeleton. The apps in `apps/`, `backend/` and `packages/` are placeholders: replace them with your project and keep the harness.
 
 - **How it works:** [`HARNESS.md`](HARNESS.md) (start here).
-- **Presentation (slides):** open [`docs/site/index.html`](docs/site/index.html) in a browser. 15 slides with the diagrams; ← → to navigate, F for full screen, P to print or save as PDF.
+- **Visual site:** open [`docs/site/index.html`](docs/site/index.html) in a browser: a landing page that explains the whole harness with animated diagrams, and links to the **slide deck** [`docs/site/presentation.html`](docs/site/presentation.html) (15 slides; ← → to navigate, F full screen, P print or PDF).
 - **Rules for agents:** [`AGENTS.md`](AGENTS.md) (imported by `CLAUDE.md`).
 - **Repository map and validation commands:** [`PROJECT_MAP.md`](PROJECT_MAP.md).
 - **GitHub Issues integration** (plans, findings and the agent work queue live in issues): [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md).

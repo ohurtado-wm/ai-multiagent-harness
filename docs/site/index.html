@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Multi-Agent Harness</title>
+<title>AI Multi-Agent Harness · How it works</title>
+<meta name="description" content="How the AI multi-agent harness turns Claude Code and Codex into a predictable engineering team.">
 <style>
   :root {
     --canvas: #F8F8F8;
@@ -16,176 +17,137 @@
     --gray-light: #E8EEF8;
     --font: "Inter", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif;
     --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --ease: cubic-bezier(.2, .7, .2, 1);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
-  body {
-    background: var(--gray-light);
-    color: var(--navy);
-    font-family: var(--font);
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  body { margin: 0; background: var(--canvas); color: var(--navy); font-family: var(--font); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--blue); }
+  code, .mono { font-family: var(--mono); font-size: .88em; background: var(--gray-light); padding: 1px 7px; border-radius: 6px; color: var(--navy); }
+  .wrap { width: min(1200px, 100% - 48px); margin: 0 auto; }
+  section { padding: 112px 0; position: relative; }
+  section.white { background: var(--white); }
 
-  /* ---------- Stage: a fixed 1600x900 canvas scaled to the window ---------- */
-  #stage {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 1600px; height: 900px;
-    transform-origin: center center;
+  /* ---------- Scroll progress + header ---------- */
+  #progress { position: fixed; top: 0; left: 0; height: 4px; width: 0; background: var(--magenta); z-index: 60; }
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255, 255, 255, .86); backdrop-filter: saturate(1.4) blur(12px);
+    border-bottom: 1px solid var(--gray-mid);
   }
-  .slide {
-    position: absolute; inset: 0;
-    width: 1600px; height: 900px;
-    background: var(--canvas);
-    padding: 64px 96px 88px;
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 24px 64px rgba(7, 1, 84, .12);
+  .top .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+  .brand { font-weight: 800; letter-spacing: -.01em; text-decoration: none; color: var(--navy); font-size: 18px; white-space: nowrap; }
+  .brand span { color: var(--magenta); }
+  nav.links { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; }
+  nav.links a { text-decoration: none; color: var(--gray-dark); font-size: 14px; font-weight: 600; padding: 8px 10px; border-radius: 8px; white-space: nowrap; transition: color .2s, background .2s; }
+  nav.links a:hover { color: var(--navy); background: var(--gray-light); }
+  nav.links a.active { color: var(--blue); background: var(--gray-light); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700;
+    border-radius: 999px; padding: 12px 22px; font-size: 15px; transition: transform .25s var(--ease), box-shadow .25s, background .25s;
+    white-space: nowrap;
   }
-  .slide.active { display: flex; }
-  body.ready .slide.active { animation: enter .35s ease-out; }
-  @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .slide.active { animation: none; } }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.primary { background: var(--blue); color: var(--white); box-shadow: 0 10px 24px rgba(0, 71, 255, .28); }
+  .btn.primary:hover { box-shadow: 0 14px 30px rgba(0, 71, 255, .38); }
+  .btn.hot { background: var(--magenta); color: var(--white); box-shadow: 0 10px 24px rgba(249, 0, 211, .3); }
+  .btn.ghost { color: var(--white); border: 1px solid rgba(255, 255, 255, .35); }
+  .btn.ghost:hover { background: rgba(255, 255, 255, .08); }
+  .btn.small { padding: 9px 16px; font-size: 14px; }
+  .btn .play { width: 0; height: 0; border-left: 9px solid currentColor; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
 
-  .slide::after { /* footer rule */
-    content: ""; position: absolute; left: 96px; right: 96px; bottom: 56px;
-    height: 1px; background: var(--gray-mid);
-  }
-  .foot {
-    position: absolute; left: 96px; right: 96px; bottom: 22px;
-    display: flex; justify-content: space-between;
-    font-size: 16px; color: var(--gray-dark); letter-spacing: .02em;
-  }
-  .foot b { color: var(--navy); font-weight: 600; }
+  /* ---------- Section headings ---------- */
+  .kicker { font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); margin: 0 0 14px; display: flex; gap: 12px; align-items: center; }
+  .core { background: var(--magenta); color: var(--white); padding: 4px 11px; border-radius: 999px; letter-spacing: .1em; }
+  h2 { font-size: clamp(34px, 4vw, 50px); line-height: 1.08; letter-spacing: -.025em; margin: 0 0 18px; font-weight: 800; max-width: 900px; }
+  .lead { font-size: 20px; color: var(--gray-dark); max-width: 820px; margin: 0 0 48px; }
+  .lead strong { color: var(--navy); }
 
-  /* ---------- Typography ---------- */
-  .kicker {
-    font-size: 18px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--blue); margin: 0 0 10px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .kicker .core {
-    background: var(--magenta); color: var(--white);
-    padding: 4px 12px; border-radius: 999px; letter-spacing: .08em; font-size: 15px;
-  }
-  h2 { font-size: 54px; line-height: 1.08; margin: 0 0 12px; letter-spacing: -.02em; font-weight: 800; }
-  .lead { font-size: 24px; line-height: 1.45; color: var(--gray-dark); margin: 0 0 32px; max-width: 1200px; }
-  .lead strong, p strong { color: var(--navy); }
-  code, .mono { font-family: var(--mono); font-size: .86em; background: var(--gray-light); padding: 1px 7px; border-radius: 6px; color: var(--navy); }
-  .body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  /* ---------- Reveal on scroll ---------- */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease), transform .7s var(--ease); transition-delay: var(--d, 0s); }
+  .reveal.in { opacity: 1; transform: none; }
+  .reveal.left { transform: translateX(-32px); }
+  .reveal.left.in { transform: none; }
+  .reveal.zoom { transform: scale(.94); }
+  .reveal.zoom.in { transform: none; }
 
-  /* ---------- Components ---------- */
-  .grid { display: grid; gap: 22px; }
-  .g2 { grid-template-columns: 1fr 1fr; }
+  /* ---------- Hero ---------- */
+  .hero { background: var(--navy); color: var(--white); padding: 96px 0 0; overflow: hidden; }
+  .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; filter: blur(90px); opacity: .45; pointer-events: none; }
+  .hero::before { width: 520px; height: 520px; background: var(--blue); top: -160px; right: -80px; animation: drift 14s ease-in-out infinite alternate; }
+  .hero::after { width: 420px; height: 420px; background: var(--magenta); bottom: -120px; left: -120px; opacity: .3; animation: drift 18s ease-in-out infinite alternate-reverse; }
+  @keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-60px, 40px) scale(1.12); } }
+  .hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+  .hero .eyebrow { display: inline-flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--gray-mid); background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .16); padding: 7px 14px; border-radius: 999px; }
+  .hero .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--magenta); box-shadow: 0 0 0 0 rgba(249, 0, 211, .7); animation: ping 2s infinite; }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(249, 0, 211, .7); } 80%, 100% { box-shadow: 0 0 0 12px rgba(249, 0, 211, 0); } }
+  .hero h1 { font-size: clamp(44px, 5.6vw, 76px); line-height: 1.02; letter-spacing: -.035em; margin: 22px 0 22px; font-weight: 800; }
+  .hero h1 em { font-style: normal; background: linear-gradient(90deg, var(--magenta), #ff6ff0, var(--magenta)); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 6s linear infinite; }
+  @keyframes shine { to { background-position: 200% center; } }
+  .hero p.sub { font-size: 21px; color: var(--gray-mid); max-width: 560px; margin: 0 0 34px; }
+  .hero .ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-visual svg { width: 100%; height: auto; display: block; }
+  .orbit { transform-origin: 280px 230px; animation: spin 40s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pulse { transform-origin: 280px 230px; animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(1); opacity: .7; } to { transform: scale(1.7); opacity: 0; } }
+  .float { animation: float 5s ease-in-out infinite; }
+  .float.b { animation-delay: -1.2s; } .float.c { animation-delay: -2.4s; } .float.d { animation-delay: -3.1s; } .float.e { animation-delay: -4s; }
+  @keyframes float { 50% { transform: translateY(-8px); } }
+
+  .stats { position: relative; z-index: 1; margin-top: 72px; border-top: 1px solid rgba(255, 255, 255, .14); }
+  .stats .wrap { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+  .stat { padding: 30px 20px; border-right: 1px solid rgba(255, 255, 255, .1); }
+  .stat:last-child { border-right: 0; }
+  .stat b { display: block; font-size: 48px; line-height: 1; font-weight: 800; letter-spacing: -.02em; }
+  .stat span { font-size: 15px; color: var(--gray-mid); }
+  .stat.hl b { color: var(--magenta); }
+
+  /* ---------- Cards and grids ---------- */
+  .grid { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
   .g3 { grid-template-columns: repeat(3, 1fr); }
   .g4 { grid-template-columns: repeat(4, 1fr); }
   .g5 { grid-template-columns: repeat(5, 1fr); }
-  .card {
-    background: var(--white); border: 1px solid var(--gray-mid); border-radius: 18px;
-    padding: 24px 26px;
-  }
-  .card h3 { margin: 0 0 8px; font-size: 25px; letter-spacing: -.01em; }
-  .card p { margin: 0; font-size: 19px; line-height: 1.45; color: var(--gray-dark); }
-  .card.accent { border-top: 6px solid var(--blue); }
-  .card.hot { border-top: 6px solid var(--magenta); }
-  .num {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--navy); color: var(--white); font-weight: 800; font-size: 19px; flex: none;
-  }
-  .num.m { background: var(--magenta); }
-  .num.b { background: var(--blue); }
-  .chip {
-    display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 17px; font-weight: 600;
-    background: var(--gray-light); color: var(--navy); border: 1px solid var(--gray-mid); margin: 0 8px 8px 0;
-    font-family: var(--mono);
-  }
-  .chip.blue { background: var(--blue); color: var(--white); border-color: var(--blue); }
-  .chip.mag { background: var(--white); color: var(--navy); border: 2px solid var(--magenta); }
-  .muted { color: var(--gray-dark); }
+  .card { background: var(--white); border: 1px solid var(--gray-mid); border-radius: 18px; padding: 24px; transition: transform .3s var(--ease), box-shadow .3s, border-color .3s; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(7, 1, 84, .1); border-color: var(--blue); }
+  .card h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.01em; }
+  .card p { margin: 0; color: var(--gray-dark); font-size: 16px; }
+  .num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: var(--white); font-weight: 800; font-size: 16px; flex: none; }
+  .num.m { background: var(--magenta); } .num.b { background: var(--blue); }
 
-  /* ---------- Title slide ---------- */
-  .title-slide { background: var(--navy); color: var(--white); justify-content: center; }
-  .title-slide::after { background: rgba(255, 255, 255, .18); }
-  .title-slide .foot, .title-slide .foot b { color: var(--gray-mid); }
-  .title-slide .bar { width: 120px; height: 8px; background: var(--magenta); border-radius: 4px; margin-bottom: 36px; }
-  .title-slide h1 { font-size: 104px; line-height: 1; margin: 0 0 24px; letter-spacing: -.035em; font-weight: 800; }
-  .title-slide h1 span { color: var(--magenta); }
-  .title-slide .sub { font-size: 30px; line-height: 1.4; color: var(--gray-mid); max-width: 1100px; margin: 0 0 64px; }
-  .stats { display: flex; gap: 22px; }
-  .stat { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .18); border-radius: 18px; padding: 22px 28px; min-width: 230px; }
-  .stat b { display: block; font-size: 60px; line-height: 1; font-weight: 800; color: var(--white); }
-  .stat span { font-size: 19px; color: var(--gray-mid); }
-  .stat.hl { border-color: var(--magenta); }
+  /* Why: problem -> fix flip cards */
+  .why .card { display: flex; flex-direction: column; gap: 14px; min-height: 210px; }
+  .why .problem { font-size: 15px; color: var(--gray-dark); text-decoration: line-through; text-decoration-color: rgba(80, 101, 142, .5); }
+  .why .arrow { width: 36px; height: 2px; background: var(--blue); position: relative; transition: width .4s var(--ease); }
+  .why .arrow::after { content: ""; position: absolute; right: -2px; top: -4px; border-left: 8px solid var(--blue); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .why .card:hover .arrow { width: 64px; }
+  .why .fix { font-size: 17px; line-height: 1.45; }
+  .why .card.hotcard { border: 2px solid var(--magenta); }
+  .why .card.hotcard .arrow, .why .card.hotcard .arrow::after { background: var(--magenta); border-left-color: var(--magenta); }
+  .note { margin-top: 40px; display: flex; gap: 18px; align-items: center; background: var(--navy); color: var(--white); border-radius: 18px; padding: 22px 28px; font-size: 18px; }
+  .note b { color: var(--magenta); }
 
-  /* ---------- Problem / fix rows ---------- */
-  .pf { display: grid; grid-template-columns: 1fr 64px 1.35fr; gap: 14px 0; align-items: stretch; }
-  .pf .p, .pf .f { border-radius: 14px; padding: 14px 22px; font-size: 20px; line-height: 1.4; display: flex; align-items: center; }
-  .pf .p { background: var(--gray-light); color: var(--gray-dark); }
-  .pf .f { background: var(--white); border: 1px solid var(--gray-mid); }
-  .pf .f.hot { border: 2px solid var(--magenta); }
-  .pf .arrow { display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 30px; font-weight: 700; }
-  .pf .head { font-size: 16px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-dark); padding: 0 4px; }
-
-  /* ---------- Pillars ---------- */
-  .pillars { display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; flex: 1; }
-  .pillar { border-radius: 24px; padding: 36px 40px; height: 100%; display: flex; flex-direction: column; }
+  /* Pillars */
+  .pillars { display: grid; grid-template-columns: 1fr 220px 1fr; align-items: stretch; }
+  .pillar { border-radius: 24px; padding: 38px; }
   .pillar.repo { background: var(--white); border: 2px solid var(--blue); }
-  .pillar.gh { background: var(--navy); color: var(--white); border: 2px solid var(--navy); position: relative; }
-  .pillar.gh::before { content: "CORE"; position: absolute; top: -16px; right: 32px; background: var(--magenta); color: var(--white); font-weight: 800; font-size: 15px; letter-spacing: .14em; padding: 6px 14px; border-radius: 999px; }
-  .pillar .tag { font-size: 18px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .pillar.gh { background: var(--navy); color: var(--white); position: relative; }
+  .pillar.gh::before { content: "CORE"; position: absolute; top: -14px; right: 28px; background: var(--magenta); color: var(--white); font-weight: 800; font-size: 12px; letter-spacing: .14em; padding: 5px 12px; border-radius: 999px; }
+  .pillar .tag { font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); }
   .pillar.gh .tag { color: var(--magenta); }
-  .pillar h3 { font-size: 46px; margin: 8px 0 6px; letter-spacing: -.02em; }
-  .pillar .what { font-size: 24px; color: var(--gray-dark); margin-bottom: 24px; }
+  .pillar h3 { font-size: 36px; margin: 6px 0 4px; letter-spacing: -.02em; }
+  .pillar .what { color: var(--gray-dark); margin: 0 0 20px; }
   .pillar.gh .what { color: var(--gray-mid); }
-  .pillar ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
-  .pillar li { font-size: 21px; line-height: 1.35; padding-left: 30px; position: relative; }
-  .pillar li::before { content: ""; position: absolute; left: 0; top: 10px; width: 12px; height: 12px; border-radius: 3px; background: var(--blue); }
+  .pillar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .pillar li { padding-left: 26px; position: relative; }
+  .pillar li::before { content: ""; position: absolute; left: 0; top: 9px; width: 11px; height: 11px; border-radius: 3px; background: var(--blue); }
   .pillar.gh li::before { background: var(--magenta); }
   .pillar.gh code { background: rgba(255, 255, 255, .12); color: var(--white); }
-  .bridge { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 17px; color: var(--gray-dark); text-align: center; font-weight: 600; }
-  .bridge svg { width: 160px; height: 70px; }
+  .bridge { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; font-size: 14px; color: var(--gray-dark); font-weight: 600; }
+  .bridge svg { width: 180px; }
 
-  /* ---------- Layers ---------- */
-  .layers { display: grid; gap: 12px; flex: 1; }
-  .layer { display: grid; grid-template-columns: 70px 330px 1fr; align-items: center; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 16px; padding: 12px 22px; }
-  .layer .n { font-size: 34px; font-weight: 800; color: var(--blue); }
-  .layer h3 { margin: 0; font-size: 26px; }
-  .layer h3 small { display: block; font-size: 17px; font-weight: 500; color: var(--gray-dark); margin-top: 2px; }
-  .layer .chips .chip { margin-bottom: 4px; font-size: 16px; }
-  .layer.l3 { border-left: 8px solid var(--navy); }
-  .layer.l4 { border-left: 8px solid var(--magenta); }
-
-  /* ---------- Lists ---------- */
-  .roster { display: grid; gap: 12px; }
-  .row { display: flex; gap: 16px; align-items: flex-start; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 14px 20px; }
-  .row h4 { margin: 0; font-size: 21px; font-family: var(--mono); }
-  .row p { margin: 2px 0 0; font-size: 18px; color: var(--gray-dark); line-height: 1.4; }
-  .col-title { font-size: 20px; font-weight: 800; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
-  .col-title .dot { width: 14px; height: 14px; border-radius: 4px; background: var(--blue); }
-  .col-title .dot.m { background: var(--magenta); }
-  .col-title .dot.n { background: var(--navy); }
-
-  /* ---------- Hooks ---------- */
-  .hook { display: flex; flex-direction: column; gap: 10px; }
-  .hook .when { font-size: 15px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
-  .hook h3 { font-family: var(--mono); font-size: 22px; margin: 0; }
-  .hook ul { margin: 0; padding-left: 20px; font-size: 18px; line-height: 1.45; color: var(--gray-dark); }
-  .banner { margin-top: 22px; display: flex; gap: 18px; align-items: center; background: var(--navy); color: var(--white); border-radius: 16px; padding: 18px 26px; font-size: 20px; line-height: 1.4; }
-  .banner b { color: var(--white); }
-  .banner .badge { background: var(--magenta); color: var(--white); font-weight: 800; border-radius: 10px; padding: 6px 12px; font-size: 16px; letter-spacing: .08em; white-space: nowrap; }
-  .banner code { background: rgba(255, 255, 255, .14); color: var(--white); }
-
-  /* ---------- Use cards (GitHub) ---------- */
-  .use { display: flex; flex-direction: column; gap: 12px; }
-  .use .who { margin-top: auto; font-size: 16px; color: var(--gray-dark); border-top: 1px solid var(--gray-light); padding-top: 10px; }
-  .use .who b { color: var(--navy); }
-
-  /* ---------- Diagrams ---------- */
-  .diagram { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
-  .diagram svg { width: 100%; height: 100%; }
+  /* SVG diagrams */
   svg text { font-family: var(--font); }
   .n-box { fill: var(--white); stroke: var(--gray-mid); stroke-width: 2; }
   .n-blue { fill: var(--white); stroke: var(--blue); stroke-width: 3; }
@@ -200,146 +162,316 @@
   .edge { fill: none; stroke: var(--blue); stroke-width: 3; }
   .edge-m { fill: none; stroke: var(--magenta); stroke-width: 3; }
   .edge-g { fill: none; stroke: var(--gray-dark); stroke-width: 2.5; stroke-dasharray: 8 7; }
+  .flow { stroke-dasharray: 10 9; animation: flow 1.1s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -19; } }
+  .diagram { background: var(--white); border: 1px solid var(--gray-mid); border-radius: 22px; padding: 28px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram svg .node { transition: transform .3s var(--ease); transform-box: fill-box; transform-origin: center; }
+  .diagram svg .node:hover { transform: scale(1.04); }
 
-  /* ---------- Lifecycle stepper ---------- */
-  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin-top: 8px; }
-  .step { position: relative; padding: 0 10px; }
-  .step .disc { width: 74px; height: 74px; border-radius: 50%; background: var(--white); border: 3px solid var(--blue); color: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; position: relative; z-index: 1; }
-  .step.human .disc { border-color: var(--magenta); background: var(--magenta); color: var(--white); }
-  .step:not(:last-child)::before { content: ""; position: absolute; top: 36px; left: 84px; right: -4px; height: 3px; background: var(--blue); }
-  .step h3 { margin: 18px 0 6px; font-size: 24px; }
-  .step .skill { font-family: var(--mono); font-size: 16px; color: var(--blue); font-weight: 700; }
-  .step p { font-size: 18px; line-height: 1.45; color: var(--gray-dark); margin: 8px 0 0; }
-  .legend { display: flex; gap: 28px; font-size: 18px; color: var(--gray-dark); margin-top: auto; align-items: center; }
-  .legend i { display: inline-block; width: 18px; height: 18px; border-radius: 50%; vertical-align: -3px; margin-right: 8px; border: 3px solid var(--blue); background: var(--white); }
-  .legend i.h { background: var(--magenta); border-color: var(--magenta); }
-  .loopnote { margin-top: 34px; display: flex; gap: 16px; align-items: center; background: var(--white); border: 2px dashed var(--blue); border-radius: 16px; padding: 16px 22px; font-size: 20px; line-height: 1.4; }
+  /* Building blocks explorer */
+  .explorer { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+  .tabs { display: flex; flex-direction: column; gap: 6px; position: sticky; top: 100px; }
+  .layer-label { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-dark); margin: 14px 0 4px 14px; }
+  .layer-label:first-child { margin-top: 0; }
+  .tab { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border: 1px solid transparent; background: transparent; border-radius: 12px; padding: 12px 14px; font: inherit; font-weight: 700; font-size: 16px; color: var(--navy); cursor: pointer; transition: background .25s, border-color .25s, transform .25s var(--ease); }
+  .tab:hover { background: var(--white); border-color: var(--gray-mid); transform: translateX(4px); }
+  .tab .n { width: 30px; height: 30px; border-radius: 9px; background: var(--gray-light); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; color: var(--blue); transition: background .25s, color .25s; }
+  .tab[aria-selected="true"] { background: var(--white); border-color: var(--blue); box-shadow: 0 10px 24px rgba(0, 71, 255, .12); }
+  .tab[aria-selected="true"] .n { background: var(--blue); color: var(--white); }
+  .panel { display: none; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 22px; padding: 34px; min-height: 520px; }
+  .panel.active { display: block; animation: panelIn .45s var(--ease); }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .panel h3 { font-size: 28px; margin: 0 0 6px; letter-spacing: -.02em; }
+  .panel > p { color: var(--gray-dark); margin: 0 0 24px; font-size: 17px; }
+  .list { display: grid; gap: 12px; }
+  .item { display: grid; grid-template-columns: 210px 1fr; gap: 18px; align-items: start; padding: 16px 18px; border-radius: 14px; background: var(--canvas); border: 1px solid var(--gray-light); transition: border-color .25s, background .25s; }
+  .item:hover { border-color: var(--gray-mid); background: var(--white); }
+  .item h4 { margin: 0; font-family: var(--mono); font-size: 15px; }
+  .item h4 small { display: block; font-family: var(--font); font-weight: 600; color: var(--gray-dark); font-size: 13px; margin-top: 4px; }
+  .item p { margin: 0; color: var(--gray-dark); font-size: 15px; }
+  .callout { margin-top: 22px; display: flex; gap: 16px; align-items: flex-start; border-radius: 16px; padding: 18px 22px; background: var(--navy); color: var(--white); font-size: 16px; }
+  .callout .badge { background: var(--magenta); color: var(--white); font-weight: 800; border-radius: 8px; padding: 4px 10px; font-size: 12px; letter-spacing: .1em; white-space: nowrap; margin-top: 2px; }
+  .callout code { background: rgba(255, 255, 255, .14); color: var(--white); }
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--gray-light); color: var(--navy); border: 1px solid var(--gray-mid); font-family: var(--mono); }
+  .chip.ok { background: #fff; border-color: var(--blue); color: var(--blue); }
+  .chip.no { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .chip.mag { background: var(--white); border: 2px solid var(--magenta); }
+  .box-title { font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gray-dark); margin: 0 0 12px; }
+  .cache { margin-top: 26px; }
+  .bar { height: 14px; border-radius: 999px; background: var(--gray-light); overflow: hidden; margin: 8px 0 4px; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--gray-dark); transition: width 1.4s var(--ease); }
+  .bar.long i { background: linear-gradient(90deg, var(--blue), var(--magenta)); }
+  .panel.active .bar i { width: var(--w); }
+  .barlabel { display: flex; justify-content: space-between; font-size: 14px; color: var(--gray-dark); }
+  pre.code { margin: 0; background: var(--navy); color: var(--white); border-radius: 16px; padding: 22px 24px; font-family: var(--mono); font-size: 14.5px; line-height: 1.7; overflow-x: auto; }
+  pre.code .k { color: #8fb0ff; } pre.code .v { color: #ff8af0; } pre.code .c { color: var(--gray-mid); opacity: .75; }
+  .term .ok { color: #7ee2a8; } .term .fail { color: #ff8a8a; } .term .skip { color: #ffd479; }
+  .tree { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+  .tree .lvl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .tree .lvl .pill { border-radius: 10px; padding: 8px 12px; font-size: 14px; font-weight: 700; border: 2px solid var(--gray-mid); background: var(--white); }
+  .tree .lvl .pill.root { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .tree .lvl .pill.ip { border-color: var(--blue); }
+  .tree .lvl .pill.val { border-color: var(--magenta); }
+  .tree .lvl .arrowr { color: var(--blue); font-weight: 800; }
 
-  /* ---------- Decisions ---------- */
-  .decide { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-  .decide .card { display: flex; flex-direction: column; gap: 10px; padding: 22px; }
-  .decide .card h3 { font-size: 22px; }
-  .decide .how { font-size: 17px; color: var(--gray-dark); line-height: 1.4; }
-  .decide .who { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--magenta); }
+  /* GitHub section */
+  .gh-section { background: var(--navy); color: var(--white); overflow: hidden; }
+  .gh-section::before { content: ""; position: absolute; width: 640px; height: 640px; border-radius: 50%; background: var(--magenta); filter: blur(140px); opacity: .18; top: -200px; right: -200px; }
+  .gh-section .wrap { position: relative; }
+  .gh-section .kicker { color: var(--magenta); }
+  .gh-section .lead { color: var(--gray-mid); }
+  .gh-section .lead strong { color: var(--white); }
+  .uses { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; position: relative; }
+  .uses::before { content: ""; position: absolute; left: 4%; right: 4%; top: 18px; height: 2px; background: linear-gradient(90deg, var(--magenta), var(--blue)); transform-origin: left; transform: scaleX(0); transition: transform 1.4s var(--ease); }
+  .uses.in::before { transform: scaleX(1); }
+  .use { position: relative; padding-top: 56px; }
+  .use .num { position: absolute; top: 0; left: 0; background: var(--magenta); box-shadow: 0 0 0 6px var(--navy); }
+  .use h3 { font-size: 19px; margin: 0 0 8px; }
+  .use p { color: var(--gray-mid); font-size: 15px; margin: 0 0 10px; }
+  .use .by { font-family: var(--mono); font-size: 13px; color: var(--magenta); }
+  .gh-section code { background: rgba(255, 255, 255, .12); color: var(--white); }
+  .gh-diagram { margin-top: 56px; display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: stretch; }
+  .gh-diagram .diagram { border: 0; }
+  .labels { display: flex; flex-direction: column; gap: 14px; }
+  .lab { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .16); border-radius: 16px; padding: 18px; transition: background .25s, border-color .25s; }
+  .lab:hover { background: rgba(255, 255, 255, .1); border-color: var(--magenta); }
+  .lab .chip { background: var(--white); color: var(--navy); border: 2px solid var(--magenta); }
+  .lab p { margin: 10px 0 0; color: var(--gray-mid); font-size: 15px; }
+  .principles { margin-top: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .principles .p { border-radius: 16px; padding: 20px 22px; background: var(--white); color: var(--navy); }
+  .principles .p h4 { margin: 0 0 6px; font-size: 17px; }
+  .principles .p p { margin: 0; color: var(--gray-dark); font-size: 15px; }
+  .gh-section .principles code { background: var(--gray-light); color: var(--navy); }
+
+  /* Lifecycle */
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+  .steps::before { content: ""; position: absolute; top: 34px; left: 8%; right: 8%; height: 3px; background: var(--gray-mid); }
+  .steps::after { content: ""; position: absolute; top: 34px; left: 8%; right: 8%; height: 3px; background: linear-gradient(90deg, var(--blue), var(--magenta)); transform-origin: left; transform: scaleX(0); transition: transform 1.8s var(--ease); }
+  .steps.in::after { transform: scaleX(1); }
+  .step { text-align: center; padding: 0 10px; position: relative; z-index: 1; }
+  .step .disc { width: 70px; height: 70px; margin: 0 auto 18px; border-radius: 50%; background: var(--white); border: 3px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; transition: transform .3s var(--ease), background .3s, color .3s; }
+  .step:hover .disc { transform: scale(1.1); background: var(--blue); color: var(--white); }
+  .step.human .disc { background: var(--magenta); border-color: var(--magenta); color: var(--white); }
+  .step h3 { margin: 0 0 4px; font-size: 20px; }
+  .step .skill { font-family: var(--mono); font-size: 13px; color: var(--blue); font-weight: 700; }
+  .step.human .skill { color: var(--magenta); }
+  .step p { color: var(--gray-dark); font-size: 15px; margin: 8px 0 0; }
+  .loopnote { margin-top: 40px; display: flex; gap: 16px; align-items: center; background: var(--white); border: 2px dashed var(--blue); border-radius: 18px; padding: 18px 24px; font-size: 17px; }
+  .loopnote .spin { display: inline-flex; width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: var(--white); align-items: center; justify-content: center; font-weight: 800; font-size: 20px; animation: spin 6s linear infinite; flex: none; }
+
+  /* Teams */
+  .team-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+  .flowlist { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 10px; }
+  .flowlist li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 12px 14px; font-size: 15px; color: var(--gray-dark); }
+  .flowlist li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: var(--white); font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .flowlist li b { color: var(--navy); }
+  .flowlist li.owner::before { background: var(--magenta); }
+
+  /* Decide */
+  .decide .card .who { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--magenta); display: block; margin-bottom: 8px; }
   .decide .card.never { background: var(--navy); border-color: var(--navy); }
-  .decide .card.never h3, .decide .card.never .how { color: var(--white); }
+  .decide .card.never h3 { color: var(--white); } .decide .card.never p { color: var(--gray-mid); }
 
-  /* ---------- Defense in depth ---------- */
-  .depth { display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 1; justify-content: center; }
-  .ring { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 14px; border-radius: 14px; padding: 11px 22px; background: var(--white); border: 1px solid var(--gray-mid); font-size: 20px; }
-  .ring .k { font-weight: 800; color: var(--blue); font-size: 24px; }
-  .ring b { font-size: 21px; }
-  .ring .tagr { font-size: 15px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-dark); }
-  .ring.outer { background: var(--navy); color: var(--white); border-color: var(--navy); }
-  .ring.outer .k { color: var(--magenta); }
-  .ring.outer .tagr { color: var(--magenta); }
+  /* Defense in depth */
+  .depth { display: grid; grid-template-columns: 480px 1fr; gap: 48px; align-items: center; }
+  .rings svg { width: 100%; height: auto; display: block; }
+  .ring { fill: none; stroke: var(--gray-mid); stroke-width: 22; opacity: 0; transform-origin: 240px 240px; transform: scale(.6); transition: opacity .6s var(--ease), transform .8s var(--ease), stroke .3s; transition-delay: var(--d); }
+  .rings.in .ring { opacity: 1; transform: none; }
+  .ring.outer { stroke: var(--navy); }
+  .ring.hl { stroke: var(--magenta) !important; }
+  .ring-num { font-size: 14px; font-weight: 800; fill: var(--blue); }
+  .ring-num.outer { fill: var(--white); }
+  .layers-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .layers-list li { display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--gray-mid); background: var(--white); cursor: default; transition: border-color .25s, transform .25s var(--ease), box-shadow .25s; }
+  .layers-list li:hover, .layers-list li.hl { border-color: var(--magenta); transform: translateX(6px); box-shadow: 0 10px 22px rgba(249, 0, 211, .12); }
+  .layers-list .k { font-weight: 800; color: var(--blue); font-size: 20px; }
+  .layers-list b { display: block; font-size: 16px; }
+  .layers-list span { color: var(--gray-dark); font-size: 14px; }
+  .layers-list li.outer { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .layers-list li.outer .k { color: var(--magenta); } .layers-list li.outer span { color: var(--gray-mid); }
 
-  /* ---------- Adopt checklist ---------- */
-  .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; }
-  .check { display: flex; gap: 16px; align-items: flex-start; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 14px 18px; }
-  .check p { margin: 0; font-size: 19px; line-height: 1.4; color: var(--gray-dark); }
+  /* Adopt */
+  .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .check { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start; text-align: left; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 16px; padding: 16px 18px; font: inherit; color: var(--navy); cursor: pointer; transition: border-color .25s, background .25s, transform .25s var(--ease); }
+  .check:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .check .box { width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--gray-mid); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--gray-dark); transition: background .25s, border-color .25s, color .25s; }
+  .check p { margin: 0; color: var(--gray-dark); font-size: 15.5px; }
   .check p b { color: var(--navy); }
   .check.hot { border: 2px solid var(--magenta); }
+  .check[aria-pressed="true"] { background: var(--gray-light); }
+  .check[aria-pressed="true"] .box { background: var(--blue); border-color: var(--blue); color: var(--white); }
+  .check[aria-pressed="true"] .box span { display: none; }
+  .check[aria-pressed="true"] .box::after { content: "✓"; }
+  .meter { margin-top: 24px; display: flex; align-items: center; gap: 16px; font-weight: 700; }
+  .meter .bar { flex: 1; margin: 0; }
+  .meter .bar i { background: linear-gradient(90deg, var(--blue), var(--magenta)); }
 
-  /* ---------- Closing ---------- */
-  .limits { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-  .limits .card { padding: 20px; }
-  .limits .card h3 { font-size: 21px; }
-  .limits .card p { font-size: 17px; }
-  .links { margin-top: 36px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-  .links a { display: block; background: var(--navy); color: var(--white); text-decoration: none; border-radius: 16px; padding: 20px 22px; font-size: 20px; font-weight: 700; }
-  .links a span { display: block; font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--gray-mid); margin-top: 6px; }
-  .links a:hover, .links a:focus-visible { background: var(--blue); outline: none; }
-  .quote { margin-top: 30px; font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
-  .quote span { color: var(--magenta); }
+  /* Inventory */
+  .inventory { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .inventory .card h3 { font-family: var(--mono); font-size: 16px; color: var(--blue); }
+  .inventory ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .inventory li { font-size: 14px; color: var(--gray-dark); }
+  .inventory li code { font-size: 13px; }
 
-  /* ---------- Controls (outside the scaled stage) ---------- */
-  #progress { position: fixed; top: 0; left: 0; height: 5px; background: var(--magenta); transition: width .3s; z-index: 10; }
-  .ctrl { position: fixed; bottom: 18px; right: 18px; display: flex; gap: 8px; z-index: 10; transition: opacity .3s; }
-  body.idle .ctrl { opacity: 0; pointer-events: none; }
-  .ctrl button { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--gray-mid); background: var(--white); color: var(--navy); font-size: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 18px rgba(7, 1, 84, .12); }
-  .ctrl button:hover, .ctrl button:focus-visible { background: var(--blue); color: var(--white); border-color: var(--blue); outline: none; }
-  .hint { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); font-size: 14px; color: var(--white); background: var(--navy); padding: 8px 16px; border-radius: 999px; z-index: 10; transition: opacity .6s; box-shadow: 0 6px 18px rgba(7, 1, 84, .2); }
-  .hint.gone { opacity: 0; pointer-events: none; }
+  /* Closing */
+  .cta-band { background: linear-gradient(120deg, var(--navy) 0%, #12086e 60%, var(--navy) 100%); color: var(--white); border-radius: 28px; padding: 56px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; position: relative; overflow: hidden; }
+  .cta-band::after { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; background: var(--magenta); filter: blur(110px); opacity: .35; right: -80px; top: -120px; animation: drift 12s ease-in-out infinite alternate; }
+  .cta-band > * { position: relative; z-index: 1; }
+  .cta-band h2 { margin: 0 0 10px; color: var(--white); }
+  .cta-band p { margin: 0; color: var(--gray-mid); font-size: 18px; max-width: 640px; }
+  .cta-band .actions { display: flex; flex-direction: column; gap: 12px; }
+  footer { padding: 40px 0 56px; color: var(--gray-dark); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--navy); font-weight: 600; text-decoration: none; margin-left: 18px; }
+  footer a:hover { color: var(--blue); }
 
-  @media print {
-    @page { size: 1600px 900px; margin: 0; }
-    body { overflow: visible; background: var(--white); }
-    #stage { position: static; transform: none !important; width: 1600px; height: auto; }
-    .slide { display: flex !important; position: relative; break-after: page; box-shadow: none; animation: none; }
-    #progress, .ctrl, .hint { display: none; }
+  /* Back to top */
+  #toTop { position: fixed; right: 22px; bottom: 22px; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--navy); color: var(--white); font-size: 20px; cursor: pointer; opacity: 0; transform: translateY(12px); transition: opacity .3s, transform .3s var(--ease), background .2s; z-index: 40; box-shadow: 0 10px 24px rgba(7, 1, 84, .25); }
+  #toTop.show { opacity: 1; transform: none; }
+  #toTop:hover { background: var(--blue); }
+
+  @media (max-width: 1000px) {
+    .hero .wrap, .pillars, .explorer, .team-layout, .depth, .gh-diagram, .cta-band { grid-template-columns: 1fr; }
+    .g4, .g5, .uses, .inventory, .stats .wrap { grid-template-columns: repeat(2, 1fr); }
+    .steps { grid-template-columns: repeat(3, 1fr); row-gap: 36px; }
+    .steps::before, .steps::after { display: none; }
+    .checklist, .twocol, .principles, .g3 { grid-template-columns: 1fr; }
+    .tabs { position: static; }
+    nav.links { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    .ring { opacity: 1; transform: none; }
   }
 </style>
 </head>
 <body>
 <div id="progress"></div>
 
-<main id="stage" aria-live="polite">
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">AI Multi-Agent Harness<span>.</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#why">Why</a>
+      <a href="#pillars">Pillars</a>
+      <a href="#blocks">Building blocks</a>
+      <a href="#github">GitHub Issues</a>
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#teams">Teams</a>
+      <a href="#loop">Issue loop</a>
+      <a href="#safety">Safety</a>
+      <a href="#adopt">Adopt</a>
+    </nav>
+    <a class="btn primary small" href="presentation.html"><span class="play"></span>Presentation</a>
+  </div>
+</header>
 
-  <!-- 1 · Title -->
-  <section class="slide title-slide" data-title="Title">
-    <div class="bar"></div>
-    <h1>AI Multi-Agent<br>Harness<span>.</span></h1>
-    <p class="sub">Rules, hooks, skills and roles that turn Claude Code and Codex into a predictable engineering team: <strong style="color:#fff">people decide, the harness enforces.</strong></p>
-    <div class="stats">
-      <div class="stat"><b>8</b><span>skills (procedures)</span></div>
-      <div class="stat"><b>7</b><span>agents and roles</span></div>
-      <div class="stat"><b>5</b><span>enforcing hooks</span></div>
-      <div class="stat"><b>70</b><span>unit tests on the harness</span></div>
-      <div class="stat hl"><b>1</b><span>coordination backbone: GitHub Issues</span></div>
-    </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · how it works</span><span class="pg"></span></div>
-  </section>
+<main id="top">
 
-  <!-- 2 · Why -->
-  <section class="slide" data-title="Why a harness">
-    <p class="kicker">01 · Why</p>
-    <h2>A capable agent is not a reliable team</h2>
-    <p class="lead">A harness is everything <strong>around</strong> the model that makes its work repeatable and safe.</p>
-    <div class="body">
-      <div class="pf">
-        <div class="head">Bare agent</div><div></div><div class="head">With the harness</div>
-        <div class="p">Forgets yesterday's decisions</div><div class="arrow">→</div><div class="f"><span><b>The repository is the memory:</b> plans with a status header, generated status page, context injected at session start</span></div>
-        <div class="p">Follows rules only when it remembers them</div><div class="arrow">→</div><div class="f"><span><b>Hooks</b> block the critical actions mechanically</span></div>
-        <div class="p">Different output every time</div><div class="arrow">→</div><div class="f"><span><b>Skills</b> turn recurring workflows into fixed procedures</span></div>
-        <div class="p">One huge, expensive context</div><div class="arrow">→</div><div class="f"><span><b>Subagents and teams:</b> narrow roles, own context, cheaper models</span></div>
-        <div class="p">Reviews its own work</div><div class="arrow">→</div><div class="f"><span><b>Codex writes, Claude reviews,</b> a person merges</span></div>
-        <div class="p">"All tests pass", with no proof</div><div class="arrow">→</div><div class="f"><span><b>One validation entry point</b> (<code>scripts/verify.sh</code>) for agents and CI</span></div>
-        <div class="p">Work and findings get lost in chat</div><div class="arrow">→</div><div class="f hot"><span><b>GitHub Issues</b> tracks every plan, every deferred finding and the agents' work queue</span></div>
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow reveal"><i></i>Claude Code · Codex · GitHub</span>
+      <h1 class="reveal" style="--d:.1s">Turn coding agents into a <em>predictable team</em>.</h1>
+      <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles around the models. <strong style="color:#fff">People decide. The harness enforces.</strong></p>
+      <div class="ctas reveal" style="--d:.3s">
+        <a class="btn hot" href="presentation.html"><span class="play"></span>View the presentation</a>
+        <a class="btn ghost" href="#why">Explore how it works ↓</a>
       </div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · why</span><span class="pg"></span></div>
-  </section>
+    <div class="hero-visual reveal zoom" style="--d:.2s">
+      <svg viewBox="0 0 560 460" role="img" aria-label="The coordinator connected to the owner, Codex, the reviewer, hooks and GitHub Issues">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0047FF" stop-opacity=".55"/><stop offset="100%" stop-color="#0047FF" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="280" cy="230" r="200" fill="url(#glow)"/>
+        <circle class="orbit" cx="280" cy="230" r="182" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.5" stroke-dasharray="4 10"/>
+        <circle class="orbit" cx="280" cy="230" r="120" fill="none" stroke="rgba(249,0,211,.35)" stroke-width="1.5" stroke-dasharray="2 12" style="animation-direction:reverse; animation-duration:28s"/>
+        <g stroke-width="2.5" fill="none">
+          <line class="flow" x1="280" y1="230" x2="280" y2="56" stroke="#F900D3"/>
+          <line class="flow" x1="280" y1="230" x2="90" y2="160" stroke="#8fb0ff"/>
+          <line class="flow" x1="280" y1="230" x2="470" y2="160" stroke="#8fb0ff"/>
+          <line class="flow" x1="280" y1="230" x2="110" y2="372" stroke="#F900D3"/>
+          <line class="flow" x1="280" y1="230" x2="452" y2="372" stroke="#8fb0ff"/>
+        </g>
+        <circle class="pulse" cx="280" cy="230" r="70" fill="none" stroke="#F900D3" stroke-width="3"/>
+        <circle cx="280" cy="230" r="70" fill="#FFFFFF"/>
+        <text x="280" y="224" text-anchor="middle" font-size="19" font-weight="800" fill="#070154">Coordinator</text>
+        <text x="280" y="248" text-anchor="middle" font-size="13" fill="#50658E">one git author</text>
+        <g class="float"><rect x="205" y="26" width="150" height="54" rx="14" fill="#F900D3"/><text x="280" y="52" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Owner</text><text x="280" y="70" text-anchor="middle" font-size="12" fill="#fff">decides · merges</text></g>
+        <g class="float b"><rect x="15" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="90" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Codex</text><text x="90" y="177" text-anchor="middle" font-size="12" fill="#50658E">writes the code</text></g>
+        <g class="float c"><rect x="395" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="470" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Reviewer</text><text x="470" y="177" text-anchor="middle" font-size="12" fill="#50658E">Claude reviews</text></g>
+        <g class="float d"><rect x="25" y="345" width="170" height="54" rx="14" fill="#fff" stroke="#F900D3" stroke-width="3"/><text x="110" y="371" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">GitHub Issues</text><text x="110" y="389" text-anchor="middle" font-size="12" fill="#50658E">coordination</text></g>
+        <g class="float e"><rect x="377" y="345" width="150" height="54" rx="14" fill="#fff"/><text x="452" y="371" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Hooks</text><text x="452" y="389" text-anchor="middle" font-size="12" fill="#50658E">enforce the rules</text></g>
+      </svg>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat reveal"><b data-count="8">0</b><span>skills (procedures)</span></div>
+      <div class="stat reveal" style="--d:.08s"><b data-count="7">0</b><span>agents and roles</span></div>
+      <div class="stat reveal" style="--d:.16s"><b data-count="5">0</b><span>enforcing hooks</span></div>
+      <div class="stat reveal" style="--d:.24s"><b data-count="70">0</b><span>unit tests on the harness</span></div>
+      <div class="stat hl reveal" style="--d:.32s"><b data-count="5">0</b><span>uses of GitHub Issues</span></div>
+    </div>
+  </div>
+</section>
 
-  <!-- 3 · Two pillars -->
-  <section class="slide" data-title="Two pillars">
-    <p class="kicker">02 · The idea</p>
-    <h2>Two pillars: detail and coordination</h2>
-    <p class="lead">Agents read and write both. Neither one duplicates the other.</p>
+<!-- ================= WHY ================= -->
+<section id="why" class="why">
+  <div class="wrap">
+    <p class="kicker reveal">01 · Why a harness</p>
+    <h2 class="reveal">A capable agent is not a reliable team.</h2>
+    <p class="lead reveal">A coding agent on its own is a capable but forgetful contractor. A <strong>harness</strong> is everything around the model that makes its work repeatable and safe.</p>
+    <div class="grid g4">
+      <div class="card reveal" style="--d:0s"><span class="problem">Forgets context between sessions</span><span class="arrow"></span><span class="fix"><b>The repository is the memory:</b> plans with a status header and context injected at session start.</span></div>
+      <div class="card reveal" style="--d:.06s"><span class="problem">Ignores team conventions</span><span class="arrow"></span><span class="fix"><b>One rule file</b> (<code>AGENTS.md</code>) for every agent, plus one per folder.</span></div>
+      <div class="card reveal" style="--d:.12s"><span class="problem">Follows rules only when it remembers them</span><span class="arrow"></span><span class="fix"><b>Hooks</b> enforce the critical rules mechanically.</span></div>
+      <div class="card reveal" style="--d:.18s"><span class="problem">Inconsistent output</span><span class="arrow"></span><span class="fix"><b>Skills</b> turn recurring workflows into fixed procedures.</span></div>
+      <div class="card reveal" style="--d:.24s"><span class="problem">One huge, expensive context</span><span class="arrow"></span><span class="fix"><b>Subagents and teams:</b> narrow roles, own context, cheaper models.</span></div>
+      <div class="card reveal" style="--d:.3s"><span class="problem">Reviews its own work</span><span class="arrow"></span><span class="fix"><b>Codex writes, Claude reviews,</b> a person merges.</span></div>
+      <div class="card reveal" style="--d:.36s"><span class="problem">"All tests pass", with no proof</span><span class="arrow"></span><span class="fix"><b>One validation entry point</b> (<code>scripts/verify.sh</code>) for agents and CI.</span></div>
+      <div class="card hotcard reveal" style="--d:.42s"><span class="problem">Work and findings get lost in chat</span><span class="arrow"></span><span class="fix"><b>GitHub Issues</b> tracks every plan, every deferred finding and the agents' work queue.</span></div>
+    </div>
+    <div class="note reveal"><span class="num m">★</span><span>The design goal: a person steps in for <b>decisions</b> (scope, approvals, merges), never for <b>enforcement</b>.</span></div>
+  </div>
+</section>
+
+<!-- ================= PILLARS ================= -->
+<section id="pillars" class="white">
+  <div class="wrap">
+    <p class="kicker reveal">02 · The idea</p>
+    <h2 class="reveal">Two pillars: detail and coordination.</h2>
+    <p class="lead reveal">The repository holds the <strong>detail</strong>; GitHub Issues holds the <strong>coordination</strong>. Agents read and write both, and neither one duplicates the other.</p>
     <div class="pillars">
-      <div class="pillar repo">
+      <div class="pillar repo reveal left">
         <span class="tag">Repository</span>
         <h3>The detail</h3>
-        <span class="what">What must be built, and how</span>
+        <p class="what">What must be built, and how.</p>
         <ul>
           <li><code>AGENTS.md</code>: one set of rules for every agent</li>
           <li>Plans in <code>docs/plans/</code> with a <code>status:</code> header</li>
-          <li>Status per area, generated plan tree</li>
+          <li>Status per area and a generated plan tree</li>
           <li>Hooks, skills and roles in <code>.claude/</code></li>
         </ul>
       </div>
-      <div class="bridge">
-        <svg viewBox="0 0 160 70" aria-hidden="true">
-          <defs><marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker></defs>
-          <line x1="12" y1="22" x2="148" y2="22" stroke="#0047FF" stroke-width="4" marker-end="url(#ab)"/>
-          <line x1="148" y1="50" x2="12" y2="50" stroke="#F900D3" stroke-width="4" marker-end="url(#ab)"/>
+      <div class="bridge reveal" style="--d:.2s">
+        <svg viewBox="0 0 180 80" aria-hidden="true">
+          <defs><marker id="pa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker><marker id="pm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker></defs>
+          <line class="flow" x1="14" y1="26" x2="166" y2="26" stroke="#0047FF" stroke-width="4" marker-end="url(#pa)"/>
+          <line class="flow" x1="166" y1="56" x2="14" y2="56" stroke="#F900D3" stroke-width="4" marker-end="url(#pm)"/>
         </svg>
         <span><code>issue: 42</code> in the plan<br><code>Closes #42</code> in the PR</span>
       </div>
-      <div class="pillar gh">
+      <div class="pillar gh reveal" style="--d:.1s">
         <span class="tag">GitHub Issues</span>
         <h3>The coordination</h3>
-        <span class="what">What exists, who is on it, what closed it</span>
+        <p class="what">What exists, who is on it, what closed it.</p>
         <ul>
           <li>An issue for every plan: epics and sub-issues</li>
           <li>An issue for every deferred finding</li>
@@ -348,459 +480,534 @@
         </ul>
       </div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · two pillars</span><span class="pg"></span></div>
-  </section>
+  </div>
+</section>
 
-  <!-- 4 · Building blocks -->
-  <section class="slide" data-title="Building blocks">
-    <p class="kicker">03 · Architecture</p>
-    <h2>Five layers</h2>
-    <p class="lead">From what agents <strong>read</strong> to what <strong>proves</strong> the work is done.</p>
-    <div class="layers">
-      <div class="layer"><span class="n">1</span><h3>Instructions<small>what agents read</small></h3><div class="chips"><span class="chip">AGENTS.md</span><span class="chip">CLAUDE.md → @AGENTS.md</span><span class="chip">folder AGENTS.md + Code Review Rules</span><span class="chip">PROJECT_MAP.md</span></div></div>
-      <div class="layer"><span class="n">2</span><h3>Procedures<small>how work is done</small></h3><div class="chips"><span class="chip">8 skills</span><span class="chip">7 subagents / team roles</span><span class="chip">briefs per role</span></div></div>
-      <div class="layer l3"><span class="n">3</span><h3>Enforcement<small>what cannot happen</small></h3><div class="chips"><span class="chip">5 hooks (fail closed)</span><span class="chip">permission deny rules</span><span class="chip">.env* denied</span></div></div>
-      <div class="layer l4"><span class="n">4</span><h3>Memory<small>where state lives</small></h3><div class="chips"><span class="chip">plans + status header</span><span class="chip">docs/status/plans.md</span><span class="chip mag">GitHub issues, labels, PR threads</span></div></div>
-      <div class="layer"><span class="n">5</span><h3>Verification<small>proof, not claims</small></h3><div class="chips"><span class="chip">scripts/verify.sh</span><span class="chip">CI by area</span><span class="chip">plan check on every PR</span></div></div>
-    </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · building blocks</span><span class="pg"></span></div>
-  </section>
+<!-- ================= BUILDING BLOCKS ================= -->
+<section id="blocks">
+  <div class="wrap">
+    <p class="kicker reveal">03 · Building blocks</p>
+    <h2 class="reveal">Five layers, from what agents read to what proves the work.</h2>
+    <p class="lead reveal">Pick a block to see what it contains and why it exists.</p>
+    <div class="explorer reveal">
+      <div class="tabs" role="tablist" aria-label="Building blocks">
+        <div class="layer-label">1 · Instructions</div>
+        <button class="tab" role="tab" aria-selected="true" aria-controls="p-instr" id="t-instr"><span class="n">1</span>Rule files</button>
+        <div class="layer-label">2 · Procedures</div>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-skills" id="t-skills"><span class="n">2a</span>Skills</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-agents" id="t-agents"><span class="n">2b</span>Subagents and roles</button>
+        <div class="layer-label">3 · Enforcement</div>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-hooks" id="t-hooks"><span class="n">3a</span>Hooks</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-perms" id="t-perms"><span class="n">3b</span>Permissions</button>
+        <div class="layer-label">4 · Memory</div>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-memory" id="t-memory"><span class="n">4</span>Plans, status, GitHub</button>
+        <div class="layer-label">5 · Verification</div>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="p-verify" id="t-verify"><span class="n">5</span>verify.sh and CI</button>
+      </div>
 
-  <!-- 5 · Skills and agents -->
-  <section class="slide" data-title="Skills and agents">
-    <p class="kicker">04 · Procedures</p>
-    <h2>Skills say how. Agents say who.</h2>
-    <p class="lead">A skill is a fixed procedure triggered by a request or <code>/name</code>. An agent is a role with its own tools and model.</p>
-    <div class="body">
-      <div class="grid g2" style="gap:36px; flex:1;">
-        <div>
-          <p class="col-title"><span class="dot"></span>Skills</p>
-          <div class="grid g2" style="gap:12px;">
-            <div class="row"><div><h4>feature-plan</h4><p>Plan in a fixed shape + GitHub issue</p></div></div>
-            <div class="row"><div><h4>new-branch</h4><p>Clean branch from an up-to-date dev</p></div></div>
-            <div class="row"><div><h4>close-increment</h4><p>Verify, Result, status, PR to dev</p></div></div>
-            <div class="row"><div><h4>orchestrate-team</h4><p>A team takes a milestone to a green PR</p></div></div>
-            <div class="row"><div><h4>resolve-issues</h4><p>Loop over <code>ai-queue</code> issues</p></div></div>
-            <div class="row"><div><h4>onboarding</h4><p>Repo summary + environment check</p></div></div>
-            <div class="row"><div><h4>verify-ui</h4><p>Screenshots and texts from a running UI</p></div></div>
-            <div class="row"><div><h4>reference-parity</h4><p>Diff against the reference app</p></div></div>
+      <div>
+        <div class="panel active" role="tabpanel" id="p-instr" aria-labelledby="t-instr">
+          <h3>Rule files</h3>
+          <p>Written as mandatory statements with the reason and the correct alternative, so a blocked agent knows what to do instead.</p>
+          <div class="list">
+            <div class="item"><h4>AGENTS.md<small>every agent, every session</small></h4><p>Repository rules (branches, plans, findings, tests), owner criteria and the root <b>Code Review Rules</b>. The single source of truth.</p></div>
+            <div class="item"><h4>CLAUDE.md<small>Claude Code</small></h4><p>One line: <code>@AGENTS.md</code>. Claude and Codex never drift apart.</p></div>
+            <div class="item"><h4>folder AGENTS.md<small>+ CLAUDE.md per folder</small></h4><p>Area rules and the area's Code Review Rules (what counts as P0/P1 there). The one-line <code>CLAUDE.md</code> makes Claude Code load it in every version.</p></div>
+            <div class="item"><h4>PROJECT_MAP.md<small>before changing anything</small></h4><p>Where things are and how to validate them. Short on purpose.</p></div>
           </div>
         </div>
-        <div>
-          <p class="col-title"><span class="dot n"></span>Team roles <span class="muted" style="font-weight:500;font-size:17px">edit or run, never touch git history</span></p>
-          <div class="roster" style="margin-bottom:22px;">
-            <div class="row"><div><h4>coder-*</h4><p>Owns an area's files · Codex writes the code, the coder verifies it</p></div></div>
-            <div class="row"><div><h4>documenter · qa · pr-reviewer</h4><p>Plans and status · acceptance and UI checks · P0/P1/P2 review</p></div></div>
+
+        <div class="panel" role="tabpanel" id="p-skills" aria-labelledby="t-skills">
+          <h3>Skills: fixed procedures</h3>
+          <p>A Markdown file with a trigger description and numbered steps. Loaded when the request matches, or with <code>/skill-name</code>.</p>
+          <div class="list">
+            <div class="item"><h4>feature-plan<small>before any feature</small></h4><p>Same plan structure every time, blocks with owner and <code>Verification:</code>, a thin GitHub issue, the plan link delivered.</p></div>
+            <div class="item"><h4>new-branch<small>starting work, after a merge</small></h4><p>Clean branch from an up-to-date <code>dev</code>; never carries uncommitted work silently.</p></div>
+            <div class="item"><h4>close-increment<small>"open the PR"</small></h4><p>Validation with real numbers, «Result» in the plan, status updated, PR to <code>dev</code> with what was <b>not</b> verified.</p></div>
+            <div class="item"><h4>orchestrate-team<small>/orchestrate-team &lt;plan&gt;</small></h4><p>A coordinated agent team takes a milestone to a green, reviewed PR.</p></div>
+            <div class="item"><h4>resolve-issues<small>/loop /resolve-issues</small></h4><p>A self-paced loop that resolves <code>ai-queue</code> issues one PR at a time.</p></div>
+            <div class="item"><h4>onboarding · verify-ui · reference-parity<small>setup and evidence</small></h4><p>Environment check; screenshots and texts from a running UI; differences against the reference app.</p></div>
           </div>
-          <p class="col-title"><span class="dot m"></span>Read-only reviewers <span class="muted" style="font-weight:500;font-size:17px">Read, Grep, Glob only</span></p>
-          <div class="roster">
-            <div class="row"><div><h4>db-security-reviewer</h4><p>Migrations, access policies, tenant isolation</p></div></div>
-            <div class="row"><div><h4>contract-reviewer · reference-explorer</h4><p>Schema compatibility · origin of a screen or rule</p></div></div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="p-agents" aria-labelledby="t-agents">
+          <h3>Subagents and team roles</h3>
+          <p>Each file in <code>.claude/agents/</code> defines a role: its tools, its model and its instructions.</p>
+          <div class="twocol">
+            <div>
+              <p class="box-title">Read-only reviewers · Read, Grep, Glob</p>
+              <div class="list">
+                <div class="item" style="grid-template-columns:1fr"><h4>db-security-reviewer</h4><p>Migrations, access policies, privileged functions, tenant isolation, denied-path tests.</p></div>
+                <div class="item" style="grid-template-columns:1fr"><h4>contract-reviewer</h4><p>Shared schemas and fixtures: backward compatibility, valid and invalid examples.</p></div>
+                <div class="item" style="grid-template-columns:1fr"><h4>reference-explorer</h4><p>Origin of a screen or rule in the reference app, with exact paths and texts.</p></div>
+              </div>
+            </div>
+            <div>
+              <p class="box-title">Team roles · never touch git history</p>
+              <div class="list">
+                <div class="item" style="grid-template-columns:1fr"><h4>coder-backend · coder-web · coder-mobile</h4><p>Owns an area's files; <b>delegates the code to Codex</b> and verifies it.</p></div>
+                <div class="item" style="grid-template-columns:1fr"><h4>documenter</h4><p>Plans, «Status», «Result» and <code>docs/status/</code>.</p></div>
+                <div class="item" style="grid-template-columns:1fr"><h4>qa · pr-reviewer</h4><p>Acceptance and UI evidence · P0/P1/P2 review with <code>file:line</code>.</p></div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="p-hooks" aria-labelledby="t-hooks">
+          <h3>Hooks: rules that don't depend on memory</h3>
+          <p>Small Node scripts run before a tool call. Exit code <code>2</code> blocks it; the message tells the agent what to do instead. Every hook has unit tests.</p>
+          <div class="list">
+            <div class="item"><h4>git-guard<small>before Bash · everyone</small></h4><p>Commits or pushes to <code>main</code>/<code>dev</code>, PRs not against <code>dev</code>, merging into <code>main</code>, <code>rm -rf</code> outside build folders, reading <code>.env</code>. Understands quotes, <code>&amp;&amp;</code>, <code>bash -c</code>, <code>cd</code> and <code>git -C</code>.</p></div>
+            <div class="item"><h4>team-guard<small>subagents and teammates</small></h4><p>Any git history change or PR command, editing the harness config, local database resets, regression tests without the owner's yes.</p></div>
+            <div class="item"><h4>generated-guard<small>before edits</small></h4><p>Hand-editing generated files; says which source to edit and which command to run.</p></div>
+            <div class="item"><h4>task-gate<small>task created / completed</small></h4><p>A plan-block task without a <code>Verification: &lt;command&gt;</code> line.</p></div>
+            <div class="item"><h4>session-context<small>session start</small></h4><p>Injects branch, open PR, touched plans and active plans, written as facts.</p></div>
+          </div>
+          <div class="callout"><span class="badge">FAIL CLOSED</span><span>Safety hooks run with <code>onFailure: "block"</code> and <code>timeout: 30</code>: a crashed or timed-out hook blocks the action. Hooks only protect inside Claude Code, which is why review, CI and branch protection back them up.</span></div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="p-perms" aria-labelledby="t-perms">
+          <h3>Permissions: a second, hard layer</h3>
+          <p><code>.claude/settings.json</code> is versioned and shared. Deny rules apply to every subcommand and no allow rule can override them.</p>
+          <div class="twocol">
+            <div>
+              <p class="box-title">Pre-approved (no prompts)</p>
+              <div class="chips"><span class="chip ok">git status</span><span class="chip ok">git diff</span><span class="chip ok">git log</span><span class="chip ok">scripts/verify.sh</span><span class="chip ok">node --test</span><span class="chip ok">plan-status.mjs</span><span class="chip ok">npm run lint</span><span class="chip ok">npm test</span></div>
+            </div>
+            <div>
+              <p class="box-title">Always denied</p>
+              <div class="chips"><span class="chip no">git push … main</span><span class="chip no">git push … dev</span><span class="chip no">git push --force</span><span class="chip no">git push --all</span><span class="chip no">git push --mirror</span><span class="chip no">read / edit .env*</span></div>
+              <p style="margin:12px 0 0; color:var(--gray-dark); font-size:14px"><code>--force-with-lease</code> to a work branch stays allowed.</p>
+            </div>
+          </div>
+          <div class="cache">
+            <p class="box-title">Teammates' prompt cache</p>
+            <div class="barlabel"><span>default</span><span>5 minutes</span></div>
+            <div class="bar"><i style="--w: 8.3%"></i></div>
+            <div class="barlabel"><span><code>subagentPromptCacheTtl: "1h"</code></span><span>60 minutes</span></div>
+            <div class="bar long"><i style="--w: 100%"></i></div>
+            <p style="margin:10px 0 0; color:var(--gray-dark); font-size:15px">Coders often wait several minutes for Codex; with the longer cache they don't pay their whole context again.</p>
+          </div>
+        </div>
+
+        <div class="panel" role="tabpanel" id="p-memory" aria-labelledby="t-memory">
+          <h3>Memory: no agent remembers anything</h3>
+          <p>State lives in files and in GitHub, and every session reconstructs it. Plans are read by line ranges (about 30 KB, at most 6 self-contained blocks).</p>
+          <pre class="code"><span class="c"># header of every plan in docs/plans/</span>
+---
+<span class="k">status</span>: <span class="v">draft | approved | in-progress | in-validation | closed</span>
+<span class="k">parent</span>: <span class="v">PLAN_PHASE_2.md</span>
+<span class="k">previous</span>: <span class="v">PLAN_PHASE_2_MILESTONE_1.md</span>
+<span class="k">next</span>: <span class="v">PLAN_PHASE_2_MILESTONE_3.md</span>
+<span class="k">issue</span>: <span class="v">42</span>   <span class="c"># its GitHub issue</span>
+---</pre>
+          <div class="tree">
+            <div class="lvl"><span class="pill root">PLAN_PRODUCT.md</span><span class="arrowr">→</span><span class="pill ip">phase 2 · in-progress</span><span class="arrowr">→</span><span class="pill">milestone 1 · closed</span><span class="arrowr">→</span><span class="pill ip">milestone 2 · in-progress</span><span class="arrowr">→</span><span class="pill val">milestone 3 · draft</span></div>
+          </div>
+          <p style="margin:16px 0 0; color:var(--gray-dark); font-size:15px"><code>scripts/plan-status.mjs</code> validates the tree and regenerates <code>docs/status/plans.md</code>: <b style="color:var(--navy)">in progress</b>, <b style="color:var(--navy)">waiting for the owner</b> and <b style="color:var(--navy)">what comes next</b>.</p>
+        </div>
+
+        <div class="panel" role="tabpanel" id="p-verify" aria-labelledby="t-verify">
+          <h3>Verification: proof, not claims</h3>
+          <p><code>scripts/verify.sh</code> maps the changed paths to areas and runs the same checks as CI. A missing tool is <b>SKIPPED with the reason</b>, never a silent pass.</p>
+          <pre class="code term">$ scripts/verify.sh
+<span class="ok">OK</span>      docs links (0s)
+<span class="ok">OK</span>      docs Claude Code hooks (1s)
+<span class="ok">OK</span>      web design tokens up to date (0s)
+<span class="skip">SKIPPED</span> mobile tests — apps/mobile/package.json has no «test» script
+<span class="fail">FAIL</span>    backend tests (4s)
+Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
+          <div style="margin-top:22px" class="twocol">
+            <div><p class="box-title">Areas</p><div class="chips"><span class="chip">docs</span><span class="chip">contracts</span><span class="chip">web</span><span class="chip">backend</span><span class="chip">mobile</span></div></div>
+            <div><p class="box-title">In CI</p><div class="chips"><span class="chip ok">--strict: skipped = fail</span><span class="chip ok">jobs only for changed areas</span><span class="chip mag">plan check: plan or «No plan: reason»</span></div></div>
+          </div>
+          <div class="callout"><span class="badge">SLOW TESTS</span><span>Fast and focused tests run on their own. Regression runs (end-to-end, simulator, integration) need the owner's explicit yes per batch; <code>team-guard</code> enforces it with <code>REGRESSIONS_APPROVED=1</code>.</span></div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · skills and agents</span><span class="pg"></span></div>
-  </section>
+  </div>
+</section>
 
-  <!-- 6 · Hooks -->
-  <section class="slide" data-title="Hooks">
-    <p class="kicker">05 · Enforcement</p>
-    <h2>Hooks: rules that don't depend on memory</h2>
-    <p class="lead">Small Node scripts that run before a tool call. Exit code <code>2</code> blocks it and tells the agent what to do instead.</p>
-    <div class="grid g5" style="flex:1;">
-      <div class="card accent hook"><span class="when">Before Bash · everyone</span><h3>git-guard</h3><ul><li>Commit or push to <code>main</code> / <code>dev</code></li><li>PR not against <code>dev</code></li><li><code>rm -rf</code> outside build folders</li><li>Reading <code>.env</code></li></ul></div>
-      <div class="card accent hook"><span class="when">Subagents only</span><h3>team-guard</h3><ul><li>Any git history change</li><li>Editing harness config</li><li>Local DB reset</li><li>Slow tests without the owner's yes</li></ul></div>
-      <div class="card accent hook"><span class="when">Before edits</span><h3>generated-guard</h3><ul><li>Hand-editing generated files</li><li>Says which source to edit and which command to run</li></ul></div>
-      <div class="card accent hook"><span class="when">Task created / done</span><h3>task-gate</h3><ul><li>Plan tasks need a <code>Verification:</code> command</li></ul></div>
-      <div class="card hook" style="border-top:6px solid var(--gray-dark)"><span class="when" style="color:var(--gray-dark)">Session start</span><h3>session-context</h3><ul><li>Injects branch, open PR, touched plans and active plans, written as facts</li></ul></div>
+<!-- ================= GITHUB ISSUES ================= -->
+<section id="github" class="gh-section">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="core">★ CORE</span>04 · GitHub Issues integration</p>
+    <h2 class="reveal" style="color:#fff">Where people and agents meet.</h2>
+    <p class="lead reveal">People see what exists, what is in progress and who is on it. Agents get a <strong>durable, shared queue of work</strong> that survives any session. Five uses, each a rule in <code>AGENTS.md</code> carried out by a skill.</p>
+    <div class="uses reveal">
+      <div class="use"><span class="num">1</span><h3>Every plan has an issue</h3><p>Phase → <b>epic</b>, milestone → <b>sub-issue</b>, standalone plan → plain issue.</p><span class="by">feature-plan</span></div>
+      <div class="use"><span class="num">2</span><h3>Deferred findings become issues</h3><p>Only when the owner leaves a review finding for later. Template <code>finding</code>, no secrets.</p><span class="by">close-increment</span></div>
+      <div class="use"><span class="num">3</span><h3>PRs close issues</h3><p><code>Closes #n</code>: milestone, the epic on the last one, each fixed finding.</p><span class="by">close-increment</span></div>
+      <div class="use"><span class="num">4</span><h3>Threads are the record</h3><p>Each inline finding gets a reply with the fixing commit and is resolved.</p><span class="by">orchestrate-team</span></div>
+      <div class="use"><span class="num">5</span><h3>Issues are a work queue</h3><p>Label <code>ai-queue</code>: an agent loop resolves it with one PR.</p><span class="by">resolve-issues</span></div>
     </div>
-    <div class="banner"><span class="badge">FAIL CLOSED</span><span>Safety hooks run with <code>onFailure: "block"</code>: if one crashes or times out, the action is <b>blocked</b>, not allowed. <b>Permission deny rules</b> back them up for pushes to <code>main</code>/<code>dev</code>.</span></div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · hooks</span><span class="pg"></span></div>
-  </section>
 
-  <!-- 7 · GitHub Issues: five uses -->
-  <section class="slide" data-title="GitHub Issues: five uses">
-    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
-    <h2>Where people and agents meet</h2>
-    <p class="lead">Five uses, each one a rule in <code>AGENTS.md</code> carried out by a skill.</p>
-    <div class="grid g5" style="flex:1;">
-      <div class="card hot use"><span class="num m">1</span><h3>Every plan has an issue</h3><p>Phase → <b>epic</b>, milestone → <b>sub-issue</b>. Thin: title, goal, link to the plan.</p><div class="who">by <b>feature-plan</b></div></div>
-      <div class="card hot use"><span class="num m">2</span><h3>Deferred findings become issues</h3><p>Only when the owner leaves a review finding for later. Template <code>finding</code>, no secrets.</p><div class="who">by <b>close-increment</b></div></div>
-      <div class="card hot use"><span class="num m">3</span><h3>PRs close issues</h3><p><code>Closes #n</code> for the milestone, the epic on the last one, and every fixed finding.</p><div class="who">by <b>close-increment</b></div></div>
-      <div class="card hot use"><span class="num m">4</span><h3>Review threads are the record</h3><p>Every inline finding gets a reply with the fixing commit, then it is resolved.</p><div class="who">by <b>orchestrate-team</b></div></div>
-      <div class="card hot use"><span class="num m">5</span><h3>Issues are a work queue</h3><p>Label <code>ai-queue</code> and an agent loop resolves it with one PR to <code>dev</code>.</p><div class="who">by <b>resolve-issues</b></div></div>
-    </div>
-    <div class="banner"><span class="badge">THIN ISSUES</span><span>The issue never copies tasks or status. <b>Status lives in the plan header</b>; on GitHub an issue is only open or closed.</span></div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · GitHub Issues</span><span class="pg"></span></div>
-  </section>
-
-  <!-- 8 · GitHub Issues: full circle -->
-  <section class="slide" data-title="GitHub Issues: the full circle">
-    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
-    <h2>The full circle</h2>
-    <p class="lead">Nothing that matters stays only in a chat: a deferred finding is, by construction, a ready-to-queue task.</p>
-    <div class="body" style="flex-direction:row; gap:28px;">
-      <div class="diagram" style="flex:1;">
-        <svg viewBox="0 0 1220 560" role="img" aria-label="Plan to issue to PR to finding to queue to closed issues">
+    <div class="gh-diagram">
+      <div class="diagram reveal zoom">
+        <svg viewBox="0 0 1220 560" role="img" aria-label="Plan, issue, PR, finding, queue and closed issues">
           <defs>
             <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
             <marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
           </defs>
-          <!-- edges -->
-          <path class="edge" d="M250,75 L304,75" marker-end="url(#ah)"/>
-          <path class="edge" d="M560,75 L614,75" marker-end="url(#ah)"/>
-          <path class="edge" d="M740,120 L740,226" marker-end="url(#ah)"/>
-          <path class="edge" d="M614,290 C530,290 530,100 612,100" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M250,75 L304,75" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M560,75 L614,75" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M740,120 L740,226" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M614,290 C530,290 530,100 612,100" marker-end="url(#ah)"/>
           <text class="t-label" x="515" y="200" text-anchor="end">fixed in the same PR</text>
           <text class="t-label" x="515" y="222" text-anchor="end">(the default)</text>
-          <path class="edge-m" d="M690,320 L520,426" marker-end="url(#am)"/>
+          <path class="edge-m flow" d="M690,320 L520,426" marker-end="url(#am)"/>
           <text class="t-label-m" x="560" y="372" text-anchor="end">owner defers it</text>
-          <path class="edge-m" d="M560,475 L614,475" marker-end="url(#am)"/>
+          <path class="edge-m flow" d="M560,475 L614,475" marker-end="url(#am)"/>
           <text class="t-label-m" x="587" y="550" text-anchor="middle">+ ai-queue</text>
-          <path class="edge" d="M870,475 L924,475" marker-end="url(#am)"/>
-          <path class="edge" d="M1050,430 L1050,324" marker-end="url(#ah)"/>
-          <path class="edge" d="M870,75 L1050,75 L1050,226" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M870,475 L924,475" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M1050,430 L1050,324" marker-end="url(#ah)"/>
+          <path class="edge flow" d="M870,75 L1050,75 L1050,226" marker-end="url(#ah)"/>
           <text class="t-label" x="960" y="62" text-anchor="middle">merge closes #n</text>
-          <!-- nodes -->
-          <rect class="n-box" x="10" y="30" width="240" height="90" rx="16"/>
-          <text class="t-title" x="130" y="70" text-anchor="middle">Plan written</text>
-          <text class="t-sub" x="130" y="96" text-anchor="middle">docs/plans/…  issue: n</text>
-          <rect class="n-mag" x="304" y="30" width="256" height="90" rx="16"/>
-          <text class="t-title" x="432" y="70" text-anchor="middle">Epic / sub-issue</text>
-          <text class="t-sub" x="432" y="96" text-anchor="middle">thin · links the plan</text>
-          <rect class="n-blue" x="614" y="30" width="256" height="90" rx="16"/>
-          <text class="t-title" x="742" y="70" text-anchor="middle">Milestone PR → dev</text>
-          <text class="t-sub" x="742" y="96" text-anchor="middle">Closes #n</text>
-          <rect class="n-soft" x="614" y="230" width="256" height="90" rx="16"/>
-          <text class="t-title" x="742" y="270" text-anchor="middle">Review finding</text>
-          <text class="t-sub" x="742" y="296" text-anchor="middle">reviewer · Codex · a person</text>
-          <rect class="n-mag" x="304" y="430" width="256" height="90" rx="16"/>
-          <text class="t-title" x="432" y="470" text-anchor="middle">Finding issue</text>
-          <text class="t-sub" x="432" y="496" text-anchor="middle">template · sub-issue of epic</text>
-          <rect class="n-mag" x="614" y="430" width="256" height="90" rx="16"/>
-          <text class="t-title" x="742" y="470" text-anchor="middle">resolve-issues loop</text>
-          <text class="t-sub" x="742" y="496" text-anchor="middle">takes it, opens a PR</text>
-          <rect class="n-blue" x="924" y="430" width="256" height="90" rx="16"/>
-          <text class="t-title" x="1052" y="470" text-anchor="middle">Loop PR → dev</text>
-          <text class="t-sub" x="1052" y="496" text-anchor="middle">Closes #finding</text>
-          <rect class="n-navy" x="924" y="230" width="256" height="90" rx="16"/>
-          <text class="t-title t-white" x="1052" y="270" text-anchor="middle">Merged into dev</text>
-          <text class="t-sub" x="1052" y="296" text-anchor="middle" fill="#CED7E6" style="fill:#CED7E6">issues closed by GitHub</text>
+          <g class="node"><rect class="n-box" x="10" y="30" width="240" height="90" rx="16"/><text class="t-title" x="130" y="70" text-anchor="middle">Plan written</text><text class="t-sub" x="130" y="96" text-anchor="middle">docs/plans/…  issue: n</text></g>
+          <g class="node"><rect class="n-mag" x="304" y="30" width="256" height="90" rx="16"/><text class="t-title" x="432" y="70" text-anchor="middle">Epic / sub-issue</text><text class="t-sub" x="432" y="96" text-anchor="middle">thin · links the plan</text></g>
+          <g class="node"><rect class="n-blue" x="614" y="30" width="256" height="90" rx="16"/><text class="t-title" x="742" y="70" text-anchor="middle">Milestone PR → dev</text><text class="t-sub" x="742" y="96" text-anchor="middle">Closes #n</text></g>
+          <g class="node"><rect class="n-soft" x="614" y="230" width="256" height="90" rx="16"/><text class="t-title" x="742" y="270" text-anchor="middle">Review finding</text><text class="t-sub" x="742" y="296" text-anchor="middle">reviewer · Codex · a person</text></g>
+          <g class="node"><rect class="n-mag" x="304" y="430" width="256" height="90" rx="16"/><text class="t-title" x="432" y="470" text-anchor="middle">Finding issue</text><text class="t-sub" x="432" y="496" text-anchor="middle">template · sub-issue of epic</text></g>
+          <g class="node"><rect class="n-mag" x="614" y="430" width="256" height="90" rx="16"/><text class="t-title" x="742" y="470" text-anchor="middle">resolve-issues loop</text><text class="t-sub" x="742" y="496" text-anchor="middle">takes it, opens a PR</text></g>
+          <g class="node"><rect class="n-blue" x="924" y="430" width="256" height="90" rx="16"/><text class="t-title" x="1052" y="470" text-anchor="middle">Loop PR → dev</text><text class="t-sub" x="1052" y="496" text-anchor="middle">Closes #finding</text></g>
+          <g class="node"><rect class="n-navy" x="924" y="230" width="256" height="90" rx="16"/><text class="t-title t-white" x="1052" y="270" text-anchor="middle">Merged into dev</text><text class="t-sub" x="1052" y="296" text-anchor="middle" style="fill:#CED7E6">issues closed by GitHub</text></g>
         </svg>
       </div>
-      <div style="width:330px; display:flex; flex-direction:column; gap:14px; justify-content:center;">
-        <p class="col-title" style="margin:0"><span class="dot m"></span>Labels</p>
-        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip mag" style="align-self:flex-start">ai-queue</span><p>Added by a person. The label <b>is</b> the authorization to open a PR.</p></div>
-        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip mag" style="align-self:flex-start">ai-merge</span><p>Only a person adds it: the agent may merge into <code>dev</code> once everything is green.</p></div>
-        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip" style="align-self:flex-start">ai-escalated</span><p>Left out of the queue by the loop, with the reason.</p></div>
-        <p class="muted" style="font-size:16px; margin:0">Plus <code>epic</code>, <code>enhancement</code>, <code>bug</code>, <code>documentation</code> · created by <code>scripts/setup-github-labels.sh</code></p>
+      <div class="labels">
+        <div class="lab reveal" style="--d:.1s"><span class="chip">ai-queue</span><p>Added by a person. The label <b style="color:#fff">is</b> the authorization to open a PR without asking.</p></div>
+        <div class="lab reveal" style="--d:.2s"><span class="chip">ai-merge</span><p>Only a person adds it: the agent may merge into <code>dev</code> once CI is green and every finding is handled.</p></div>
+        <div class="lab reveal" style="--d:.3s"><span class="chip" style="border-color:#CED7E6">ai-escalated</span><p>Left out of the queue by the loop, with the reason (too large, regression-only, skipped).</p></div>
+        <p class="reveal" style="--d:.4s; margin:0; color:var(--gray-mid); font-size:14px">Plus <code>epic</code>, <code>enhancement</code>, <code>bug</code>, <code>documentation</code> · all created by <code>scripts/setup-github-labels.sh</code>.</p>
       </div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · GitHub Issues</span><span class="pg"></span></div>
-  </section>
 
-  <!-- 9 · Lifecycle -->
-  <section class="slide" data-title="Lifecycle of the work">
-    <p class="kicker">07 · Workflow</p>
-    <h2>From idea to merge</h2>
-    <p class="lead">Every piece of work follows the same path; only the two pink steps belong to a person.</p>
-    <div class="body">
-      <div class="steps">
-        <div class="step"><div class="disc">1</div><h3>Plan</h3><span class="skill">feature-plan</span><p>Fixed structure, owner answers open questions, thin GitHub issue. No PR yet.</p></div>
-        <div class="step"><div class="disc">2</div><h3>Branch</h3><span class="skill">new-branch</span><p>From an up-to-date <code>dev</code>. Never on <code>main</code> or <code>dev</code>.</p></div>
-        <div class="step"><div class="disc">3</div><h3>Build</h3><span class="skill">you · subagent · team</span><p>Block by block: owner role, files, <code>Verification:</code>.</p></div>
-        <div class="step"><div class="disc">4</div><h3>Close</h3><span class="skill">close-increment</span><p><code>verify.sh</code>, «Result» with what was <b>not</b> verified, PR to <code>dev</code>.</p></div>
-        <div class="step"><div class="disc">5</div><h3>Review</h3><span class="skill">pr-reviewer + Codex</span><p>P0/P1/P2 with <code>file:line</code>. Fixed on the same branch.</p></div>
-        <div class="step human"><div class="disc">6</div><h3>Merge</h3><span class="skill" style="color:var(--magenta)">a person</span><p>Merges into <code>dev</code>. A person also promotes <code>dev</code> → <code>main</code>.</p></div>
-      </div>
-      <div class="loopnote"><span class="num b">↺</span><span><b>Review → Close loop:</b> every finding is a task on the same branch, each inline thread gets a reply with the fixing commit and is resolved. Only the owner can defer one, and then it becomes a <code>finding</code> issue.</span></div>
-      <div class="legend"><span><i></i>agent step</span><span><i class="h"></i>human step</span><span>Branch flow: <code>work branch → dev → main</code></span></div>
+    <div class="principles">
+      <div class="p reveal"><h4>Thin issues, rich plans</h4><p>An issue never copies tasks or status: title, goal and a link. Status lives in the plan header; the issue is only open or closed.</p></div>
+      <div class="p reveal" style="--d:.1s"><h4>Epics mirror the plan tree</h4><p><code>parent:</code> in the plan and GitHub sub-issues express the same hierarchy, so an epic shows everything still open for a phase.</p></div>
+      <div class="p reveal" style="--d:.2s"><h4>A deferred finding is a ready task</h4><p>The <code>finding</code> template (Origin, What, Where, Proposal, Severity) is exactly what the issue loop needs to resolve it later.</p></div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · lifecycle</span><span class="pg"></span></div>
-  </section>
+  </div>
+</section>
 
-  <!-- 10 · Agent team -->
-  <section class="slide" data-title="Agent teams">
-    <p class="kicker">08 · Agent teams</p>
-    <h2>One coordinator, one git author, one voice</h2>
-    <p class="lead"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR.</p>
-    <div class="body" style="flex-direction:row; gap:28px;">
-      <div class="diagram" style="flex:1;">
+<!-- ================= LIFECYCLE ================= -->
+<section id="lifecycle" class="white">
+  <div class="wrap">
+    <p class="kicker reveal">05 · Lifecycle</p>
+    <h2 class="reveal">From idea to merge, the same path every time.</h2>
+    <p class="lead reveal">Agents do the first five steps. Only the pink one belongs to a person.</p>
+    <div class="steps reveal">
+      <div class="step"><div class="disc">1</div><h3>Plan</h3><span class="skill">feature-plan</span><p>Owner answers open questions; thin issue. Branch pushed, no PR yet.</p></div>
+      <div class="step"><div class="disc">2</div><h3>Branch</h3><span class="skill">new-branch</span><p>From an up-to-date <code>dev</code>; a phase and its first milestone share one.</p></div>
+      <div class="step"><div class="disc">3</div><h3>Build</h3><span class="skill">you · subagent · team</span><p>Block by block: owner role, files, <code>Verification:</code>.</p></div>
+      <div class="step"><div class="disc">4</div><h3>Close</h3><span class="skill">close-increment</span><p><code>verify.sh</code>, «Result» with what was not verified, PR with <code>Closes #n</code>.</p></div>
+      <div class="step"><div class="disc">5</div><h3>Review</h3><span class="skill">pr-reviewer + Codex</span><p>P0/P1/P2 with <code>file:line</code>, fixed on the same branch.</p></div>
+      <div class="step human"><div class="disc">6</div><h3>Merge</h3><span class="skill">a person</span><p>Into <code>dev</code>; a person also promotes <code>dev</code> → <code>main</code>.</p></div>
+    </div>
+    <div class="loopnote reveal"><span class="spin">↻</span><span><b>Review ↔ Close loop:</b> every finding is a task on the same branch; each inline thread gets a reply with the fixing commit and is resolved. Only the owner can defer a finding, which then becomes a <code>finding</code> issue.</span></div>
+  </div>
+</section>
+
+<!-- ================= TEAMS ================= -->
+<section id="teams">
+  <div class="wrap">
+    <p class="kicker reveal">06 · Agent teams</p>
+    <h2 class="reveal">One coordinator, one git author, one voice.</h2>
+    <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. The most capable model coordinates; cheaper models do the narrow work.</p>
+    <div class="team-layout">
+      <div class="diagram reveal zoom">
         <svg viewBox="0 0 1100 560" role="img" aria-label="Owner, coordinator and team roles">
           <defs>
             <marker id="tb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
             <marker id="tm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
             <marker id="tg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#50658E"/></marker>
           </defs>
-          <!-- owner -->
-          <rect class="n-mag" x="400" y="8" width="300" height="70" rx="16"/>
-          <text class="t-title" x="550" y="40" text-anchor="middle">Owner (a person)</text>
-          <text class="t-sub" x="550" y="64" text-anchor="middle">decides · approves · merges</text>
-          <path class="edge-m" d="M550,82 L550,140" marker-start="url(#tm)" marker-end="url(#tm)"/>
+          <g class="node"><rect class="n-mag" x="400" y="8" width="300" height="70" rx="16"/><text class="t-title" x="550" y="40" text-anchor="middle">Owner (a person)</text><text class="t-sub" x="550" y="64" text-anchor="middle">decides · approves · merges</text></g>
+          <path class="edge-m flow" d="M550,82 L550,140" marker-start="url(#tm)" marker-end="url(#tm)"/>
           <text class="t-label-m" x="566" y="118">questions ↑  decisions ↓</text>
-          <!-- coordinator -->
-          <rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/>
-          <text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · main session</text>
-          <text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">only git author · only voice · most capable model</text>
-          <!-- bus -->
+          <g class="node"><rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/><text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · main session</text><text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">only git author · only voice · most capable model</text></g>
           <path class="edge" d="M550,240 L550,286"/>
-          <path class="edge" d="M140,286 L960,286"/>
+          <path class="edge flow" d="M140,286 L960,286"/>
           <path class="edge" d="M140,286 L140,322" marker-end="url(#tb)"/>
           <path class="edge" d="M413,286 L413,322" marker-end="url(#tb)"/>
           <path class="edge" d="M687,286 L687,322" marker-end="url(#tb)"/>
           <path class="edge" d="M960,286 L960,322" marker-end="url(#tb)"/>
           <text class="t-label" x="570" y="276">briefs: files · plan line ranges · Verification:</text>
-          <!-- roles -->
-          <rect class="n-box" x="20" y="326" width="240" height="96" rx="16"/>
-          <text class="t-title" x="140" y="364" text-anchor="middle">documenter</text>
-          <text class="t-sub" x="140" y="392" text-anchor="middle">plans · status · Result</text>
-          <rect class="n-blue" x="293" y="326" width="240" height="96" rx="16"/>
-          <text class="t-title" x="413" y="364" text-anchor="middle">coder-*</text>
-          <text class="t-sub" x="413" y="392" text-anchor="middle">own files · verifies</text>
-          <rect class="n-box" x="567" y="326" width="240" height="96" rx="16"/>
-          <text class="t-title" x="687" y="364" text-anchor="middle">qa</text>
-          <text class="t-sub" x="687" y="392" text-anchor="middle">verify.sh · UI · acceptance</text>
-          <rect class="n-box" x="840" y="326" width="240" height="96" rx="16"/>
-          <text class="t-title" x="960" y="364" text-anchor="middle">reviewer</text>
-          <text class="t-sub" x="960" y="392" text-anchor="middle">read-only · P0/P1/P2</text>
-          <!-- codex -->
-          <path class="edge" d="M413,422 L413,476" marker-end="url(#tb)"/>
+          <g class="node"><rect class="n-box" x="20" y="326" width="240" height="96" rx="16"/><text class="t-title" x="140" y="364" text-anchor="middle">documenter</text><text class="t-sub" x="140" y="392" text-anchor="middle">plans · status · Result</text></g>
+          <g class="node"><rect class="n-blue" x="293" y="326" width="240" height="96" rx="16"/><text class="t-title" x="413" y="364" text-anchor="middle">coder-*</text><text class="t-sub" x="413" y="392" text-anchor="middle">own files · verifies</text></g>
+          <g class="node"><rect class="n-box" x="567" y="326" width="240" height="96" rx="16"/><text class="t-title" x="687" y="364" text-anchor="middle">qa</text><text class="t-sub" x="687" y="392" text-anchor="middle">verify.sh · UI · acceptance</text></g>
+          <g class="node"><rect class="n-box" x="840" y="326" width="240" height="96" rx="16"/><text class="t-title" x="960" y="364" text-anchor="middle">reviewer</text><text class="t-sub" x="960" y="392" text-anchor="middle">read-only · P0/P1/P2</text></g>
+          <path class="edge flow" d="M413,422 L413,476" marker-end="url(#tb)"/>
           <text class="t-label" x="428" y="455">delegates the code</text>
-          <rect class="n-soft" x="293" y="480" width="240" height="70" rx="16"/>
-          <text class="t-title" x="413" y="512" text-anchor="middle">Codex</text>
-          <text class="t-sub" x="413" y="536" text-anchor="middle">writes code · never reviews</text>
-          <!-- feedback -->
+          <g class="node"><rect class="n-soft" x="293" y="480" width="240" height="70" rx="16"/><text class="t-title" x="413" y="512" text-anchor="middle">Codex</text><text class="t-sub" x="413" y="536" text-anchor="middle">writes code · never reviews</text></g>
           <path class="edge-g" d="M600,422 C600,470 560,470 537,470" marker-end="url(#tg)"/>
           <text class="t-sub" x="610" y="470">failures → tasks</text>
           <path class="edge-g" d="M960,422 C960,520 700,520 537,520" marker-end="url(#tg)"/>
           <text class="t-sub" x="800" y="545" text-anchor="middle">P0/P1 findings → tasks</text>
         </svg>
       </div>
-      <div style="width:360px; display:flex; flex-direction:column; gap:12px; justify-content:center;">
-        <div class="row"><span class="num b">1</span><div><h4 style="font-family:var(--font)">Codex writes, Claude reviews</h4><p>Nobody approves their own work.</p></div></div>
-        <div class="row"><span class="num b">2</span><div><h4 style="font-family:var(--font)">Ownership by files</h4><p>Two teammates never edit the same file.</p></div></div>
-        <div class="row"><span class="num b">3</span><div><h4 style="font-family:var(--font)">Cost discipline</h4><p>Sonnet teammates, ≤ 4 at a time, plans read by line ranges, 1 h prompt cache.</p></div></div>
-        <div class="row"><span class="num b">4</span><div><h4 style="font-family:var(--font)">Stop rules</h4><p>Two failures, a file clash, a limit or a design change → ask the owner.</p></div></div>
-      </div>
+      <ol class="flowlist reveal" style="--d:.15s">
+        <li class="owner"><span><b>Owner</b> runs <code>/orchestrate-team phase N</code>.</span></li>
+        <li><span><b>Documenter</b> writes the plan; open questions go to the owner.</span></li>
+        <li><span><b>Coordinator</b> commits the plan and hands out tasks per block.</span></li>
+        <li><span><b>Coders</b> brief Codex, check the diff and run the focused test.</span></li>
+        <li><span><b>QA</b> runs verify.sh, UI and parity; failures become tasks.</span></li>
+        <li><span><b>Reviewer</b> returns P0/P1/P2 with <code>file:line</code>.</span></li>
+        <li><span><b>Coordinator</b> commits by layer, opens the PR, asks <code>@codex review</code>.</span></li>
+        <li class="owner"><span><b>Owner</b> merges the green PR into <code>dev</code>.</span></li>
+      </ol>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · agent teams</span><span class="pg"></span></div>
-  </section>
+    <div class="grid g4" style="margin-top:24px">
+      <div class="card reveal"><span class="num b">1</span><h3 style="margin-top:12px">Codex writes, Claude reviews</h3><p>Nobody approves their own work; Codex on GitHub adds an external opinion.</p></div>
+      <div class="card reveal" style="--d:.08s"><span class="num b">2</span><h3 style="margin-top:12px">Ownership by files</h3><p>Each coder owns globs; anything outside is restored and sent back.</p></div>
+      <div class="card reveal" style="--d:.16s"><span class="num b">3</span><h3 style="margin-top:12px">Cost discipline</h3><p>≤ 4 cheaper teammates, plans read by line ranges, waits without polling, 1 h cache.</p></div>
+      <div class="card reveal" style="--d:.24s"><span class="num b">4</span><h3 style="margin-top:12px">Stop rules, resumable</h3><p>Two failures, a file clash or a design change: ask. The plan's «Status» resumes a new session.</p></div>
+    </div>
+  </div>
+</section>
 
-  <!-- 11 · Issue loop -->
-  <section class="slide" data-title="The issue loop">
-    <p class="kicker"><span class="core">★ CORE</span>09 · The issue loop</p>
-    <h2>Label an issue, get a PR</h2>
-    <p class="lead"><code>/loop /resolve-issues</code> resolves <code>ai-queue</code> issues one PR at a time, stateless and safe for several developers.</p>
-    <div class="body" style="flex-direction:row; gap:28px;">
-      <div class="diagram" style="flex:1;">
-        <svg viewBox="0 0 1180 540" role="img" aria-label="Issue loop: pick, classify, fix, PR, merge">
-          <defs>
-            <marker id="lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
-            <marker id="lm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
-            <marker id="lg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#50658E"/></marker>
-          </defs>
-          <!-- return to start -->
-          <path class="edge-m" d="M1085,200 L1085,40 L105,40 L105,196" marker-end="url(#lm)"/>
-          <text class="t-label-m" x="595" y="30" text-anchor="middle">next issue</text>
-          <!-- PR -> fix loop -->
-          <path class="edge-g" d="M805,200 C805,128 625,128 625,196" marker-end="url(#lg)"/>
-          <text class="t-sub" x="715" y="118" text-anchor="middle">CI red · conflict · finding</text>
-          <!-- main row -->
-          <path class="edge" d="M200,250 L244,250" marker-end="url(#lb)"/>
-          <path class="edge" d="M436,250 L480,250" marker-end="url(#lb)"/>
-          <path class="edge" d="M672,250 L716,250" marker-end="url(#lb)"/>
-          <path class="edge" d="M908,250 L952,250" marker-end="url(#lb)"/>
-          <rect class="n-mag" x="10" y="200" width="190" height="100" rx="16"/>
-          <text class="t-title" x="105" y="240" text-anchor="middle">Pick</text>
-          <text class="t-sub" x="105" y="266" text-anchor="middle">ai-queue · severity</text>
-          <text class="t-sub" x="105" y="288" text-anchor="middle">assign to me</text>
-          <rect class="n-box" x="246" y="200" width="190" height="100" rx="16"/>
-          <text class="t-title" x="341" y="240" text-anchor="middle">Classify</text>
-          <text class="t-sub" x="341" y="266" text-anchor="middle">small · medium ·</text>
-          <text class="t-sub" x="341" y="288" text-anchor="middle">with plan · large</text>
-          <rect class="n-blue" x="482" y="200" width="190" height="100" rx="16"/>
-          <text class="t-title" x="577" y="240" text-anchor="middle">Fix</text>
-          <text class="t-sub" x="577" y="266" text-anchor="middle">coder → Codex</text>
-          <text class="t-sub" x="577" y="288" text-anchor="middle">reviewer · verify.sh</text>
-          <rect class="n-blue" x="718" y="200" width="190" height="100" rx="16"/>
-          <text class="t-title" x="813" y="240" text-anchor="middle">PR → dev</text>
-          <text class="t-sub" x="813" y="266" text-anchor="middle">no confirmation:</text>
-          <text class="t-sub" x="813" y="288" text-anchor="middle">the label authorizes</text>
-          <rect class="n-navy" x="954" y="200" width="200" height="100" rx="16"/>
-          <text class="t-title t-white" x="1054" y="240" text-anchor="middle">Merge</text>
-          <text class="t-sub" x="1054" y="266" text-anchor="middle" style="fill:#CED7E6">a person, or</text>
-          <text class="t-sub" x="1054" y="288" text-anchor="middle" style="fill:#CED7E6">ai-merge label</text>
-          <!-- branches -->
-          <path class="edge" d="M380,300 L380,420 L398,420" marker-end="url(#lb)"/>
-          <rect class="n-soft" x="402" y="380" width="240" height="84" rx="16"/>
-          <text class="t-title" x="522" y="414" text-anchor="middle">Short plan</text>
-          <text class="t-sub" x="522" y="440" text-anchor="middle">two areas · reuses the issue</text>
-          <path class="edge" d="M622,380 L622,304" marker-end="url(#lb)"/>
-          <path class="edge-g" d="M300,300 L300,420 L254,420" marker-end="url(#lg)"/>
-          <rect class="n-soft" x="10" y="380" width="240" height="84" rx="16"/>
-          <text class="t-title" x="130" y="414" text-anchor="middle">ai-escalated</text>
-          <text class="t-sub" x="130" y="440" text-anchor="middle">large → team · regression-only</text>
-          <text class="t-sub" x="10" y="500">Large: the owner picks team, here, or skip</text>
+<!-- ================= ISSUE LOOP ================= -->
+<section id="loop" class="white">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="core">★ CORE</span>07 · The issue loop</p>
+    <h2 class="reveal">Label an issue, get a PR.</h2>
+    <p class="lead reveal"><code>/loop /resolve-issues</code> resolves <code>ai-queue</code> issues one PR at a time, by severity and number.</p>
+    <div class="diagram reveal zoom">
+      <svg viewBox="0 0 1180 540" role="img" aria-label="Issue loop: pick, classify, fix, PR, merge">
+        <defs>
+          <marker id="lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+          <marker id="lm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+          <marker id="lg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#50658E"/></marker>
+        </defs>
+        <path class="edge-m flow" d="M1085,200 L1085,40 L105,40 L105,196" marker-end="url(#lm)"/>
+        <text class="t-label-m" x="595" y="30" text-anchor="middle">next issue</text>
+        <path class="edge-g" d="M805,200 C805,128 625,128 625,196" marker-end="url(#lg)"/>
+        <text class="t-sub" x="715" y="118" text-anchor="middle">CI red · conflict · finding</text>
+        <path class="edge flow" d="M200,250 L244,250" marker-end="url(#lb)"/>
+        <path class="edge flow" d="M436,250 L480,250" marker-end="url(#lb)"/>
+        <path class="edge flow" d="M672,250 L716,250" marker-end="url(#lb)"/>
+        <path class="edge flow" d="M908,250 L952,250" marker-end="url(#lb)"/>
+        <g class="node"><rect class="n-mag" x="10" y="200" width="190" height="100" rx="16"/><text class="t-title" x="105" y="240" text-anchor="middle">Pick</text><text class="t-sub" x="105" y="266" text-anchor="middle">ai-queue · severity</text><text class="t-sub" x="105" y="288" text-anchor="middle">assign to me</text></g>
+        <g class="node"><rect class="n-box" x="246" y="200" width="190" height="100" rx="16"/><text class="t-title" x="341" y="240" text-anchor="middle">Classify</text><text class="t-sub" x="341" y="266" text-anchor="middle">small · medium ·</text><text class="t-sub" x="341" y="288" text-anchor="middle">with plan · large</text></g>
+        <g class="node"><rect class="n-blue" x="482" y="200" width="190" height="100" rx="16"/><text class="t-title" x="577" y="240" text-anchor="middle">Fix</text><text class="t-sub" x="577" y="266" text-anchor="middle">coder → Codex</text><text class="t-sub" x="577" y="288" text-anchor="middle">reviewer · verify.sh</text></g>
+        <g class="node"><rect class="n-blue" x="718" y="200" width="190" height="100" rx="16"/><text class="t-title" x="813" y="240" text-anchor="middle">PR → dev</text><text class="t-sub" x="813" y="266" text-anchor="middle">no confirmation:</text><text class="t-sub" x="813" y="288" text-anchor="middle">the label authorizes</text></g>
+        <g class="node"><rect class="n-navy" x="954" y="200" width="200" height="100" rx="16"/><text class="t-title t-white" x="1054" y="240" text-anchor="middle">Merge</text><text class="t-sub" x="1054" y="266" text-anchor="middle" style="fill:#CED7E6">a person, or</text><text class="t-sub" x="1054" y="288" text-anchor="middle" style="fill:#CED7E6">ai-merge label</text></g>
+        <path class="edge" d="M380,300 L380,420 L398,420" marker-end="url(#lb)"/>
+        <g class="node"><rect class="n-soft" x="402" y="380" width="240" height="84" rx="16"/><text class="t-title" x="522" y="414" text-anchor="middle">Short plan</text><text class="t-sub" x="522" y="440" text-anchor="middle">two areas · reuses the issue</text></g>
+        <path class="edge" d="M622,380 L622,304" marker-end="url(#lb)"/>
+        <path class="edge-g" d="M300,300 L300,420 L254,420" marker-end="url(#lg)"/>
+        <g class="node"><rect class="n-soft" x="10" y="380" width="240" height="84" rx="16"/><text class="t-title" x="130" y="414" text-anchor="middle">ai-escalated</text><text class="t-sub" x="130" y="440" text-anchor="middle">large → team · regression-only</text></g>
+        <text class="t-sub" x="10" y="500">Large: the owner picks team, here, or skip</text>
+      </svg>
+    </div>
+    <div class="grid g4" style="margin-top:24px">
+      <div class="card reveal"><span class="num m">A</span><h3 style="margin-top:12px">Assignment is the lock</h3><p>The loop assigns the issue before reading it; several developers share the queue without collisions.</p></div>
+      <div class="card reveal" style="--d:.08s"><span class="num m">B</span><h3 style="margin-top:12px">Stateless</h3><p>Every turn re-reads GitHub and git; HTML markers in PR comments record what was handled.</p></div>
+      <div class="card reveal" style="--d:.16s"><span class="num m">C</span><h3 style="margin-top:12px">Comments are data</h3><p>A comment asking for a merge does not authorize it. Only the <code>ai-merge</code> label.</p></div>
+      <div class="card reveal" style="--d:.24s"><span class="num m">D</span><h3 style="margin-top:12px">Self-limiting</h3><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HUMANS ================= -->
+<section id="humans" class="decide">
+  <div class="wrap">
+    <p class="kicker reveal">08 · Human in the loop</p>
+    <h2 class="reveal">People decide. The harness enforces.</h2>
+    <p class="lead reveal">Every irreversible or design-changing step waits for a person.</p>
+    <div class="grid g4">
+      <div class="card reveal"><span class="who">Owner</span><h3>Plan questions</h3><p>Concrete options, recommendation first; recorded in «Owner decisions».</p></div>
+      <div class="card reveal" style="--d:.05s"><span class="who">Owner</span><h3>Phase plan approval</h3><p>The team stops until the plan is approved.</p></div>
+      <div class="card reveal" style="--d:.1s"><span class="who">Owner</span><h3>Slow regression tests</h3><p>Asked per batch; a no becomes «not verified» in the PR.</p></div>
+      <div class="card reveal" style="--d:.15s"><span class="who">Owner</span><h3>Deferring a finding</h3><p>Otherwise it is fixed in the same PR.</p></div>
+      <div class="card reveal" style="--d:.2s"><span class="who">Owner</span><h3>DB reset, remote deploys</h3><p>Always asked; teammates are blocked by a hook.</p></div>
+      <div class="card reveal" style="--d:.25s"><span class="who">Owner</span><h3>Queueing work</h3><p>Adding <code>ai-queue</code> and, optionally, <code>ai-merge</code>.</p></div>
+      <div class="card reveal" style="--d:.3s"><span class="who">Owner</span><h3>Merge into dev</h3><p>Or the opt-in <code>ai-merge</code> label for the issue loop.</p></div>
+      <div class="card never reveal" style="--d:.35s"><span class="who">Always a person</span><h3>Promote dev → main</h3><p>Never an agent: <code>git-guard</code> and the deny rules block it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SAFETY ================= -->
+<section id="safety" class="white">
+  <div class="wrap">
+    <p class="kicker reveal">09 · Defense in depth</p>
+    <h2 class="reveal">No single layer is trusted on its own.</h2>
+    <p class="lead reveal">Hover a layer to find it in the rings. The outermost one is the only layer that also covers people and tools outside Claude Code.</p>
+    <div class="depth">
+      <div class="rings">
+        <svg viewBox="0 0 480 480" role="img" aria-label="Eight concentric protection layers">
+          <circle class="ring outer" data-ring="8" cx="240" cy="240" r="226" style="--d:.0s"/>
+          <circle class="ring" data-ring="7" cx="240" cy="240" r="200" style="--d:.08s"/>
+          <circle class="ring" data-ring="6" cx="240" cy="240" r="174" style="--d:.16s; stroke:#E8EEF8"/>
+          <circle class="ring" data-ring="5" cx="240" cy="240" r="148" style="--d:.24s"/>
+          <circle class="ring" data-ring="4" cx="240" cy="240" r="122" style="--d:.32s; stroke:#E8EEF8"/>
+          <circle class="ring" data-ring="3" cx="240" cy="240" r="96" style="--d:.4s"/>
+          <circle class="ring" data-ring="2" cx="240" cy="240" r="70" style="--d:.48s; stroke:#E8EEF8"/>
+          <circle class="ring" data-ring="1" cx="240" cy="240" r="44" style="--d:.56s"/>
+          <circle cx="240" cy="240" r="30" fill="#0047FF"/>
+          <text x="240" y="236" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">YOUR</text>
+          <text x="240" y="250" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">REPO</text>
+          <text class="ring-num outer" x="240" y="19">8</text><text class="ring-num" x="240" y="45">7</text><text class="ring-num" x="240" y="71">6</text><text class="ring-num" x="240" y="97">5</text><text class="ring-num" x="240" y="123">4</text><text class="ring-num" x="240" y="149">3</text><text class="ring-num" x="240" y="175">2</text><text class="ring-num" x="240" y="201">1</text>
         </svg>
       </div>
-      <div style="width:330px; display:flex; flex-direction:column; gap:12px; justify-content:center;">
-        <div class="row"><span class="num m">A</span><div><h4 style="font-family:var(--font)">Assignment is the lock</h4><p>Several developers share the queue without collisions.</p></div></div>
-        <div class="row"><span class="num m">B</span><div><h4 style="font-family:var(--font)">Stateless</h4><p>Every turn re-reads GitHub and git; a new session resumes.</p></div></div>
-        <div class="row"><span class="num m">C</span><div><h4 style="font-family:var(--font)">Comments are data</h4><p>A comment asking to merge does not count. Only the label.</p></div></div>
-        <div class="row"><span class="num m">D</span><div><h4 style="font-family:var(--font)">Self-limiting</h4><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session.</p></div></div>
+      <ul class="layers-list">
+        <li class="outer reveal" data-layer="8"><span class="k">8</span><div><b>GitHub branch protection</b><span>required checks, no direct pushes to main and dev</span></div></li>
+        <li class="reveal" data-layer="7" style="--d:.05s"><span class="k">7</span><div><b>CI</b><span>re-runs verify.sh by area and the plan check</span></div></li>
+        <li class="reveal" data-layer="6" style="--d:.1s"><span class="k">6</span><div><b>Independent review</b><span>written P0/P1 rules in every AGENTS.md</span></div></li>
+        <li class="reveal" data-layer="5" style="--d:.15s"><span class="k">5</span><div><b>Ownership checks</b><span>git status / diff after every task (Codex runs outside the hooks)</span></div></li>
+        <li class="reveal" data-layer="4" style="--d:.2s"><span class="k">4</span><div><b>Permissions</b><span>deny secrets and protected pushes</span></div></li>
+        <li class="reveal" data-layer="3" style="--d:.25s"><span class="k">3</span><div><b>Hooks</b><span>block dangerous actions inside Claude Code, fail closed</span></div></li>
+        <li class="reveal" data-layer="2" style="--d:.3s"><span class="k">2</span><div><b>Skills</b><span>make the right path the easy path</span></div></li>
+        <li class="reveal" data-layer="1" style="--d:.35s"><span class="k">1</span><div><b>Instructions</b><span>say what to do and why</span></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ADOPT ================= -->
+<section id="adopt">
+  <div class="wrap">
+    <p class="kicker reveal">10 · Adoption</p>
+    <h2 class="reveal">Adopt it in ten steps.</h2>
+    <p class="lead reveal">The apps are placeholders: replace them with your project and keep the harness. Tick the steps as you go.</p>
+    <div class="checklist">
+      <button class="check reveal" aria-pressed="false"><span class="box"><span>1</span></span><p><b>Copy the repo.</b> Create <code>dev</code>, make it the default branch, protect <code>main</code> and <code>dev</code>.</p></button>
+      <button class="check hot reveal" aria-pressed="false" style="--d:.05s"><span class="box"><span>2</span></span><p><b>GitHub Issues.</b> Run <code>scripts/setup-github-labels.sh</code>, enable sub-issues, read the guide. Don't skip it.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.1s"><span class="box"><span>3</span></span><p><b>Project context</b> in <code>AGENTS.md</code>; declare the reference app, if any.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.15s"><span class="box"><span>4</span></span><p><b>Areas and commands:</b> plug your stack into <code>scripts/verify.sh</code>, its test and CI.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.2s"><span class="box"><span>5</span></span><p><b>Folder rules:</b> each <code>AGENTS.md</code> (+ <code>CLAUDE.md</code>) with its Code Review Rules.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.25s"><span class="box"><span>6</span></span><p><b>Generated files:</b> list them in <code>generated-guard.mjs</code>.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.3s"><span class="box"><span>7</span></span><p><b>Slow tests:</b> name them <code>e2e-*</code>, <code>integration-*</code> or <code>regression-*</code>.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.35s"><span class="box"><span>8</span></span><p><b>Onboarding:</b> add your toolchain to <code>check.sh</code> and its table.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.4s"><span class="box"><span>9</span></span><p><b>Codex (optional):</b> CLI + Claude Code plugin; without it, coders implement directly.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.45s"><span class="box"><span>10</span></span><p><b>Check it:</b> <code>npm run test:harness</code> and <code>scripts/verify.sh docs</code>.</p></button>
+    </div>
+    <div class="meter reveal"><span id="meterText">0 / 10 done</span><div class="bar"><i id="meterBar" style="width:0"></i></div></div>
+  </div>
+</section>
+
+<!-- ================= INVENTORY + LIMITS ================= -->
+<section id="inventory" class="white">
+  <div class="wrap">
+    <p class="kicker reveal">11 · What's in the box</p>
+    <h2 class="reveal">File inventory.</h2>
+    <div class="inventory">
+      <div class="card reveal"><h3>root</h3><ul><li><code>AGENTS.md</code> rules for every agent</li><li><code>CLAUDE.md</code> → <code>@AGENTS.md</code></li><li><code>HARNESS.md</code> how it works</li><li><code>PROJECT_MAP.md</code> paths, commands</li></ul></div>
+      <div class="card reveal" style="--d:.08s"><h3>.claude/</h3><ul><li><code>settings.json</code> hooks, permissions</li><li><code>hooks/</code> 5 hooks + tests</li><li><code>agents/</code> 7 roles</li><li><code>skills/</code> 8 skills</li></ul></div>
+      <div class="card reveal" style="--d:.16s"><h3>scripts/ · .github/</h3><ul><li><code>verify.sh</code> validation by area</li><li><code>plan-status.mjs</code> plan tree</li><li><code>setup-github-labels.sh</code></li><li>CI, plan check, PR and <code>finding</code> templates</li></ul></div>
+      <div class="card reveal" style="--d:.24s"><h3>docs/ · apps/</h3><ul><li><code>plans/</code>, <code>status/</code>, <code>guides/</code></li><li><code>apps/web</code>, <code>apps/mobile</code></li><li><code>backend</code>, <code>packages/ui</code>, <code>shared</code></li><li>each with <code>AGENTS.md</code> + <code>CLAUDE.md</code></li></ul></div>
+    </div>
+
+    <p class="kicker reveal" style="margin-top:72px">12 · Honest caveats</p>
+    <h2 class="reveal">What it does not do.</h2>
+    <div class="grid g5">
+      <div class="card reveal"><h3>Teams are experimental</h3><p>The skill falls back to sequential subagents.</p></div>
+      <div class="card reveal" style="--d:.06s"><h3>Hooks are local</h3><p>Codex and terminals rely on review, CI and branch protection.</p></div>
+      <div class="card reveal" style="--d:.12s"><h3>Codex on GitHub</h3><p>Needs its GitHub integration; the in-team reviewer still runs.</p></div>
+      <div class="card reveal" style="--d:.18s"><h3>Cost grows with teams</h3><p>Use one session or the issue loop for small changes.</p></div>
+      <div class="card reveal" style="--d:.24s"><h3>Not infallible</h3><p>It makes mistakes visible and keeps irreversible steps human.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section style="padding-top:80px; padding-bottom:40px">
+  <div class="wrap">
+    <div class="cta-band reveal zoom">
+      <div>
+        <h2>Present it to your team.</h2>
+        <p>The same story in 15 slides that fit any screen: arrow keys to navigate, F for full screen, P to save as PDF.</p>
+      </div>
+      <div class="actions">
+        <a class="btn hot" href="presentation.html"><span class="play"></span>Open the presentation</a>
+        <a class="btn ghost" href="../../HARNESS.md">Read HARNESS.md</a>
       </div>
     </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · issue loop</span><span class="pg"></span></div>
-  </section>
-
-  <!-- 12 · Humans decide -->
-  <section class="slide" data-title="Where humans decide">
-    <p class="kicker">10 · Human in the loop</p>
-    <h2>People decide. The harness enforces.</h2>
-    <p class="lead">A person steps in for <strong>decisions</strong>, never for <strong>enforcement</strong>.</p>
-    <div class="decide" style="flex:1; align-content:start;">
-      <div class="card"><span class="who">Owner</span><h3>Plan questions</h3><p class="how">Concrete options, recommendation first; answers recorded in «Owner decisions».</p></div>
-      <div class="card"><span class="who">Owner</span><h3>Phase plan approval</h3><p class="how">The team stops until it is approved.</p></div>
-      <div class="card"><span class="who">Owner</span><h3>Slow regression tests</h3><p class="how">«Do you want the regression tests to run?» per batch. A no becomes «not verified».</p></div>
-      <div class="card"><span class="who">Owner</span><h3>Deferring a finding</h3><p class="how">Otherwise it is fixed in the same PR.</p></div>
-      <div class="card"><span class="who">Owner</span><h3>DB reset, remote deploys</h3><p class="how">Always asked; teammates are blocked by a hook.</p></div>
-      <div class="card"><span class="who">Owner</span><h3>Queueing work</h3><p class="how">Adding <code>ai-queue</code>, and optionally <code>ai-merge</code>.</p></div>
-      <div class="card"><span class="who">Owner</span><h3>Merge into dev</h3><p class="how">Or the opt-in <code>ai-merge</code> label for the issue loop.</p></div>
-      <div class="card never"><span class="who">Always a person</span><h3>Promote dev → main</h3><p class="how">Never an agent. <code>git-guard</code> and the deny rules block it.</p></div>
-    </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · humans decide</span><span class="pg"></span></div>
-  </section>
-
-  <!-- 13 · Defense in depth -->
-  <section class="slide" data-title="Defense in depth">
-    <p class="kicker">11 · Safety</p>
-    <h2>Defense in depth</h2>
-    <p class="lead">No single layer is trusted on its own.</p>
-    <div class="depth">
-      <div class="ring outer" style="width:100%"><span class="k">8</span><b>GitHub branch protection on main and dev</b><span class="tagr">also covers people and tools outside Claude Code</span></div>
-      <div class="ring" style="width:96%"><span class="k">7</span><b>CI re-runs verify.sh by area + the plan check</b><span class="tagr">every PR</span></div>
-      <div class="ring" style="width:92%"><span class="k">6</span><b>Independent review with written P0/P1 rules</b><span class="tagr">pr-reviewer · Codex on GitHub</span></div>
-      <div class="ring" style="width:88%"><span class="k">5</span><b>Ownership check: git status / diff after every task</b><span class="tagr">Codex runs outside the hooks</span></div>
-      <div class="ring" style="width:84%"><span class="k">4</span><b>Permissions: deny secrets and protected pushes</b><span class="tagr">settings.json</span></div>
-      <div class="ring" style="width:80%"><span class="k">3</span><b>Hooks block dangerous actions, fail closed</b><span class="tagr">inside Claude Code</span></div>
-      <div class="ring" style="width:76%"><span class="k">2</span><b>Skills make the right path the easy path</b><span class="tagr">procedures</span></div>
-      <div class="ring" style="width:72%"><span class="k">1</span><b>Instructions say what and why</b><span class="tagr">AGENTS.md</span></div>
-    </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · defense in depth</span><span class="pg"></span></div>
-  </section>
-
-  <!-- 14 · Adopt -->
-  <section class="slide" data-title="Adopt it">
-    <p class="kicker">12 · Adoption</p>
-    <h2>Adopt it in ten steps</h2>
-    <p class="lead">The apps are placeholders: replace them with your project and keep the harness.</p>
-    <div class="checklist">
-      <div class="check"><span class="num">1</span><p><b>Copy the repo.</b> Create <code>dev</code>, make it the default branch, protect <code>main</code> and <code>dev</code>.</p></div>
-      <div class="check hot"><span class="num m">2</span><p><b>GitHub Issues.</b> Run <code>scripts/setup-github-labels.sh</code>, enable sub-issues, read the guide.</p></div>
-      <div class="check"><span class="num">3</span><p><b>Project context</b> in <code>AGENTS.md</code>; declare the reference app, if any.</p></div>
-      <div class="check"><span class="num">4</span><p><b>Areas and commands:</b> plug your stack into <code>scripts/verify.sh</code> and CI.</p></div>
-      <div class="check"><span class="num">5</span><p><b>Folder rules:</b> each <code>AGENTS.md</code> (+ <code>CLAUDE.md</code>) with its Code Review Rules.</p></div>
-      <div class="check"><span class="num">6</span><p><b>Generated files:</b> list them in <code>generated-guard.mjs</code>.</p></div>
-      <div class="check"><span class="num">7</span><p><b>Slow tests:</b> name them <code>e2e-*</code>, <code>integration-*</code>, <code>regression-*</code>.</p></div>
-      <div class="check"><span class="num">8</span><p><b>Onboarding:</b> add your toolchain to <code>check.sh</code>.</p></div>
-      <div class="check"><span class="num">9</span><p><b>Codex (optional):</b> CLI + Claude Code plugin; without it, coders implement directly.</p></div>
-      <div class="check"><span class="num">10</span><p><b>Check it:</b> <code>npm run test:harness</code> and <code>scripts/verify.sh docs</code>.</p></div>
-    </div>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · adoption</span><span class="pg"></span></div>
-  </section>
-
-  <!-- 15 · Limits and links -->
-  <section class="slide" data-title="Limits and next steps">
-    <p class="kicker">13 · Honest caveats</p>
-    <h2>What it does not do</h2>
-    <p class="lead">It does not make agents infallible: it makes their mistakes <strong>visible</strong> and keeps irreversible steps in <strong>human hands</strong>.</p>
-    <div class="limits">
-      <div class="card"><h3>Teams are experimental</h3><p>Falls back to sequential subagents.</p></div>
-      <div class="card"><h3>Hooks are local</h3><p>Codex and terminals rely on review, CI and branch protection.</p></div>
-      <div class="card"><h3>Codex on GitHub</h3><p>Needs its GitHub integration; the in-team reviewer still runs.</p></div>
-      <div class="card"><h3>Cost grows with teams</h3><p>Use a single session or the issue loop for small changes.</p></div>
-      <div class="card"><h3>Version-dependent</h3><p>Fail-closed hooks and the 1 h cache need a recent Claude Code.</p></div>
-    </div>
-    <div class="links">
-      <a href="../../HARNESS.md">How it works<span>HARNESS.md</span></a>
-      <a href="../../AGENTS.md">Rules for agents<span>AGENTS.md</span></a>
-      <a href="../guides/GITHUB_ISSUES.md">GitHub Issues guide<span>docs/guides/GITHUB_ISSUES.md</span></a>
-      <a href="../guides/AGENT_TEAMS.md">Agent teams guide<span>docs/guides/AGENT_TEAMS.md</span></a>
-    </div>
-    <p class="quote">People decide<span>.</span> The harness enforces<span>.</span></p>
-    <div class="foot"><span><b>AI Multi-Agent Harness</b> · caveats</span><span class="pg"></span></div>
-  </section>
-
+  </div>
+</section>
 </main>
 
-<div class="ctrl" aria-label="Slide navigation">
-  <button id="prev" type="button" aria-label="Previous slide">←</button>
-  <button id="next" type="button" aria-label="Next slide">→</button>
-</div>
-<div class="hint" id="hint">← → or Space to navigate · F full screen · P print / PDF</div>
+<footer>
+  <div class="wrap">
+    <span><b style="color:var(--navy)">AI Multi-Agent Harness</b> · people decide, the harness enforces.</span>
+    <span><a href="presentation.html">Presentation</a><a href="../../HARNESS.md">HARNESS.md</a><a href="../../AGENTS.md">AGENTS.md</a><a href="../guides/GITHUB_ISSUES.md">GitHub Issues guide</a></span>
+  </div>
+</footer>
+
+<button id="toTop" type="button" aria-label="Back to top">↑</button>
 
 <script>
-  const stage = document.getElementById("stage");
-  const slides = [...document.querySelectorAll(".slide")];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Reveal on scroll, count-up and one-shot animations.
+  const countUp = (el) => {
+    const target = +el.dataset.count;
+    if (reduced) { el.textContent = target; return; }
+    const start = performance.now(), dur = 1200;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / dur);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add("in");
+      e.target.querySelectorAll?.("[data-count]").forEach(countUp);
+      io.unobserve(e.target);
+    }
+  }, { threshold: 0.15 });
+  document.querySelectorAll(".reveal, .rings").forEach((el) => io.observe(el));
+
+  // Tabs (building blocks).
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach((tab) => tab.addEventListener("click", () => {
+    tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+    document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === tab.getAttribute("aria-controls")));
+  }));
+  document.querySelector(".tabs").addEventListener("keydown", (e) => {
+    const i = tabs.indexOf(document.activeElement);
+    if (i < 0 || !["ArrowDown", "ArrowUp"].includes(e.key)) return;
+    e.preventDefault();
+    const next = tabs[(i + (e.key === "ArrowDown" ? 1 : tabs.length - 1)) % tabs.length];
+    next.focus(); next.click();
+  });
+
+  // Defense-in-depth: hovering a layer highlights its ring.
+  document.querySelectorAll(".layers-list li").forEach((li) => {
+    const ring = document.querySelector(`.ring[data-ring="${li.dataset.layer}"]`);
+    li.addEventListener("mouseenter", () => ring.classList.add("hl"));
+    li.addEventListener("mouseleave", () => ring.classList.remove("hl"));
+  });
+
+  // Adoption checklist.
+  const checks = [...document.querySelectorAll(".check")];
+  const meterText = document.getElementById("meterText"), meterBar = document.getElementById("meterBar");
+  checks.forEach((c) => c.addEventListener("click", () => {
+    c.setAttribute("aria-pressed", String(c.getAttribute("aria-pressed") !== "true"));
+    const done = checks.filter((x) => x.getAttribute("aria-pressed") === "true").length;
+    meterText.textContent = `${done} / ${checks.length} done`;
+    meterBar.style.width = `${(done / checks.length) * 100}%`;
+  }));
+
+  // Scroll progress, active nav link and back-to-top.
   const progress = document.getElementById("progress");
-  let current = 0;
-
-  slides.forEach((s, i) => {
-    const pg = s.querySelector(".pg");
-    if (pg) pg.textContent = `${i + 1} / ${slides.length}`;
-  });
-
-  function fit() {
-    const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
-    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  const toTop = document.getElementById("toTop");
+  const navLinks = [...document.querySelectorAll("nav.links a")];
+  const sections = navLinks.map((a) => document.querySelector(a.getAttribute("href")));
+  function onScroll() {
+    const h = document.documentElement;
+    progress.style.width = `${(h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100}%`;
+    toTop.classList.toggle("show", h.scrollTop > 900);
+    let current = -1;
+    sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top < 140) current = i; });
+    navLinks.forEach((a, i) => a.classList.toggle("active", i === current));
   }
-
-  function show(i) {
-    current = Math.max(0, Math.min(slides.length - 1, i));
-    slides.forEach((s, k) => s.classList.toggle("active", k === current));
-    progress.style.width = `${((current + 1) / slides.length) * 100}%`;
-    document.title = `${current + 1}. ${slides[current].dataset.title} · AI Multi-Agent Harness`;
-    history.replaceState(null, "", `#${current + 1}`);
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(current + 1); }
-    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(current - 1); }
-    else if (e.key === "Home") show(0);
-    else if (e.key === "End") show(slides.length - 1);
-    else if (e.key.toLowerCase() === "f") { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
-    else if (e.key.toLowerCase() === "p") window.print();
-  });
-  document.getElementById("prev").addEventListener("click", () => show(current - 1));
-  document.getElementById("next").addEventListener("click", () => show(current + 1));
-
-  let touchX = null;
-  document.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
-  document.addEventListener("touchend", (e) => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
-    touchX = null;
-  });
-
-  // Presenter-friendly chrome: the hint fades after a few seconds and the buttons hide while idle.
-  const hint = document.getElementById("hint");
-  setTimeout(() => hint.classList.add("gone"), 4000);
-  let idleTimer;
-  function wake() {
-    document.body.classList.remove("idle");
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => document.body.classList.add("idle"), 2500);
-  }
-  ["mousemove", "touchstart", "focusin"].forEach((ev) => document.addEventListener(ev, wake, { passive: true }));
-  wake();
-
-  window.addEventListener("resize", fit);
-  fit();
-  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
-  requestAnimationFrame(() => document.body.classList.add("ready")); // animate only on slide changes
+  addEventListener("scroll", onScroll, { passive: true });
+  toTop.addEventListener("click", () => scrollTo({ top: 0 }));
+  onScroll();
 </script>
 </body>
 </html>

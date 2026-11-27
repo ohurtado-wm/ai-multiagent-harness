@@ -224,6 +224,9 @@
   .gh-section .kicker { color: var(--magenta); }
   .gh-section .lead { color: var(--gray-mid); }
   .gh-section .lead strong { color: var(--white); }
+  .gh-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .62fr); gap: 36px; align-items: center; margin-bottom: 48px; }
+  .gh-intro .lead { margin-bottom: 0; }
+  .gh-screenshot { display: block; width: 100%; max-width: 420px; height: auto; justify-self: end; border: 1px solid rgba(255, 255, 255, .2); border-radius: 14px; }
   .uses { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; position: relative; }
   .uses::before { content: ""; position: absolute; left: 4%; right: 4%; top: 18px; height: 2px; background: linear-gradient(90deg, var(--magenta), var(--blue)); transform-origin: left; transform: scaleX(0); transition: transform 1.4s var(--ease); }
   .uses.in::before { transform: scaleX(1); }
@@ -402,7 +405,7 @@
   #toTop:hover { background: var(--blue); }
 
   @media (max-width: 1000px) {
-    .hero .wrap, .pillars, .explorer, .team-layout, .depth, .gh-diagram, .cta-band { grid-template-columns: 1fr; }
+    .hero .wrap, .pillars, .explorer, .team-layout, .depth, .gh-diagram, .gh-intro, .cta-band { grid-template-columns: 1fr; }
     .g4, .g5, .uses, .inventory, .stats .wrap { grid-template-columns: repeat(2, 1fr); }
     .steps { grid-template-columns: repeat(3, 1fr); row-gap: 36px; }
     .steps::before, .steps::after { display: none; }
@@ -448,7 +451,6 @@
       <h1 class="reveal" style="--d:.1s">Turn coding agents into a <em>predictable team</em>.</h1>
       <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles, <strong style="color:#fff">built on Claude Code</strong>. People decide. The harness enforces.</p>
       <div class="ctas reveal" style="--d:.3s">
-        <a class="btn hot" href="presentation.html"><span class="play"></span>View the presentation</a>
         <a class="btn ghost" href="#why">Explore how it works ↓</a>
       </div>
     </div>
@@ -764,9 +766,14 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= GITHUB ISSUES ================= -->
 <section id="github" class="gh-section">
   <div class="wrap">
-    <p class="kicker reveal"><span class="core">★ CORE</span>05 · GitHub Issues integration</p>
-    <h2 class="reveal" style="color:#fff">Where people and agents meet.</h2>
-    <p class="lead reveal">People see what exists, what is in progress and who is on it. Agents get a <strong>durable, shared queue of work</strong> that survives any session. Five uses, each a rule in <code>AGENTS.md</code> carried out by a skill.</p>
+    <div class="gh-intro">
+      <div>
+        <p class="kicker reveal"><span class="core">★ CORE</span>05 · GitHub Issues integration</p>
+        <h2 class="reveal" style="color:#fff">Where people and agents meet.</h2>
+        <p class="lead reveal">People see what exists, what is in progress and who is on it. Agents get a <strong>durable, shared queue of work</strong> that survives any session. Five uses, each a rule in <code>AGENTS.md</code> carried out by a skill.</p>
+      </div>
+      <img class="gh-screenshot reveal zoom" src="assets/github-issues-list.png" alt="GitHub issues list with work queue labels" loading="lazy">
+    </div>
     <div class="uses reveal">
       <div class="use"><span class="num">1</span><h3>Every plan has an issue</h3><p>Phase → <b>epic</b>, milestone → <b>sub-issue</b>, standalone plan → plain issue.</p><span class="by">feature-plan</span></div>
       <div class="use"><span class="num">2</span><h3>Deferred findings become issues</h3><p>Only when the owner leaves a review finding for later. Template <code>finding</code>, no secrets.</p><span class="by">close-increment</span></div>

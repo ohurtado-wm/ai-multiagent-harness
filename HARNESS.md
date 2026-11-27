@@ -1,6 +1,6 @@
 # How this agent harness works
 
-This document explains, for people, how the harness in this repository turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md).
+This document explains, for people, how the harness in this repository, **built on [Claude Code](https://code.claude.com/docs)**, turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md). For a visual version, open [`docs/site/index.html`](docs/site/index.html) (landing page with animated diagrams) or the slide deck [`docs/site/presentation.html`](docs/site/presentation.html) to present it to a team.
 
 ## 1. What a harness is, and why
 
@@ -15,13 +15,50 @@ A coding agent on its own is a capable but forgetful contractor: it does not rem
 | One context does everything and gets expensive | **Subagents and teams** split work into narrow roles with their own context and cheaper models. |
 | Reviews its own work | **Separation of duties:** Codex writes the code, Claude reviews it, a person merges. |
 | Unverified claims | **One validation entry point** (`scripts/verify.sh`) used by agents and CI alike; skipped checks are reported, never silent. |
-| Work and findings get lost in chat | **GitHub Issues is the coordination backbone:** every plan has an issue (epics and sub-issues), every deferred finding becomes an issue, PRs close them, and labeled issues are a work queue agents resolve on their own (section 3). |
+| Work and findings get lost in chat | **GitHub Issues is the coordination backbone:** every plan has an issue (epics and sub-issues), every deferred finding becomes an issue, PRs close them, and labeled issues are a work queue agents resolve on their own (section 4). |
 
 The design goal is that a person only has to step in for **decisions** (scope, approvals, merges), never for **enforcement**.
 
 > **The two pillars.** The repository holds the *detail* (plans, rules, status) and **GitHub Issues holds the *coordination*** (what exists, who is on it, what is open, what closed it). Agents read and write both; neither one duplicates the other.
 
-## 2. The building blocks
+## 2. Built on Claude Code
+
+The harness is configuration; **Claude Code is the runtime that makes it work**. Every agent (the main session, each teammate, each subagent) runs in **its own context window**, and none of them shares a conversation. What connects them is Claude Code, through three channels: the memory it loads into every context, what agent teams share while they work, and what lasts between sessions.
+
+```mermaid
+flowchart TB
+  M["Loaded into every context<br/>CLAUDE.md → @AGENTS.md · folder rules · skills · MCP servers"]
+  subgraph Agents["Each agent has its own context window · hooks and permissions check every tool call"]
+    L[Lead session<br/>coordinator]
+    T1[Teammate<br/>coder · documenter]
+    T2[Teammate<br/>qa · reviewer]
+    S[Subagent<br/>read-only reviewer]
+  end
+  W["Shared while they work (agent teams)<br/>task list + dependencies · mailbox by name · idle notice to the lead"]
+  D["Durable across sessions<br/>auto memory · subagent memory · plans in the repo · GitHub Issues"]
+  M --> L & T1 & T2 & S
+  L <--> W
+  T1 <--> W
+  T2 <--> W
+  S -- summary --> L
+  Agents --> D
+```
+
+| Claude Code feature | What it provides | What the harness builds on it |
+|---|---|---|
+| [Project memory](https://code.claude.com/docs/en/memory) | `CLAUDE.md` loaded at the start of every session, subagent and teammate; `@imports`; files in subfolders loaded when Claude works there | `CLAUDE.md` → `@AGENTS.md` at the root and in every folder: one source of rules for Claude and Codex |
+| [Auto memory](https://code.claude.com/docs/en/memory) | Notes Claude writes itself (a `MEMORY.md` index); its first lines load each session; it lives on one machine | Because it is per machine, decisions the whole team must follow go to `AGENTS.md` («Owner criteria») |
+| [Skills](https://code.claude.com/docs/en/skills) | `SKILL.md` procedures triggered by their description or by `/name` | The 8 skills (section 3.2) |
+| [Subagents](https://code.claude.com/docs/en/sub-agents) | Own context window, tools, model and optional persistent memory; only a summary returns | The 7 roles; reviewers limited to `Read, Grep, Glob` (section 3.3) |
+| [Agent teams](https://code.claude.com/docs/en/agent-teams) | Teammates load the project context (CLAUDE.md, skills, MCP servers), share a task list with dependencies and file-locked claims, message each other by name; the lead is notified when one goes idle | `/orchestrate-team`, its briefs and the `task-gate` hook (section 6) |
+| [Hooks](https://code.claude.com/docs/en/hooks) | Lifecycle events (`SessionStart`, `PreToolUse`, `TaskCreated`, `TaskCompleted`, `TeammateIdle`…); exit code 2 blocks with feedback; `onFailure` can make them fail closed | The 5 hooks (section 3.4) |
+| [Permissions and settings](https://code.claude.com/docs/en/permissions) | A versioned `.claude/settings.json` with allow and deny rules, environment and options | Denied protected pushes, the agent teams flag, the one-hour prompt cache (section 3.5) |
+| [Plugins](https://code.claude.com/docs/en/plugins) | Installable bundles of skills, agents, hooks and MCP servers from a marketplace | The Codex plugin (`codex:codex-rescue`) that coders delegate code to |
+| `/loop` | Re-runs a prompt or a skill at its own pace until the work is done | `/loop /resolve-issues` works the issue queue (section 7) |
+
+**Versions.** Agent teams are experimental (enabled by `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`). Fail-closed hooks need Claude Code v2.1.295 or later and the one-hour cache v2.1.242 or later; older versions ignore those fields and the harness works as before.
+
+## 3. The building blocks
 
 ```mermaid
 flowchart TB
@@ -53,7 +90,7 @@ flowchart TB
   Procedures --> Verification
 ```
 
-### 2.1 Instructions
+### 3.1 Instructions
 
 | File | Read by | Purpose |
 |---|---|---|
@@ -64,7 +101,7 @@ flowchart TB
 
 Rules are written as **mandatory statements with the reason and the correct alternative**, so an agent that is blocked knows what to do instead.
 
-### 2.2 Skills (procedures)
+### 3.2 Skills (procedures)
 
 A skill is a Markdown file with a `description` (when to trigger) and numbered steps. Claude Code loads it when the description matches the request, or when the user types `/<skill>`.
 
@@ -79,7 +116,7 @@ A skill is a Markdown file with a `description` (when to trigger) and numbered s
 | [`verify-ui`](.claude/skills/verify-ui/SKILL.md) | "Verify the screen" | Evidence from a running UI (screenshots, texts read from the screen, console and network). |
 | [`reference-parity`](.claude/skills/reference-parity/SKILL.md) | "Does it match the reference?" | A table of text/order/rule differences against the project's functional reference app. |
 
-### 2.3 Subagents and team roles
+### 3.3 Subagents and team roles
 
 Each file in `.claude/agents/` defines a role: its tools, its model and its instructions. Two families:
 
@@ -102,7 +139,7 @@ Each file in `.claude/agents/` defines a role: its tools, its model and its inst
 
 How to use them, read their reports and write new ones: [`docs/guides/SUBAGENTS.md`](docs/guides/SUBAGENTS.md).
 
-### 2.4 Hooks (enforcement)
+### 3.4 Hooks (enforcement)
 
 Hooks are small Node scripts that Claude Code runs before a tool call (or on session/task events). Exit code `2` blocks the call and the message on stderr is shown to the agent, which then follows it. Every hook has unit tests. The three safety hooks (`git-guard`, `team-guard`, `generated-guard`) are registered with `"onFailure": "block"` and `"timeout": 30`, so if one **crashes or times out, the action is blocked** instead of going ahead (Claude Code v2.1.295+; older versions ignore the field). Inside the scripts, input that is not valid JSON is still let through with a warning, so a malformed event cannot stall the work. The session hook writes its context as **facts, not orders**: imperative hook text can trigger Claude's prompt-injection defenses.
 
@@ -118,11 +155,11 @@ The parser in `git-guard` understands quoting, chained commands (`&&`, `;`, `|`)
 
 > Hooks only protect **inside Claude Code**. Codex, other agents and your own terminal do not pass through them. That is why the harness also relies on server-side branch protection, CI, and the rule that only the coordinator commits after checking `git diff`.
 
-### 2.5 Permissions
+### 3.5 Permissions
 
 [`.claude/settings.json`](.claude/settings.json) (versioned, shared by the team) registers the hooks, enables agent teams, pre-approves read-only and validation commands (`git status`, `git diff`, `scripts/verify.sh`, `node --test`…) so agents do not stall on prompts, and **denies** reading or editing `.env*` files. It also **denies pushes to `main` and `dev`, forced pushes (`--force`, `-f`; `--force-with-lease` stays allowed), `--all` and `--mirror`**: the docs recommend the permission system for hard denies, deny rules apply to every subcommand of a chained command and no allow rule can override them. `git-guard` remains the first layer because it also understands `git -C`, `cd` and `bash -c` forms the rule syntax cannot see. `"subagentPromptCacheTtl": "1h"` keeps the prompt cache of subagents and teammates for an hour instead of five minutes, so a coder waiting several minutes for Codex does not pay its whole context again. Personal preferences go in `.claude/settings.local.json` (git-ignored).
 
-### 2.6 Memory: plans, status and GitHub
+### 3.6 Memory: plans, status and GitHub
 
 The harness assumes **no agent remembers anything**. State lives in files and in GitHub, and every session reconstructs it:
 
@@ -144,7 +181,7 @@ The harness assumes **no agent remembers anything**. State lives in files and in
 
 Plans are written to be **read by line ranges** (about 30 KB, at most 6 self-contained blocks), so a teammate reads only its block.
 
-### 2.7 Verification
+### 3.7 Verification
 
 [`scripts/verify.sh`](scripts/verify.sh) is the single validation entry point:
 
@@ -159,7 +196,7 @@ It maps changed paths to areas (`docs`, `contracts`, `web`, `backend`, `mobile`)
 
 Tests are split in two classes: **fast/focused** tests run on their own; **regression** tests (full end-to-end, simulator or integration runs) need the person's explicit «yes» per batch, and `team-guard` enforces that for teammates.
 
-## 3. ⭐ GitHub Issues integration (the coordination backbone)
+## 4. ⭐ GitHub Issues integration (the coordination backbone)
 
 This is one of the most important parts of the harness. GitHub Issues is where **humans and agents meet**: people see at a glance what exists, what is in progress and who is on it, and agents get a durable, shared queue of work that survives any session. Step-by-step guide: [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md). One-time setup: `scripts/setup-github-labels.sh`.
 
@@ -200,21 +237,21 @@ flowchart LR
   PR2 -- merge closes --> Q
 ```
 
-### 3.1 Thin issues, rich plans
+### 4.1 Thin issues, rich plans
 
 An issue **never copies** tasks, decisions or status from the plan: it has the plan title, two or three lines of goal and the link to the plan file on `dev`. The **real status lives in the plan header** (`status:`); on GitHub the issue is only *open* or *closed*, and the plan header stores its number (`issue: <n>`, validated by `plan-status.mjs`). This avoids the classic drift where the tracker says one thing and the docs another.
 
-### 3.2 Epics and sub-issues mirror the plan tree
+### 4.2 Epics and sub-issues mirror the plan tree
 
 `parent:` in the plan header and GitHub's sub-issues express the same hierarchy: phase plan → epic, milestone plan → sub-issue (created with `gh api … /issues/<epic>/sub_issues`). Findings born from a milestone also hang from that epic, so the epic shows everything still open for the phase.
 
-### 3.3 Findings: fixed in the PR by default, an issue only when deferred
+### 4.3 Findings: fixed in the PR by default, an issue only when deferred
 
 Review findings (from `pr-reviewer`, Codex on GitHub or a person) are **tasks on the same branch**, not issues. Only when the owner decides to leave one for later does the coordinator create a `finding` issue — after searching for a duplicate (`gh issue list --search … --state all`) and commenting on it if it exists — with **no secrets or personal data**, and links it on one line in the final answer, the plan's «Result» and the PR body. The template ([`.github/ISSUE_TEMPLATE/finding.md`](.github/ISSUE_TEMPLATE/finding.md)) has a fixed structure — Origin, What happens, Where (`file:line`), Proposal, Area and **Severity** — which is exactly what the issue loop needs to pick and resolve it later. That closes the circle: **a deferred finding is, by construction, a ready-to-queue task.**
 
-### 3.4 Issues as an autonomous work queue
+### 4.4 Issues as an autonomous work queue
 
-Three labels turn GitHub Issues into an agent work queue (section 6):
+Three labels turn GitHub Issues into an agent work queue (section 7):
 
 | Label | Added by | Meaning |
 |---|---|---|
@@ -224,7 +261,7 @@ Three labels turn GitHub Issues into an agent work queue (section 6):
 
 Issue **assignment** is the lock: the loop assigns the issue to the current `gh` user before reading it, so several developers can run their own loop on the same queue without collisions. HTML markers in PR comments (`<!-- resolve-issues: handled <id> -->`, `<!-- resolve-issues: notified -->`) let a brand-new session know which findings were already addressed, without any memory of its own.
 
-### 3.5 Labels used by the harness
+### 4.5 Labels used by the harness
 
 | Label | Used for |
 |---|---|
@@ -234,7 +271,7 @@ Issue **assignment** is the lock: the loop assigns the issue to the current `gh`
 
 Create them once with [`scripts/setup-github-labels.sh`](scripts/setup-github-labels.sh) (idempotent).
 
-## 4. Lifecycle of a piece of work
+## 5. Lifecycle of a piece of work
 
 ```mermaid
 flowchart LR
@@ -256,7 +293,7 @@ flowchart LR
 5. **Review**: the `pr-reviewer` (and the specialist reviewers) plus the Codex review on GitHub. **Findings are fixed in the same PR**; each inline thread gets a reply with the fixing commit and is resolved. Only the owner can decide to defer a finding, which then becomes a `finding` issue.
 6. **Merge**: a person merges into `dev`, and a person promotes `dev` to `main`. Agents never do either (except the opt-in `ai-merge` into `dev`, below).
 
-## 5. Agent teams
+## 6. Agent teams
 
 For milestones with pieces in several areas, `/orchestrate-team <plan>` runs a team. Guide: [`docs/guides/AGENT_TEAMS.md`](docs/guides/AGENT_TEAMS.md).
 
@@ -298,7 +335,7 @@ The key design choices:
 - **Stop rules.** Two failures on the same task, two teammates needing the same file, a limit running out, a design change, or a hook block → stop and tell the person.
 - **Resumable.** Teammates do not survive `/resume`, but the plan's «Status» table and `git log` do: a new session with the same command continues where it stopped.
 
-## 6. The issue loop
+## 7. The issue loop
 
 For a stream of small, well-described issues, `/loop /resolve-issues` resolves them one at a time. Guide: [`docs/guides/RESOLVE_ISSUES.md`](docs/guides/RESOLVE_ISSUES.md).
 
@@ -327,7 +364,20 @@ stateDiagram-v2
 - **Multi-developer safe.** Issues are assigned to whoever takes them; ties are broken by the oldest current assignment; each loop only touches its own PRs.
 - **Self-limiting.** It cuts itself after ~250k tokens of context or 5 merged PRs and proposes a fresh session, because long sessions get more expensive per turn.
 
-## 7. Where humans decide
+**Why 250k tokens or 5 PRs.** The numbers come from measuring four real sessions of the loop:
+
+| Measurement | Value |
+|---|---|
+| Context when the session starts (instructions, tools, skills) | ~85k |
+| Added by each issue | 25k–90k, ~70k on average; the short-context rules (the coordinator reads no code, short outputs, reports of up to 15 lines) aim for 45–50k |
+| Highest context measured | 335k at the third issue: a third of a 1M window |
+| Tokens re-read per issue in the same session | 14.5M, then 21M, then 28M, with a similar number of turns |
+
+The window is not the limit; **the cost of re-reading the whole context on every turn is**, and it grows with the session, not with the size of the issue. At 45–50k per issue, 4 or 5 issues fit between the ~85k start and 250k, so the context cut is the main rule and the 5-PR cap is the backstop for unusually small issues. A fresh session starts again at ~85k. In a terminal, where the loop cannot read its own context size, it cuts every 3 merged PRs (an issue with a plan counts as two).
+
+**Calibrate it per project.** These numbers were measured on one repository. The starting context is mostly the harness itself, but what each issue adds depends on the codebase: diff sizes, test output, subagent reports. In a small project each issue adds less and many more PRs fit before the cut; in a large one, fewer. To calibrate: note the context of a fresh session, note how much it grows per issue over a few runs, set the token cut where a turn still costs what you accept, and set the PR cap a little above the number of issues that fit. Both values live in the `resolve-issues` skill («Cut», step 5).
+
+## 8. Where humans decide
 
 | Moment | Who | How |
 |---|---|---|
@@ -340,7 +390,7 @@ stateDiagram-v2
 | Merging into `dev` | Owner | Or the opt-in `ai-merge` label for the issue loop. |
 | Promoting `dev` → `main` | A person | Never an agent; `git-guard` blocks it. |
 
-## 8. Defense in depth
+## 9. Defense in depth
 
 No single layer is trusted on its own:
 
@@ -353,7 +403,7 @@ No single layer is trusted on its own:
 7. **CI** re-runs the same `verify.sh` areas and checks the plan rule.
 8. **GitHub branch protection** on `main` and `dev` (configure it: required checks, no direct pushes). This is the only layer that also covers people and tools outside Claude Code.
 
-## 9. Adopting it in your project
+## 10. Adopting it in your project
 
 1. **Copy** this folder into your repository (or start from it). Create `dev` and make it the default branch; protect `main` and `dev` on GitHub.
 2. **GitHub Issues:** run `scripts/setup-github-labels.sh` to create the labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`), make sure sub-issues are enabled, and read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md). Do not skip this step: plans, findings and the issue loop depend on it.
@@ -362,11 +412,11 @@ No single layer is trusted on its own:
 5. **Folder rules:** rewrite each folder's `AGENTS.md` and its «Code Review Rules» for your stack. Add or remove folders and the matching `coder-*` names in `coder.md` and `orchestrate-team`.
 6. **Generated files:** list them in `CONFIG` of `.claude/hooks/generated-guard.mjs`.
 7. **Regression and platform rules:** name your slow scripts `scripts/e2e-*.sh`, `scripts/integration-*.sh` or `scripts/regression-*.sh` (or change the pattern in `team-guard.mjs`); adjust the mobile toolchain list if you have other heavy platforms.
-8. **Onboarding:** add your toolchain to the table in `onboarding/SKILL.md` and to `onboarding/scripts/check.sh`.
+8. **Onboarding:** add your toolchain to the table in `onboarding/SKILL.md` and to `onboarding/scripts/check.sh`. After a few runs of the issue loop, calibrate its cut (250k tokens / 5 PRs) for your repository (section 7).
 9. **Codex (optional):** install the Codex CLI and the `codex@openai-codex` plugin for Claude Code. Without it, coders implement directly and say so; the rest of the harness is unchanged. The Codex model and effort are set in `coder.md` and `briefs.md`.
 10. **Check the harness:** `npm run test:harness` and `scripts/verify.sh docs`.
 
-## 10. File inventory
+## 11. File inventory
 
 ```
 AGENTS.md                      rules for every agent (single source)
@@ -402,7 +452,7 @@ docs/
 apps/web, apps/mobile, backend, packages/ui, shared/   monorepo skeleton, each with its AGENTS.md and CLAUDE.md
 ```
 
-## 11. Limits and honest caveats
+## 12. Limits and honest caveats
 
 - **Agent teams are an experimental Claude Code feature**; the skill falls back to sequential subagents when teams are not available.
 - **Hooks are local guardrails, not security boundaries.** Anything that runs outside Claude Code (Codex, a terminal, another agent) is only covered by review, CI and branch protection.

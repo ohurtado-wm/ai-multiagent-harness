@@ -5,7 +5,7 @@
 //   - git that writes history or changes branch (commit, push, merge, rebase, reset, switch, branch
 //     checkout, stash, tag, cherry-pick, revert, worktree, pull) and gh pr create/merge/edit/close: the only
 //     git author is the coordinator. `git checkout -- <file>` and `git restore` are allowed.
-//   - editing the harness configuration (.claude/settings*.json, .claude/hooks/**).
+//   - editing the harness configuration (.claude/settings*.json, .claude/hooks/**), including configure-agents apply.
 //   - the documenter editing outside docs/**, PROJECT_MAP.md, HARNESS.md and the AGENTS.md files.
 //   - resetting the local database (supabase db reset, prisma migrate reset, npm run db:reset): it wipes the
 //     owner's test data; the coordinator decides that with the owner.
@@ -95,6 +95,9 @@ export function evaluateCommand(command, context = {}) {
     if (!block && cmd === "git") block = evaluateGit(args);
     else if (!block && cmd === "gh" && args[0] === "pr" && GH_PR.has(args[1])) {
       block = `«gh pr ${args[1]}» is not allowed from a subagent or teammate. ${author}`;
+    } else if (!block && /^node(?:\.exe)?$/.test(basename(cmd)) &&
+        args.some((arg, index) => basename(arg) === "configure-agents.mjs" && args[index + 1] === "apply")) {
+      block = "Only the coordinator can apply agent model settings for the repository owner.";
     } else if (!block && isDbReset(cmd, args)) {
       block = dbReset;
     } else if (!block && context.team) {

@@ -42,6 +42,7 @@ Replace `<owner>/<new-repo>` with the account (or organization) and name of your
 Check the harness itself at any time:
 
 ```sh
+npm ci                    # install the harness parsers
 npm run test:harness      # hook and script unit tests
 scripts/verify.sh docs    # links, hooks, plan table
 ```

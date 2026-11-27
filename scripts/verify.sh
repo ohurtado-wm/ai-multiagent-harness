@@ -59,7 +59,7 @@ areas_of() {
       backend/*) add backend ;;
       apps/web/*|packages/*) add web ;;
       apps/mobile/*) add mobile ;;
-      .claude/*|.agents/*|.codex/*|.github/*|scripts/verify*|scripts/plan-status*|scripts/pr-check-plan*|scripts/check-links.mjs|scripts/set-codeowners*|scripts/setup-*) add docs ;;
+      .claude/*|.agents/*|.codex/*|.github/*|scripts/verify*|scripts/plan-status*|scripts/pr-check-plan*|scripts/check-links.mjs|scripts/set-codeowners*|scripts/setup-*|scripts/configure-agents*) add docs ;;
     esac
   done
 }
@@ -159,7 +159,7 @@ area_docs() {
   step docs . "links" "node scripts/check-links.mjs"
   step docs . "client hooks" "node --test --test-reporter=dot .claude/hooks/*.test.mjs"
   step docs . "plans table" "node scripts/plan-status.mjs --check"
-  step docs . "harness scripts (verify, plan status, PR plan, CODEOWNERS)" "node --test --test-reporter=dot scripts/verify.test.mjs scripts/plan-status.test.mjs scripts/pr-check-plan.test.mjs scripts/set-codeowners.test.mjs"
+  step docs . "harness scripts (verify, plan status, PR plan, CODEOWNERS, agent models)" "node --test --test-reporter=dot scripts/verify.test.mjs scripts/plan-status.test.mjs scripts/pr-check-plan.test.mjs scripts/set-codeowners.test.mjs scripts/configure-agents.test.mjs"
 }
 area_contracts() {
   step contracts . "well-formed JSON in shared/" "node scripts/check-json.mjs shared"

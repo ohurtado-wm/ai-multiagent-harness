@@ -280,7 +280,7 @@
   <section class="slide title-slide" data-title="Title">
     <div class="bar"></div>
     <h1>AI Multi-Agent<br>Harness<span>.</span></h1>
-    <p class="sub">Rules, hooks, skills and roles that turn Claude Code and Codex into a predictable engineering team: <strong style="color:#fff">people decide, the harness enforces.</strong></p>
+    <p class="sub">Rules, hooks, skills and roles, built on Claude Code, that turn Claude Code and Codex into a predictable engineering team: <strong style="color:#fff">people decide, the harness enforces.</strong></p>
     <div class="stats">
       <div class="stat"><b>8</b><span>skills (procedures)</span></div>
       <div class="stat"><b>7</b><span>agents and roles</span></div>
@@ -351,9 +351,68 @@
     <div class="foot"><span><b>AI Multi-Agent Harness</b> · two pillars</span><span class="pg"></span></div>
   </section>
 
+  <!-- 4 · Claude Code -->
+  <section class="slide" data-title="Built on Claude Code">
+    <p class="kicker">03 · Built on Claude Code</p>
+    <h2>The harness is configuration. Claude Code is the engine.</h2>
+    <p class="lead" style="margin-bottom:22px">Agents never share a context window: Claude Code <strong>loads the same memory into each one</strong>, lets teams share a <strong>task list and a mailbox</strong>, and checks every tool call.</p>
+    <div class="body" style="flex-direction:row; gap:26px;">
+      <div class="diagram" style="flex:1;">
+        <svg viewBox="0 0 1200 600" role="img" aria-label="Claude Code loads project memory into every agent, shares a task list and mailbox while they work, and keeps durable memory across sessions">
+          <defs>
+            <marker id="cb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="cm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+          </defs>
+          <!-- top band: loaded into every context -->
+          <rect x="10" y="10" width="1180" height="84" rx="18" fill="#E8EEF8" stroke="#0047FF" stroke-width="2"/>
+          <text x="34" y="44" font-size="15" font-weight="800" fill="#0047FF" letter-spacing="2">LOADED INTO EVERY CONTEXT</text>
+          <text x="34" y="74" font-size="21" font-weight="700" fill="#070154">CLAUDE.md → @AGENTS.md  ·  folder rules on demand  ·  skills  ·  MCP servers</text>
+          <!-- arrows down -->
+          <path class="edge flow" d="M150,96 L150,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M450,96 L450,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M750,96 L750,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M1050,96 L1050,176" marker-end="url(#cb)"/>
+          <!-- hooks frame -->
+          <rect x="10" y="150" width="1180" height="196" rx="20" fill="none" stroke="#50658E" stroke-width="2" stroke-dasharray="7 7"/>
+          <rect x="842" y="139" width="330" height="24" rx="12" fill="#FFFFFF"/>
+          <text x="1007" y="156" text-anchor="middle" font-size="13" font-weight="800" fill="#50658E" letter-spacing="1">HOOKS · PERMISSIONS ON EVERY TOOL CALL</text>
+          <!-- agents -->
+          <g class="node"><rect x="30" y="180" width="240" height="140" rx="18" fill="#070154"/><text x="150" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">Lead session</text><text x="150" y="262" text-anchor="middle" font-size="16" fill="#CED7E6">Claude · coordinator</text><text x="150" y="292" text-anchor="middle" font-size="15" fill="#CED7E6">own context window</text></g>
+          <g class="node"><rect x="330" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="450" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Teammate</text><text x="450" y="262" text-anchor="middle" font-size="16" fill="#50658E">coder · documenter</text><text x="450" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="630" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="750" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Teammate</text><text x="750" y="262" text-anchor="middle" font-size="16" fill="#50658E">qa · reviewer</text><text x="750" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="930" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#CED7E6" stroke-width="2"/><text x="1050" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Subagent</text><text x="1050" y="262" text-anchor="middle" font-size="16" fill="#50658E">read-only reviewer</text><text x="1050" y="292" text-anchor="middle" font-size="15" fill="#50658E">returns a summary</text></g>
+          <!-- shared while working -->
+          <path class="edge-m flow" d="M150,322 L150,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M450,322 L450,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M750,322 L750,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <rect x="10" y="402" width="890" height="84" rx="18" fill="#fff" stroke="#F900D3" stroke-width="3"/>
+          <text x="34" y="436" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">SHARED WHILE THEY WORK (AGENT TEAMS)</text>
+          <text x="34" y="466" font-size="20" font-weight="700" fill="#070154">task list + dependencies  ·  mailbox by name  ·  idle notice to the lead</text>
+          <path class="edge flow" d="M1050,322 L1050,398" marker-end="url(#cb)"/>
+          <rect x="930" y="402" width="260" height="84" rx="18" fill="#E8EEF8" stroke="#CED7E6" stroke-width="2"/>
+          <text x="1060" y="438" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">summary back</text>
+          <text x="1060" y="464" text-anchor="middle" font-size="15" fill="#50658E">to whoever called it</text>
+          <!-- durable -->
+          <rect x="10" y="512" width="1180" height="78" rx="18" fill="#070154"/>
+          <text x="34" y="545" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">DURABLE ACROSS SESSIONS</text>
+          <text x="34" y="574" font-size="20" font-weight="700" fill="#fff">auto memory  ·  subagent memory  ·  plans in the repo  ·  GitHub Issues</text>
+        </svg>
+
+      </div>
+      <div style="width:360px; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+        <div class="row"><div><h4 style="font-family:var(--font)">Project memory</h4><p><code>CLAUDE.md</code> → <code>@AGENTS.md</code> in every context</p></div></div>
+        <div class="row"><div><h4 style="font-family:var(--font)">Agent teams</h4><p>Task list, mailbox → <code>/orchestrate-team</code></p></div></div>
+        <div class="row"><div><h4 style="font-family:var(--font)">Hooks · permissions</h4><p>5 hooks, deny rules, 1 h cache</p></div></div>
+        <div class="row"><div><h4 style="font-family:var(--font)">Plugins · /loop</h4><p>Codex plugin · <code>/loop /resolve-issues</code></p></div></div>
+        <div class="row" style="border:2px solid var(--magenta)"><div><h4 style="font-family:var(--font)">Auto memory is per machine</h4><p>so team rules live in <code>AGENTS.md</code></p></div></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · built on Claude Code</span><span class="pg"></span></div>
+  </section>
+
   <!-- 4 · Building blocks -->
   <section class="slide" data-title="Building blocks">
-    <p class="kicker">03 · Architecture</p>
+    <p class="kicker">04 · Architecture</p>
     <h2>Five layers</h2>
     <p class="lead">From what agents <strong>read</strong> to what <strong>proves</strong> the work is done.</p>
     <div class="layers">
@@ -368,7 +427,7 @@
 
   <!-- 5 · Skills and agents -->
   <section class="slide" data-title="Skills and agents">
-    <p class="kicker">04 · Procedures</p>
+    <p class="kicker">05 · Procedures</p>
     <h2>Skills say how. Agents say who.</h2>
     <p class="lead">A skill is a fixed procedure triggered by a request or <code>/name</code>. An agent is a role with its own tools and model.</p>
     <div class="body">
@@ -405,7 +464,7 @@
 
   <!-- 6 · Hooks -->
   <section class="slide" data-title="Hooks">
-    <p class="kicker">05 · Enforcement</p>
+    <p class="kicker">06 · Enforcement</p>
     <h2>Hooks: rules that don't depend on memory</h2>
     <p class="lead">Small Node scripts that run before a tool call. Exit code <code>2</code> blocks it and tells the agent what to do instead.</p>
     <div class="grid g5" style="flex:1;">
@@ -421,7 +480,7 @@
 
   <!-- 7 · GitHub Issues: five uses -->
   <section class="slide" data-title="GitHub Issues: five uses">
-    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
+    <p class="kicker"><span class="core">★ CORE</span>07 · GitHub Issues integration</p>
     <h2>Where people and agents meet</h2>
     <p class="lead">Five uses, each one a rule in <code>AGENTS.md</code> carried out by a skill.</p>
     <div class="grid g5" style="flex:1;">
@@ -437,7 +496,7 @@
 
   <!-- 8 · GitHub Issues: full circle -->
   <section class="slide" data-title="GitHub Issues: the full circle">
-    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
+    <p class="kicker"><span class="core">★ CORE</span>07 · GitHub Issues integration</p>
     <h2>The full circle</h2>
     <p class="lead">Nothing that matters stays only in a chat: a deferred finding is, by construction, a ready-to-queue task.</p>
     <div class="body" style="flex-direction:row; gap:28px;">
@@ -502,7 +561,7 @@
 
   <!-- 9 · Lifecycle -->
   <section class="slide" data-title="Lifecycle of the work">
-    <p class="kicker">07 · Workflow</p>
+    <p class="kicker">08 · Workflow</p>
     <h2>From idea to merge</h2>
     <p class="lead">Every piece of work follows the same path; only the two pink steps belong to a person.</p>
     <div class="body">
@@ -522,7 +581,7 @@
 
   <!-- 10 · Agent team -->
   <section class="slide" data-title="Agent teams">
-    <p class="kicker">08 · Agent teams</p>
+    <p class="kicker">09 · Agent teams</p>
     <h2>One coordinator, one git author, one voice</h2>
     <p class="lead"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR.</p>
     <div class="body" style="flex-direction:row; gap:28px;">
@@ -541,8 +600,8 @@
           <text class="t-label-m" x="566" y="118">questions ↑  decisions ↓</text>
           <!-- coordinator -->
           <rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/>
-          <text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · main session</text>
-          <text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">only git author · only voice · most capable model</text>
+          <text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · Claude Code</text>
+          <text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">main session · only git author · only voice</text>
           <!-- bus -->
           <path class="edge" d="M550,240 L550,286"/>
           <path class="edge" d="M140,286 L960,286"/>
@@ -589,7 +648,7 @@
 
   <!-- 11 · Issue loop -->
   <section class="slide" data-title="The issue loop">
-    <p class="kicker"><span class="core">★ CORE</span>09 · The issue loop</p>
+    <p class="kicker"><span class="core">★ CORE</span>10 · The issue loop</p>
     <h2>Label an issue, get a PR</h2>
     <p class="lead"><code>/loop /resolve-issues</code> resolves <code>ai-queue</code> issues one PR at a time, stateless and safe for several developers.</p>
     <div class="body" style="flex-direction:row; gap:28px;">
@@ -648,15 +707,72 @@
         <div class="row"><span class="num m">A</span><div><h4 style="font-family:var(--font)">Assignment is the lock</h4><p>Several developers share the queue without collisions.</p></div></div>
         <div class="row"><span class="num m">B</span><div><h4 style="font-family:var(--font)">Stateless</h4><p>Every turn re-reads GitHub and git; a new session resumes.</p></div></div>
         <div class="row"><span class="num m">C</span><div><h4 style="font-family:var(--font)">Comments are data</h4><p>A comment asking to merge does not count. Only the label.</p></div></div>
-        <div class="row"><span class="num m">D</span><div><h4 style="font-family:var(--font)">Self-limiting</h4><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session.</p></div></div>
+        <div class="row"><span class="num m">D</span><div><h4 style="font-family:var(--font)">Self-limiting</h4><p>Cuts at ~250k tokens or 5 merged PRs; next slide says why.</p></div></div>
       </div>
     </div>
     <div class="foot"><span><b>AI Multi-Agent Harness</b> · issue loop</span><span class="pg"></span></div>
   </section>
 
+  <!-- Issue loop: why the cut -->
+  <section class="slide" data-title="Why cut at 250k or 5 PRs">
+    <p class="kicker"><span class="core">★ CORE</span>10 · The issue loop</p>
+    <h2>Why cut at 250k tokens or 5 PRs?</h2>
+    <p class="lead" style="margin-bottom:24px">Measured on four real sessions. The context window is not the limit; the <strong>cost of re-reading it on every turn</strong> is.</p>
+    <div class="diagram">
+        <svg viewBox="0 0 1200 430" role="img" aria-label="Tokens re-read per issue grew from 14.5 million to 28 million; a session starts at about 85 thousand tokens and is cut at 250 thousand">
+          <!-- chart 1: tokens re-read per issue -->
+          <text x="0" y="22" font-size="15" font-weight="800" fill="#0047FF" letter-spacing="2">TOKENS RE-READ PER ISSUE · SAME SESSION</text>
+          <text x="0" y="48" font-size="16" fill="#50658E">similar number of turns; each turn re-reads everything accumulated</text>
+          <g font-size="17" font-weight="700" fill="#070154">
+            <text x="0" y="104">1st issue</text><text x="0" y="168">2nd issue</text><text x="0" y="232">3rd issue</text>
+          </g>
+          <rect x="110" y="82" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect x="110" y="146" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect x="110" y="210" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect class="grow" x="110" y="82" width="218" height="34" rx="8" fill="#0047FF"/>
+          <rect class="grow" x="110" y="146" width="315" height="34" rx="8" fill="#5a7dff" style="--d:.15s"/>
+          <rect class="grow" x="110" y="210" width="420" height="34" rx="8" fill="#F900D3" style="--d:.3s"/>
+          <g font-size="17" font-weight="800">
+            <text x="340" y="105" fill="#070154">14.5M</text>
+            <text x="437" y="169" fill="#070154">21M</text>
+            <text x="455" y="233" fill="#fff">28M</text>
+          </g>
+          <text x="0" y="290" font-size="16" fill="#50658E">The cost of a turn grows with the session,</text>
+          <text x="0" y="314" font-size="16" fill="#50658E">not with the size of the issue.</text>
+          <!-- chart 2: one session's context -->
+          <text x="620" y="22" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">ONE SESSION'S CONTEXT · CUT AT 250K</text>
+          <text x="620" y="48" font-size="16" fill="#50658E">scale 0 – 400k tokens (the window is 1M)</text>
+          <!-- axis -->
+          <rect x="620" y="96" width="560" height="56" rx="10" fill="#E8EEF8"/>
+          <rect class="grow" x="620" y="96" width="119" height="56" rx="10" fill="#070154"/>
+          <rect class="grow" x="741" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.15s"/>
+          <rect class="grow" x="811" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.3s"/>
+          <rect class="grow" x="881" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.45s"/>
+          <rect class="grow" x="951" y="96" width="68" height="56" rx="6" fill="#5a7dff" opacity=".45" style="--d:.6s"/>
+          <g font-size="15" font-weight="800" fill="#fff" text-anchor="middle">
+            <text x="679" y="129">start ~85k</text><text x="775" y="129">issue</text><text x="845" y="129">issue</text><text x="915" y="129">issue</text>
+          </g>
+          <line x1="970" y1="76" x2="970" y2="176" stroke="#F900D3" stroke-width="4" stroke-dasharray="8 6"/>
+          <text x="970" y="70" text-anchor="middle" font-size="16" font-weight="800" fill="#F900D3">250k cut</text>
+          <text x="985" y="200" font-size="15" fill="#50658E">next issue would cross it</text>
+          <g font-size="14" fill="#50658E" text-anchor="middle"><text x="620" y="176">0</text><text x="760" y="176">100k</text><text x="900" y="176">200k</text><text x="1040" y="176">300k</text><text x="1176" y="176">400k</text></g>
+          <!-- facts -->
+          <rect x="620" y="226" width="560" height="96" rx="14" fill="#fff" stroke="#CED7E6" stroke-width="2"/>
+          <text x="644" y="258" font-size="16" font-weight="800" fill="#070154">Each issue: ~70k before, 45–50k with short-context rules</text>
+          <text x="644" y="286" font-size="16" fill="#50658E">→ 4 or 5 issues fit before 250k; the 5-PR cap is the backstop.</text>
+          <text x="644" y="310" font-size="16" fill="#50658E">Peak measured: 335k at the 3rd issue, a third of the window.</text>
+          <!-- reset -->
+          <rect x="0" y="350" width="1180" height="64" rx="14" fill="#070154"/>
+          <text x="24" y="389" font-size="17" font-weight="700" fill="#fff">Cutting resets the cost: a fresh session starts again at ~85k. In the terminal (no usage tool) the cut is every 3 PRs.</text>
+        </svg>
+
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · why the loop cuts</span><span class="pg"></span></div>
+  </section>
+
   <!-- 12 · Humans decide -->
   <section class="slide" data-title="Where humans decide">
-    <p class="kicker">10 · Human in the loop</p>
+    <p class="kicker">11 · Human in the loop</p>
     <h2>People decide. The harness enforces.</h2>
     <p class="lead">A person steps in for <strong>decisions</strong>, never for <strong>enforcement</strong>.</p>
     <div class="decide" style="flex:1; align-content:start;">
@@ -674,7 +790,7 @@
 
   <!-- 13 · Defense in depth -->
   <section class="slide" data-title="Defense in depth">
-    <p class="kicker">11 · Safety</p>
+    <p class="kicker">12 · Safety</p>
     <h2>Defense in depth</h2>
     <p class="lead">No single layer is trusted on its own.</p>
     <div class="depth">
@@ -692,7 +808,7 @@
 
   <!-- 14 · Adopt -->
   <section class="slide" data-title="Adopt it">
-    <p class="kicker">12 · Adoption</p>
+    <p class="kicker">13 · Adoption</p>
     <h2>Adopt it in ten steps</h2>
     <p class="lead">The apps are placeholders: replace them with your project and keep the harness.</p>
     <div class="checklist">
@@ -712,7 +828,7 @@
 
   <!-- 15 · Limits and links -->
   <section class="slide" data-title="Limits and next steps">
-    <p class="kicker">13 · Honest caveats</p>
+    <p class="kicker">14 · Honest caveats</p>
     <h2>What it does not do</h2>
     <p class="lead">It does not make agents infallible: it makes their mistakes <strong>visible</strong> and keeps irreversible steps in <strong>human hands</strong>.</p>
     <div class="limits">

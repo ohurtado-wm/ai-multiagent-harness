@@ -246,6 +246,24 @@
   .principles .p p { margin: 0; color: var(--gray-dark); font-size: 15px; }
   .gh-section .principles code { background: var(--gray-light); color: var(--navy); }
 
+
+  /* Claude Code section */
+  .cc-section { background: linear-gradient(180deg, var(--gray-light) 0%, var(--canvas) 100%); }
+  .cc-badge { display: inline-flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 999px; padding: 8px 16px 8px 8px; font-weight: 800; margin-bottom: 18px; }
+  .cc-badge i { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: var(--white); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 15px; }
+  .cc-map { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .cc-map .card { display: flex; flex-direction: column; gap: 10px; }
+  .cc-map .feat { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .cc-map .uses-it { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--gray-light); font-size: 15px; color: var(--navy); }
+  .cc-map .uses-it b { color: var(--magenta); }
+
+  .grow { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); transition: transform 1.2s var(--ease); transition-delay: var(--d, 0s); }
+  .in .grow { transform: scaleX(1); }
+  .why-cut { margin-top: 40px; }
+  .why-cut h3 { font-size: 28px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .why-cut > p { color: var(--gray-dark); margin: 0 0 20px; max-width: 900px; }
+  @media (prefers-reduced-motion: reduce) { .grow { transform: none; } }
+
   /* Lifecycle */
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
   .steps::before { content: ""; position: absolute; top: 34px; left: 8%; right: 8%; height: 3px; background: var(--gray-mid); }
@@ -357,7 +375,7 @@
     <a class="brand" href="#top">AI Multi-Agent Harness<span>.</span></a>
     <nav class="links" aria-label="Sections">
       <a href="#why">Why</a>
-      <a href="#pillars">Pillars</a>
+      <a href="#claude">Claude Code</a>
       <a href="#blocks">Building blocks</a>
       <a href="#github">GitHub Issues</a>
       <a href="#lifecycle">Lifecycle</a>
@@ -378,7 +396,7 @@
     <div>
       <span class="eyebrow reveal"><i></i>Claude Code · Codex · GitHub</span>
       <h1 class="reveal" style="--d:.1s">Turn coding agents into a <em>predictable team</em>.</h1>
-      <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles around the models. <strong style="color:#fff">People decide. The harness enforces.</strong></p>
+      <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles, <strong style="color:#fff">built on Claude Code</strong>. People decide. The harness enforces.</p>
       <div class="ctas reveal" style="--d:.3s">
         <a class="btn hot" href="presentation.html"><span class="play"></span>View the presentation</a>
         <a class="btn ghost" href="#why">Explore how it works ↓</a>
@@ -401,8 +419,9 @@
         </g>
         <circle class="pulse" cx="280" cy="230" r="70" fill="none" stroke="#F900D3" stroke-width="3"/>
         <circle cx="280" cy="230" r="70" fill="#FFFFFF"/>
-        <text x="280" y="224" text-anchor="middle" font-size="19" font-weight="800" fill="#070154">Coordinator</text>
-        <text x="280" y="248" text-anchor="middle" font-size="13" fill="#50658E">one git author</text>
+        <text x="280" y="214" text-anchor="middle" font-size="12" font-weight="800" fill="#F900D3" letter-spacing="1.5">CLAUDE CODE</text>
+        <text x="280" y="237" text-anchor="middle" font-size="19" font-weight="800" fill="#070154">Coordinator</text>
+        <text x="280" y="256" text-anchor="middle" font-size="12" fill="#50658E">one git author</text>
         <g class="float"><rect x="205" y="26" width="150" height="54" rx="14" fill="#F900D3"/><text x="280" y="52" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Owner</text><text x="280" y="70" text-anchor="middle" font-size="12" fill="#fff">decides · merges</text></g>
         <g class="float b"><rect x="15" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="90" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Codex</text><text x="90" y="177" text-anchor="middle" font-size="12" fill="#50658E">writes the code</text></g>
         <g class="float c"><rect x="395" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="470" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Reviewer</text><text x="470" y="177" text-anchor="middle" font-size="12" fill="#50658E">Claude reviews</text></g>
@@ -483,10 +502,74 @@
   </div>
 </section>
 
+<!-- ================= CLAUDE CODE ================= -->
+<section id="claude" class="cc-section">
+  <div class="wrap">
+    <span class="cc-badge reveal"><i>✦</i>Powered by Claude Code</span>
+    <p class="kicker reveal">03 · Built on Claude Code</p>
+    <h2 class="reveal">The harness is configuration. Claude Code is the engine.</h2>
+    <p class="lead reveal">Every agent runs in its <strong>own context window</strong>; none of them shares a conversation. Claude Code is what connects them: it loads the same project memory into each one, gives teams a <strong>shared task list and a mailbox</strong>, runs the hooks on every tool call and keeps memory between sessions.</p>
+    <div class="diagram reveal zoom">
+        <svg viewBox="0 0 1200 600" role="img" aria-label="Claude Code loads project memory into every agent, shares a task list and mailbox while they work, and keeps durable memory across sessions">
+          <defs>
+            <marker id="cb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="cm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+          </defs>
+          <!-- top band: loaded into every context -->
+          <rect x="10" y="10" width="1180" height="84" rx="18" fill="#E8EEF8" stroke="#0047FF" stroke-width="2"/>
+          <text x="34" y="44" font-size="15" font-weight="800" fill="#0047FF" letter-spacing="2">LOADED INTO EVERY CONTEXT</text>
+          <text x="34" y="74" font-size="21" font-weight="700" fill="#070154">CLAUDE.md → @AGENTS.md  ·  folder rules on demand  ·  skills  ·  MCP servers</text>
+          <!-- arrows down -->
+          <path class="edge flow" d="M150,96 L150,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M450,96 L450,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M750,96 L750,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M1050,96 L1050,176" marker-end="url(#cb)"/>
+          <!-- hooks frame -->
+          <rect x="10" y="150" width="1180" height="196" rx="20" fill="none" stroke="#50658E" stroke-width="2" stroke-dasharray="7 7"/>
+          <rect x="842" y="139" width="330" height="24" rx="12" fill="#FFFFFF"/>
+          <text x="1007" y="156" text-anchor="middle" font-size="13" font-weight="800" fill="#50658E" letter-spacing="1">HOOKS · PERMISSIONS ON EVERY TOOL CALL</text>
+          <!-- agents -->
+          <g class="node"><rect x="30" y="180" width="240" height="140" rx="18" fill="#070154"/><text x="150" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">Lead session</text><text x="150" y="262" text-anchor="middle" font-size="16" fill="#CED7E6">Claude · coordinator</text><text x="150" y="292" text-anchor="middle" font-size="15" fill="#CED7E6">own context window</text></g>
+          <g class="node"><rect x="330" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="450" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Teammate</text><text x="450" y="262" text-anchor="middle" font-size="16" fill="#50658E">coder · documenter</text><text x="450" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="630" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="750" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Teammate</text><text x="750" y="262" text-anchor="middle" font-size="16" fill="#50658E">qa · reviewer</text><text x="750" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="930" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#CED7E6" stroke-width="2"/><text x="1050" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Subagent</text><text x="1050" y="262" text-anchor="middle" font-size="16" fill="#50658E">read-only reviewer</text><text x="1050" y="292" text-anchor="middle" font-size="15" fill="#50658E">returns a summary</text></g>
+          <!-- shared while working -->
+          <path class="edge-m flow" d="M150,322 L150,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M450,322 L450,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M750,322 L750,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <rect x="10" y="402" width="890" height="84" rx="18" fill="#fff" stroke="#F900D3" stroke-width="3"/>
+          <text x="34" y="436" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">SHARED WHILE THEY WORK (AGENT TEAMS)</text>
+          <text x="34" y="466" font-size="20" font-weight="700" fill="#070154">task list + dependencies  ·  mailbox by name  ·  idle notice to the lead</text>
+          <path class="edge flow" d="M1050,322 L1050,398" marker-end="url(#cb)"/>
+          <rect x="930" y="402" width="260" height="84" rx="18" fill="#E8EEF8" stroke="#CED7E6" stroke-width="2"/>
+          <text x="1060" y="438" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">summary back</text>
+          <text x="1060" y="464" text-anchor="middle" font-size="15" fill="#50658E">to whoever called it</text>
+          <!-- durable -->
+          <rect x="10" y="512" width="1180" height="78" rx="18" fill="#070154"/>
+          <text x="34" y="545" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">DURABLE ACROSS SESSIONS</text>
+          <text x="34" y="574" font-size="20" font-weight="700" fill="#fff">auto memory  ·  subagent memory  ·  plans in the repo  ·  GitHub Issues</text>
+        </svg>
+
+    </div>
+    <div class="cc-map">
+      <div class="card reveal"><span class="feat">Project memory</span><h3>CLAUDE.md and imports</h3><p>Loaded at the start of every session, subagent and teammate; <code>@imports</code> pull in other files and folder files load when Claude works there.</p><span class="uses-it"><b>Harness:</b> <code>CLAUDE.md</code> → <code>@AGENTS.md</code>, one per folder.</span></div>
+      <div class="card reveal" style="--d:.05s"><span class="feat">Auto memory</span><h3>Notes Claude keeps itself</h3><p>A <code>MEMORY.md</code> index Claude writes as it learns; its first lines load each session. It lives on one machine.</p><span class="uses-it"><b>Harness:</b> team decisions move to <code>AGENTS.md</code> so every machine sees them.</span></div>
+      <div class="card reveal" style="--d:.1s"><span class="feat">Skills</span><h3>Procedures on demand</h3><p><code>SKILL.md</code> files triggered by their description or by <code>/name</code>.</p><span class="uses-it"><b>Harness:</b> 8 skills, from <code>feature-plan</code> to <code>resolve-issues</code>.</span></div>
+      <div class="card reveal" style="--d:.15s"><span class="feat">Subagents</span><h3>Narrow roles, own context</h3><p>Each with its own tools, model and, optionally, a persistent memory folder; only a summary comes back.</p><span class="uses-it"><b>Harness:</b> 7 roles; reviewers limited to Read, Grep, Glob.</span></div>
+      <div class="card reveal" style="--d:.2s"><span class="feat">Agent teams</span><h3>Task list and mailbox</h3><p>Teammates load the project context, claim tasks with dependencies (file-locked) and message each other by name; the lead is told when one goes idle.</p><span class="uses-it"><b>Harness:</b> <code>/orchestrate-team</code> and its briefs.</span></div>
+      <div class="card reveal" style="--d:.25s"><span class="feat">Hooks</span><h3>Lifecycle events</h3><p><code>SessionStart</code>, <code>PreToolUse</code>, <code>TaskCreated</code>, <code>TaskCompleted</code>, <code>TeammateIdle</code>… exit code 2 blocks with feedback.</p><span class="uses-it"><b>Harness:</b> 5 hooks, the safety ones fail closed.</span></div>
+      <div class="card reveal" style="--d:.3s"><span class="feat">Permissions and settings</span><h3>Versioned settings.json</h3><p>Allow and deny rules, environment and options shared by the whole team.</p><span class="uses-it"><b>Harness:</b> deny protected pushes, 1 h cache, teams flag.</span></div>
+      <div class="card reveal" style="--d:.35s"><span class="feat">Plugins</span><h3>Installable extensions</h3><p>Bundles of skills, agents, hooks and MCP servers, installed from a marketplace.</p><span class="uses-it"><b>Harness:</b> the Codex plugin (<code>codex:codex-rescue</code>) that coders delegate to.</span></div>
+      <div class="card reveal" style="--d:.4s"><span class="feat">/loop</span><h3>Self-paced loops</h3><p>Re-runs a prompt or a skill on its own schedule until the work is done.</p><span class="uses-it"><b>Harness:</b> <code>/loop /resolve-issues</code> works the issue queue.</span></div>
+    </div>
+    <div class="note reveal"><span class="num m">!</span><span>Why the rules live in the repository: Claude Code's auto memory is <b>per machine</b>. Anything the whole team must follow goes into <b>AGENTS.md</b>, which Claude Code loads into every agent on every machine.</span></div>
+  </div>
+</section>
+
 <!-- ================= BUILDING BLOCKS ================= -->
 <section id="blocks">
   <div class="wrap">
-    <p class="kicker reveal">03 · Building blocks</p>
+    <p class="kicker reveal">04 · Building blocks</p>
     <h2 class="reveal">Five layers, from what agents read to what proves the work.</h2>
     <p class="lead reveal">Pick a block to see what it contains and why it exists.</p>
     <div class="explorer reveal">
@@ -631,7 +714,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= GITHUB ISSUES ================= -->
 <section id="github" class="gh-section">
   <div class="wrap">
-    <p class="kicker reveal"><span class="core">★ CORE</span>04 · GitHub Issues integration</p>
+    <p class="kicker reveal"><span class="core">★ CORE</span>05 · GitHub Issues integration</p>
     <h2 class="reveal" style="color:#fff">Where people and agents meet.</h2>
     <p class="lead reveal">People see what exists, what is in progress and who is on it. Agents get a <strong>durable, shared queue of work</strong> that survives any session. Five uses, each a rule in <code>AGENTS.md</code> carried out by a skill.</p>
     <div class="uses reveal">
@@ -692,7 +775,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= LIFECYCLE ================= -->
 <section id="lifecycle" class="white">
   <div class="wrap">
-    <p class="kicker reveal">05 · Lifecycle</p>
+    <p class="kicker reveal">06 · Lifecycle</p>
     <h2 class="reveal">From idea to merge, the same path every time.</h2>
     <p class="lead reveal">Agents do the first five steps. Only the pink one belongs to a person.</p>
     <div class="steps reveal">
@@ -710,7 +793,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= TEAMS ================= -->
 <section id="teams">
   <div class="wrap">
-    <p class="kicker reveal">06 · Agent teams</p>
+    <p class="kicker reveal">07 · Agent teams</p>
     <h2 class="reveal">One coordinator, one git author, one voice.</h2>
     <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. The most capable model coordinates; cheaper models do the narrow work.</p>
     <div class="team-layout">
@@ -724,7 +807,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <g class="node"><rect class="n-mag" x="400" y="8" width="300" height="70" rx="16"/><text class="t-title" x="550" y="40" text-anchor="middle">Owner (a person)</text><text class="t-sub" x="550" y="64" text-anchor="middle">decides · approves · merges</text></g>
           <path class="edge-m flow" d="M550,82 L550,140" marker-start="url(#tm)" marker-end="url(#tm)"/>
           <text class="t-label-m" x="566" y="118">questions ↑  decisions ↓</text>
-          <g class="node"><rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/><text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · main session</text><text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">only git author · only voice · most capable model</text></g>
+          <g class="node"><rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/><text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · Claude Code</text><text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">main session · only git author · only voice</text></g>
           <path class="edge" d="M550,240 L550,286"/>
           <path class="edge flow" d="M140,286 L960,286"/>
           <path class="edge" d="M140,286 L140,322" marker-end="url(#tb)"/>
@@ -768,7 +851,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= ISSUE LOOP ================= -->
 <section id="loop" class="white">
   <div class="wrap">
-    <p class="kicker reveal"><span class="core">★ CORE</span>07 · The issue loop</p>
+    <p class="kicker reveal"><span class="core">★ CORE</span>08 · The issue loop</p>
     <h2 class="reveal">Label an issue, get a PR.</h2>
     <p class="lead reveal"><code>/loop /resolve-issues</code> resolves <code>ai-queue</code> issues one PR at a time, by severity and number.</p>
     <div class="diagram reveal zoom">
@@ -803,7 +886,60 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <div class="card reveal"><span class="num m">A</span><h3 style="margin-top:12px">Assignment is the lock</h3><p>The loop assigns the issue before reading it; several developers share the queue without collisions.</p></div>
       <div class="card reveal" style="--d:.08s"><span class="num m">B</span><h3 style="margin-top:12px">Stateless</h3><p>Every turn re-reads GitHub and git; HTML markers in PR comments record what was handled.</p></div>
       <div class="card reveal" style="--d:.16s"><span class="num m">C</span><h3 style="margin-top:12px">Comments are data</h3><p>A comment asking for a merge does not authorize it. Only the <code>ai-merge</code> label.</p></div>
-      <div class="card reveal" style="--d:.24s"><span class="num m">D</span><h3 style="margin-top:12px">Self-limiting</h3><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session.</p></div>
+      <div class="card reveal" style="--d:.24s"><span class="num m">D</span><h3 style="margin-top:12px">Self-limiting</h3><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session. <a href="#why-cut">Why these numbers ↓</a></p></div>
+    </div>
+    <div class="why-cut" id="why-cut">
+      <h3 class="reveal">Why cut at 250k tokens or 5 PRs?</h3>
+      <p class="reveal">Measured on four real sessions of the loop. The context window is not the limit; the <b>cost of re-reading it on every turn</b> is.</p>
+      <div class="diagram reveal">
+        <svg viewBox="0 0 1200 430" role="img" aria-label="Tokens re-read per issue grew from 14.5 million to 28 million; a session starts at about 85 thousand tokens and is cut at 250 thousand">
+          <!-- chart 1: tokens re-read per issue -->
+          <text x="0" y="22" font-size="15" font-weight="800" fill="#0047FF" letter-spacing="2">TOKENS RE-READ PER ISSUE · SAME SESSION</text>
+          <text x="0" y="48" font-size="16" fill="#50658E">similar number of turns; each turn re-reads everything accumulated</text>
+          <g font-size="17" font-weight="700" fill="#070154">
+            <text x="0" y="104">1st issue</text><text x="0" y="168">2nd issue</text><text x="0" y="232">3rd issue</text>
+          </g>
+          <rect x="110" y="82" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect x="110" y="146" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect x="110" y="210" width="420" height="34" rx="8" fill="#E8EEF8"/>
+          <rect class="grow" x="110" y="82" width="218" height="34" rx="8" fill="#0047FF"/>
+          <rect class="grow" x="110" y="146" width="315" height="34" rx="8" fill="#5a7dff" style="--d:.15s"/>
+          <rect class="grow" x="110" y="210" width="420" height="34" rx="8" fill="#F900D3" style="--d:.3s"/>
+          <g font-size="17" font-weight="800">
+            <text x="340" y="105" fill="#070154">14.5M</text>
+            <text x="437" y="169" fill="#070154">21M</text>
+            <text x="455" y="233" fill="#fff">28M</text>
+          </g>
+          <text x="0" y="290" font-size="16" fill="#50658E">The cost of a turn grows with the session,</text>
+          <text x="0" y="314" font-size="16" fill="#50658E">not with the size of the issue.</text>
+          <!-- chart 2: one session's context -->
+          <text x="620" y="22" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">ONE SESSION'S CONTEXT · CUT AT 250K</text>
+          <text x="620" y="48" font-size="16" fill="#50658E">scale 0 – 400k tokens (the window is 1M)</text>
+          <!-- axis -->
+          <rect x="620" y="96" width="560" height="56" rx="10" fill="#E8EEF8"/>
+          <rect class="grow" x="620" y="96" width="119" height="56" rx="10" fill="#070154"/>
+          <rect class="grow" x="741" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.15s"/>
+          <rect class="grow" x="811" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.3s"/>
+          <rect class="grow" x="881" y="96" width="68" height="56" rx="6" fill="#0047FF" style="--d:.45s"/>
+          <rect class="grow" x="951" y="96" width="68" height="56" rx="6" fill="#5a7dff" opacity=".45" style="--d:.6s"/>
+          <g font-size="15" font-weight="800" fill="#fff" text-anchor="middle">
+            <text x="679" y="129">start ~85k</text><text x="775" y="129">issue</text><text x="845" y="129">issue</text><text x="915" y="129">issue</text>
+          </g>
+          <line x1="970" y1="76" x2="970" y2="176" stroke="#F900D3" stroke-width="4" stroke-dasharray="8 6"/>
+          <text x="970" y="70" text-anchor="middle" font-size="16" font-weight="800" fill="#F900D3">250k cut</text>
+          <text x="985" y="200" font-size="15" fill="#50658E">next issue would cross it</text>
+          <g font-size="14" fill="#50658E" text-anchor="middle"><text x="620" y="176">0</text><text x="760" y="176">100k</text><text x="900" y="176">200k</text><text x="1040" y="176">300k</text><text x="1176" y="176">400k</text></g>
+          <!-- facts -->
+          <rect x="620" y="226" width="560" height="96" rx="14" fill="#fff" stroke="#CED7E6" stroke-width="2"/>
+          <text x="644" y="258" font-size="16" font-weight="800" fill="#070154">Each issue: ~70k before, 45–50k with short-context rules</text>
+          <text x="644" y="286" font-size="16" fill="#50658E">→ 4 or 5 issues fit before 250k; the 5-PR cap is the backstop.</text>
+          <text x="644" y="310" font-size="16" fill="#50658E">Peak measured: 335k at the 3rd issue, a third of the window.</text>
+          <!-- reset -->
+          <rect x="0" y="350" width="1180" height="64" rx="14" fill="#070154"/>
+          <text x="24" y="389" font-size="17" font-weight="700" fill="#fff">Cutting resets the cost: a fresh session starts again at ~85k. In the terminal (no usage tool) the cut is every 3 PRs.</text>
+        </svg>
+
+      </div>
     </div>
   </div>
 </section>
@@ -811,7 +947,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= HUMANS ================= -->
 <section id="humans" class="decide">
   <div class="wrap">
-    <p class="kicker reveal">08 · Human in the loop</p>
+    <p class="kicker reveal">09 · Human in the loop</p>
     <h2 class="reveal">People decide. The harness enforces.</h2>
     <p class="lead reveal">Every irreversible or design-changing step waits for a person.</p>
     <div class="grid g4">
@@ -830,7 +966,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= SAFETY ================= -->
 <section id="safety" class="white">
   <div class="wrap">
-    <p class="kicker reveal">09 · Defense in depth</p>
+    <p class="kicker reveal">10 · Defense in depth</p>
     <h2 class="reveal">No single layer is trusted on its own.</h2>
     <p class="lead reveal">Hover a layer to find it in the rings. The outermost one is the only layer that also covers people and tools outside Claude Code.</p>
     <div class="depth">
@@ -867,7 +1003,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= ADOPT ================= -->
 <section id="adopt">
   <div class="wrap">
-    <p class="kicker reveal">10 · Adoption</p>
+    <p class="kicker reveal">11 · Adoption</p>
     <h2 class="reveal">Adopt it in ten steps.</h2>
     <p class="lead reveal">The apps are placeholders: replace them with your project and keep the harness. Tick the steps as you go.</p>
     <div class="checklist">
@@ -889,7 +1025,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <!-- ================= INVENTORY + LIMITS ================= -->
 <section id="inventory" class="white">
   <div class="wrap">
-    <p class="kicker reveal">11 · What's in the box</p>
+    <p class="kicker reveal">12 · What's in the box</p>
     <h2 class="reveal">File inventory.</h2>
     <div class="inventory">
       <div class="card reveal"><h3>root</h3><ul><li><code>AGENTS.md</code> rules for every agent</li><li><code>CLAUDE.md</code> → <code>@AGENTS.md</code></li><li><code>HARNESS.md</code> how it works</li><li><code>PROJECT_MAP.md</code> paths, commands</li></ul></div>
@@ -898,7 +1034,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <div class="card reveal" style="--d:.24s"><h3>docs/ · apps/</h3><ul><li><code>plans/</code>, <code>status/</code>, <code>guides/</code></li><li><code>apps/web</code>, <code>apps/mobile</code></li><li><code>backend</code>, <code>packages/ui</code>, <code>shared</code></li><li>each with <code>AGENTS.md</code> + <code>CLAUDE.md</code></li></ul></div>
     </div>
 
-    <p class="kicker reveal" style="margin-top:72px">12 · Honest caveats</p>
+    <p class="kicker reveal" style="margin-top:72px">13 · Honest caveats</p>
     <h2 class="reveal">What it does not do.</h2>
     <div class="grid g5">
       <div class="card reveal"><h3>Teams are experimental</h3><p>The skill falls back to sequential subagents.</p></div>
@@ -916,7 +1052,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
     <div class="cta-band reveal zoom">
       <div>
         <h2>Present it to your team.</h2>
-        <p>The same story in 15 slides that fit any screen: arrow keys to navigate, F for full screen, P to save as PDF.</p>
+        <p>The same story in 17 slides that fit any screen: arrow keys to navigate, F for full screen, P to save as PDF.</p>
       </div>
       <div class="actions">
         <a class="btn hot" href="presentation.html"><span class="play"></span>Open the presentation</a>

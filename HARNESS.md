@@ -269,7 +269,7 @@ Issue **assignment** is the lock: the loop assigns the issue to the current `gh`
 | `enhancement`, `bug`, `documentation` | Kind of plan or finding |
 | `ai-queue`, `ai-merge`, `ai-escalated` | The issue loop |
 
-Create them once with [`scripts/setup-github-labels.sh`](scripts/setup-github-labels.sh) (idempotent).
+Create them once with [`scripts/setup-github-labels.sh`](scripts/setup-github-labels.sh) (idempotent); in a repository created from the template, [`scripts/setup-new-repo.sh`](scripts/setup-new-repo.sh) runs it for you.
 
 ## 5. Lifecycle of a piece of work
 
@@ -405,8 +405,8 @@ No single layer is trusted on its own:
 
 ## 10. Adopting it in your project
 
-1. **Create the repository from the template** (steps and commands in the [README](README.md#quick-start-a-new-repository-from-this-template)): `gh repo create --template … --include-all-branches`, then make `dev` the default branch and protect `main` and `dev` on GitHub.
-2. **GitHub Issues:** run `scripts/setup-github-labels.sh` to create the labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`), make sure sub-issues are enabled, and read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md). Do not skip this step: plans, findings and the issue loop depend on it.
+1. **Create the repository from the template** (steps in the [README](README.md#quick-start-a-new-repository-from-this-template)): `gh repo create --template … --include-all-branches`, then run `scripts/setup-new-repo.sh`, which points `CODEOWNERS` to you, makes `dev` the default branch and creates the labels. Protect `main` and `dev` on GitHub.
+2. **GitHub Issues:** `scripts/setup-new-repo.sh` already runs `scripts/setup-github-labels.sh` to create the labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`), make sure sub-issues are enabled, and read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md). Do not skip this step: plans, findings and the issue loop depend on it.
 3. **Describe the project** in «Project context» of `AGENTS.md`; declare the functional reference app if you have one (or delete `reference-explorer` and `reference-parity`).
 4. **Areas and commands:** edit `areas_of` and the `area_*` functions in `scripts/verify.sh` with your real commands, update `scripts/verify.test.mjs`, and mirror the jobs in `.github/workflows/ci.yml`.
 5. **Folder rules:** rewrite each folder's `AGENTS.md` and its «Code Review Rules» for your stack. Add or remove folders and the matching `coder-*` names in `coder.md` and `orchestrate-team`.
@@ -444,6 +444,7 @@ scripts/
   check-json.mjs               well-formed JSON in shared/
   build-tokens.mjs             generates packages/ui/src/tokens.css
   setup-github-labels.sh       creates the GitHub labels the harness uses (idempotent)
+  setup-new-repo.sh            one-time setup of a repo created from the template (+ set-codeowners.mjs, test)
 docs/
   plans/                       one folder per product or theme (harness/, product/)
   status/                      plans.md (generated) and one file per area

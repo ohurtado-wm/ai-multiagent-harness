@@ -2,6 +2,13 @@
 
 Real status of the agent harness, newest first. How it works: [`HARNESS.md`](../../HARNESS.md).
 
+## Setup script for repositories created from the template
+
+Plan: [`PLAN_SETUP_NEW_REPO.md`](../plans/harness/PLAN_SETUP_NEW_REPO.md) (issue #6).
+
+- `scripts/setup-new-repo.sh`: points `CODEOWNERS` to the new owner (`scripts/set-codeowners.mjs`, with tests), makes `dev` the default branch, creates the labels and prints the next steps; `--dry-run` and `--codeowner`. It never commits.
+- README quick start, the site's «Adopt» block and the deck use it.
+
 ## Presentation site
 
 - [`docs/site/index.html`](../site/index.html): landing page that explains the whole harness (`HARNESS.md`), including what it takes from Claude Code, with animated diagrams, a tabbed explorer of the building blocks and links to the deck.

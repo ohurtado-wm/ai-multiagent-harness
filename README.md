@@ -30,20 +30,13 @@ Replace `<owner>/<new-repo>` with the account (or organization) and name of your
    gh repo create <owner>/<new-repo> --template ohurtado-wm/ai-multiagent-harness --include-all-branches --private --clone
    ```
 
-2. **Make `dev` the default branch**, so `Closes #n` closes issues when a PR is merged into `dev`. Work branches always target `dev`; a person promotes `dev` to `main`.
+2. **Run the setup script** from the new repository's folder. It points `.github/CODEOWNERS` to you (instead of the template owner), makes `dev` the default branch (so `Closes #n` closes issues on merge into `dev`) and creates the GitHub Issues labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`). Add `--dry-run` to preview it, or `--codeowner @org/team` to use a team:
 
    ```bash
-   gh repo edit <owner>/<new-repo> --default-branch dev
+   cd <new-repo> && scripts/setup-new-repo.sh
    ```
 
-3. **Set up GitHub Issues** (a core part of the harness; a template copies files, not labels). From the new repository's folder:
-
-   ```bash
-   scripts/setup-github-labels.sh <owner>/<new-repo>
-   ```
-
-   It creates `epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge` and `ai-escalated`. Then read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md).
-
+3. **Commit the `CODEOWNERS` change** on a work branch and open a PR against `dev`; the script prints the exact commands (it never commits to `main` or `dev`). Then read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md).
 4. **Protect `main` and `dev`** in *Settings → Branches* (no direct pushes, required CI checks). A template does not copy branch protection, and it is the only layer that also covers work done outside Claude Code.
 5. **Open Claude Code** in the repository root and run `/onboarding`.
 6. **Make it yours:** fill in «Project context» in [`AGENTS.md`](AGENTS.md), the folders' `AGENTS.md` and the `area_*` functions of [`scripts/verify.sh`](scripts/verify.sh) with your real stack, and replace the placeholder apps. Full checklist in [`HARNESS.md`](HARNESS.md), «Adopting it in your project».

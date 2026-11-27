@@ -50,9 +50,10 @@ test("several areas at once, documentation included", () => {
   assert.deepEqual(areasFor(["apps/web/src/page.tsx", "backend/migrations/x.sql", "docs/PROJECT_STATUS.md"]), ["backend", "contracts", "docs", "web"]);
 });
 
-test("harness configuration and CI → docs", () => {
+test("harness configuration, CI and setup scripts → docs", () => {
   assert.deepEqual(areasFor([".claude/hooks/git-guard.mjs"]), ["docs"]);
   assert.deepEqual(areasFor([".github/workflows/plan.yml"]), ["docs"]);
+  assert.deepEqual(areasFor(["scripts/set-codeowners.mjs", "scripts/setup-new-repo.sh", "scripts/setup-github-labels.sh"]), ["docs"]);
 });
 
 test("changing the validation mechanism runs every CI area", () => {

@@ -20,13 +20,39 @@ The harness is configuration; Claude Code is the engine that runs it. Each agent
 
 Details and minimum versions: [`HARNESS.md`](HARNESS.md), section 2.
 
-## Quick start
+## Quick start: a new repository from this template
 
-1. Copy this folder into a new repository (or use it as a GitHub template) and make the first commit on `main`.
-2. Create the integration branch `dev` and make it the default branch on GitHub. Work branches always target `dev`; a person promotes `dev` to `main`.
-3. **Set up GitHub Issues** (a core part of the harness): run `scripts/setup-github-labels.sh` to create the labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`) and read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md).
-4. Open Claude Code in the repository root and run `/onboarding`.
-5. Fill in «Project context» in [`AGENTS.md`](AGENTS.md), the folders' `AGENTS.md` and the `area_*` functions of [`scripts/verify.sh`](scripts/verify.sh) with your real stack.
+Replace `<owner>/<new-repo>` with the account (or organization) and name of your new repository, and check that `gh auth status` shows the account that will own it.
+
+1. **Mark this repository as a template** (once, by its owner; or in *Settings → General → Template repository*):
+
+   ```bash
+   gh repo edit ohurtado-wm/ai-multiagent-harness --template
+   ```
+
+2. **Create the new repository from the template.** `--include-all-branches` copies both `main` and `dev`; without it, only the default branch is copied:
+
+   ```bash
+   gh repo create <owner>/<new-repo> --template ohurtado-wm/ai-multiagent-harness --include-all-branches --private --clone
+   ```
+
+3. **Make `dev` the default branch**, so `Closes #n` closes issues when a PR is merged into `dev`. Work branches always target `dev`; a person promotes `dev` to `main`.
+
+   ```bash
+   gh repo edit <owner>/<new-repo> --default-branch dev
+   ```
+
+4. **Set up GitHub Issues** (a core part of the harness; a template copies files, not labels). From the new repository's folder:
+
+   ```bash
+   scripts/setup-github-labels.sh <owner>/<new-repo>
+   ```
+
+   It creates `epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge` and `ai-escalated`. Then read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md).
+
+5. **Protect `main` and `dev`** in *Settings → Branches* (no direct pushes, required CI checks). A template does not copy branch protection, and it is the only layer that also covers work done outside Claude Code.
+6. **Open Claude Code** in the repository root and run `/onboarding`.
+7. **Make it yours:** fill in «Project context» in [`AGENTS.md`](AGENTS.md), the folders' `AGENTS.md` and the `area_*` functions of [`scripts/verify.sh`](scripts/verify.sh) with your real stack, and replace the placeholder apps. Full checklist in [`HARNESS.md`](HARNESS.md), «Adopting it in your project».
 
 Check the harness itself at any time:
 

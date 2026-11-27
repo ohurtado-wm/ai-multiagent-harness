@@ -405,7 +405,7 @@ No single layer is trusted on its own:
 
 ## 10. Adopting it in your project
 
-1. **Copy** this folder into your repository (or start from it). Create `dev` and make it the default branch; protect `main` and `dev` on GitHub.
+1. **Create the repository from the template** (steps and commands in the [README](README.md#quick-start-a-new-repository-from-this-template)): `gh repo create --template … --include-all-branches`, then make `dev` the default branch and protect `main` and `dev` on GitHub.
 2. **GitHub Issues:** run `scripts/setup-github-labels.sh` to create the labels (`epic`, `enhancement`, `bug`, `documentation`, `ai-queue`, `ai-merge`, `ai-escalated`), make sure sub-issues are enabled, and read [`docs/guides/GITHUB_ISSUES.md`](docs/guides/GITHUB_ISSUES.md). Do not skip this step: plans, findings and the issue loop depend on it.
 3. **Describe the project** in «Project context» of `AGENTS.md`; declare the functional reference app if you have one (or delete `reference-explorer` and `reference-parity`).
 4. **Areas and commands:** edit `areas_of` and the `area_*` functions in `scripts/verify.sh` with your real commands, update `scripts/verify.test.mjs`, and mirror the jobs in `.github/workflows/ci.yml`.

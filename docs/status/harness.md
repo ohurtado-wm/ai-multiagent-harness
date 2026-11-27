@@ -2,6 +2,18 @@
 
 Real status of the agent harness, newest first. How it works: [`HARNESS.md`](../../HARNESS.md).
 
+## Hardening after the review against the official docs
+
+Plan: [`PLAN_HARNESS_REVIEW_HARDENING.md`](../plans/harness/PLAN_HARNESS_REVIEW_HARDENING.md) (issue #1).
+
+- Folder `CLAUDE.md` files (`@AGENTS.md`) in `apps/web`, `apps/mobile`, `backend`, `packages/ui` and `shared`.
+- Safety hooks registered with `onFailure: "block"` and `timeout: 30`.
+- `permissions.deny` blocks pushes to `main`/`dev`, forced pushes, `--all` and `--mirror`.
+- `subagentPromptCacheTtl: "1h"` for subagents and teammates.
+- The session hook states facts instead of orders.
+
+**Not verified:** the behavior of `onFailure`, the deny rules and the cache setting inside a live Claude Code session (they need Claude Code v2.1.295+ opened on this repository).
+
 ## Initial import
 
 - Rules for agents (`AGENTS.md`, imported by `CLAUDE.md`) and one `AGENTS.md` per main folder with its «Code Review Rules».

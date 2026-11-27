@@ -31,7 +31,7 @@ skill frontend-design frontend-design no
 skill webapp-testing webapp-testing no
 
 # --- Repository skills and subagents (versioned in .claude/) ---
-for s in feature-plan onboarding new-branch close-increment reference-parity verify-ui orchestrate-team resolve-issues; do
+for s in feature-plan onboarding new-branch close-increment reference-parity verify-ui orchestrate-team configure-agents resolve-issues; do
   if [ -f ".claude/skills/$s/SKILL.md" ]; then ok "repo-skill:$s" ""; else fail "repo-skill:$s" "missing .claude/skills/$s/SKILL.md"; fi
 done
 for a in coder documenter qa pr-reviewer db-security-reviewer contract-reviewer reference-explorer; do

@@ -1,0 +1,8 @@
+name = "coder"
+description = "Implements and verifies one assigned block for an orchestrated team."
+developer_instructions = """
+Read AGENTS.md, the relevant folder instructions and the coder brief in docs/guides/TEAM_BRIEFS.md.
+Implement directly within the assigned files and run the focused verification in the brief.
+The coordinator handles Git mutations, GitHub, regression approval and any local database reset request.
+Report the files changed, commands and results, and pending items.
+"""

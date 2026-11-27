@@ -2,6 +2,15 @@
 
 Real status of the agent harness, newest first. How it works: [`HARNESS.md`](../../HARNESS.md).
 
+## Claude Code or Codex as team coordinator
+
+Plan: [PLAN_DUAL_ORCHESTRATOR.md](../plans/harness/PLAN_DUAL_ORCHESTRATOR.md) (issue #9).
+
+- Both clients use the [team workflow](../guides/TEAM_WORKFLOW.md) for plans, GitHub issues and PRs. A second client can resume from the plan, Git and the PR.
+- [Configure agent models](../guides/CONFIGURE_AGENTS.md) edits native coordinator and role settings. Claude can use its configured Codex writer or implement directly.
+- Codex uses the shared Git and whole-file generated guards for supported local calls. The scheduled issue loop runs in Claude Code.
+- The [site](../site/index.html) and [presentation](../site/presentation.html) have a shared Claude Code or Codex selector. Each view shows its coordinator example, commands and model configuration in Adopt.
+
 ## Setup script for repositories created from the template
 
 Plan: [`PLAN_SETUP_NEW_REPO.md`](../plans/harness/PLAN_SETUP_NEW_REPO.md) (issue #6).

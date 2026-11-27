@@ -1,6 +1,6 @@
 # How this agent harness works
 
-This document explains, for people, how the harness in this repository, **built on [Claude Code](https://code.claude.com/docs)**, turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md). For a visual version, open [`docs/site/index.html`](docs/site/index.html) (landing page with animated diagrams) or the slide deck [`docs/site/presentation.html`](docs/site/presentation.html) to present it to a team.
+This document explains, for people, how the harness in this repository, **with [Claude Code](https://code.claude.com/docs) and [Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents) entry points**, turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md). For a visual version, open [`docs/site/index.html`](docs/site/index.html) (landing page with animated diagrams) or the slide deck [`docs/site/presentation.html`](docs/site/presentation.html) to present it to a team.
 
 ## 1. What a harness is, and why
 
@@ -21,9 +21,9 @@ The design goal is that a person only has to step in for **decisions** (scope, a
 
 > **The two pillars.** The repository holds the *detail* (plans, rules, status) and **GitHub Issues holds the *coordination*** (what exists, who is on it, what is open, what closed it). Agents read and write both; neither one duplicates the other.
 
-## 2. Built on Claude Code
+## 2. Claude Code and Codex
 
-The harness is configuration; **Claude Code is the runtime that makes it work**. Every agent (the main session, each teammate, each subagent) runs in **its own context window**, and none of them shares a conversation. What connects them is Claude Code, through three channels: the memory it loads into every context, what agent teams share while they work, and what lasts between sessions.
+The team workflow runs in either client. Claude Code uses Agent Teams or its subagents. Codex uses native subagents. Both use the same plan, branch and PR for handoff. Choose which client coordinates and [configure its models](docs/guides/CONFIGURE_AGENTS.md). The diagram and table below illustrate the Claude Code setup, including its separate scheduled issue loop.
 
 ```mermaid
 flowchart TB
@@ -48,7 +48,7 @@ flowchart TB
 |---|---|---|
 | [Project memory](https://code.claude.com/docs/en/memory) | `CLAUDE.md` loaded at the start of every session, subagent and teammate; `@imports`; files in subfolders loaded when Claude works there | `CLAUDE.md` → `@AGENTS.md` at the root and in every folder: one source of rules for Claude and Codex |
 | [Auto memory](https://code.claude.com/docs/en/memory) | Notes Claude writes itself (a `MEMORY.md` index); its first lines load each session; it lives on one machine | Because it is per machine, decisions the whole team must follow go to `AGENTS.md` («Owner criteria») |
-| [Skills](https://code.claude.com/docs/en/skills) | `SKILL.md` procedures triggered by their description or by `/name` | The 8 skills (section 3.2) |
+| [Skills](https://code.claude.com/docs/en/skills) | `SKILL.md` procedures triggered by their description or by `/name` | The Claude skills (section 3.2) |
 | [Subagents](https://code.claude.com/docs/en/sub-agents) | Own context window, tools, model and optional persistent memory; only a summary returns | The 7 roles; reviewers limited to `Read, Grep, Glob` (section 3.3) |
 | [Agent teams](https://code.claude.com/docs/en/agent-teams) | Teammates load the project context (CLAUDE.md, skills, MCP servers), share a task list with dependencies and file-locked claims, message each other by name; the lead is notified when one goes idle | `/orchestrate-team`, its briefs and the `task-gate` hook (section 6) |
 | [Hooks](https://code.claude.com/docs/en/hooks) | Lifecycle events (`SessionStart`, `PreToolUse`, `TaskCreated`, `TaskCompleted`, `TeammateIdle`…); exit code 2 blocks with feedback; `onFailure` can make them fail closed | The 5 hooks (section 3.4) |
@@ -112,6 +112,7 @@ A skill is a Markdown file with a `description` (when to trigger) and numbered s
 | [`new-branch`](.claude/skills/new-branch/SKILL.md) | Starting work, after a merge | Clean branch from an up-to-date `dev`; never carries someone's uncommitted work silently. |
 | [`close-increment`](.claude/skills/close-increment/SKILL.md) | "Close the milestone", "open the PR" | Validation with real numbers, «Result» section in the plan, status updated, PR against `dev` with what was **not** verified, Codex review requested. |
 | [`orchestrate-team`](.claude/skills/orchestrate-team/SKILL.md) | `/orchestrate-team <plan \| issue #N \| PR #N>` | A coordinated agent team that takes a milestone to a green, reviewed PR. |
+| [`configure-agents`](docs/guides/CONFIGURE_AGENTS.md) | Choose models for the coordinator and roles | Updates native model settings from either client. |
 | [`resolve-issues`](.claude/skills/resolve-issues/SKILL.md) | `/loop /resolve-issues` | A self-paced loop that resolves `ai-queue` issues one PR at a time. |
 | [`verify-ui`](.claude/skills/verify-ui/SKILL.md) | "Verify the screen" | Evidence from a running UI (screenshots, texts read from the screen, console and network). |
 | [`reference-parity`](.claude/skills/reference-parity/SKILL.md) | "Does it match the reference?" | A table of text/order/rule differences against the project's functional reference app. |
@@ -133,7 +134,7 @@ Each file in `.claude/agents/` defines a role: its tools, its model and its inst
 | Role | Owns | Never |
 |---|---|---|
 | [`documenter`](.claude/agents/documenter.md) | `docs/**`, `PROJECT_MAP.md`, `HARNESS.md`, `AGENTS.md` files | Code, tests, commits. |
-| [`coder`](.claude/agents/coder.md) (`coder-backend`, `coder-web`, `coder-mobile`) | Its area's files; **delegates the code to Codex** and verifies it | Commits, editing outside its area, fixing by hand while Codex is available, reviewing its own work. |
+| [`coder`](.claude/agents/coder.md) (`coder-backend`, `coder-web`, `coder-mobile`) | Its area’s files. Implements directly in Codex or uses the optional bridge in Claude, then verifies | Commits, editing outside its area, fixing by hand while Codex is available, reviewing its own work. |
 | [`qa`](.claude/agents/qa.md) | Acceptance tests and evidence | Fixing production code; regression tests without permission. |
 | [`pr-reviewer`](.claude/agents/pr-reviewer.md) | The review (P0/P1/P2 with `file:line`) | Editing, running tests. |
 
@@ -153,7 +154,7 @@ Hooks are small Node scripts that Claude Code runs before a tool call (or on ses
 
 The parser in `git-guard` understands quoting, chained commands (`&&`, `;`, `|`), `bash -c`, `cd` and `git -C`, so `git commit -m "git push origin main"` is allowed and `cd /repo && git push origin main` is not.
 
-> Hooks only protect **inside Claude Code**. Codex, other agents and your own terminal do not pass through them. That is why the harness also relies on server-side branch protection, CI, and the rule that only the coordinator commits after checking `git diff`.
+> Local Codex registers the shared Git guard and whole-file generated guard in [hooks.json](.codex/hooks.json). Task and team hooks are Claude-specific. GitHub branch protection enforces remote rules for all clients when configured.
 
 ### 3.5 Permissions
 
@@ -295,7 +296,7 @@ flowchart LR
 
 ## 6. Agent teams
 
-For milestones with pieces in several areas, `/orchestrate-team <plan>` runs a team. Guide: [`docs/guides/AGENT_TEAMS.md`](docs/guides/AGENT_TEAMS.md).
+Use the [team skill](docs/guides/AGENT_TEAMS.md) in either client when a milestone has pieces that can advance independently. This sequence illustrates Claude Code with the Codex plugin enabled.
 
 ```mermaid
 sequenceDiagram
@@ -328,12 +329,12 @@ sequenceDiagram
 
 The key design choices:
 
-- **One coordinator, one git author, one voice.** Only the main session commits, pushes, opens PRs and asks the person. A teammate's message is never the person's permission. `team-guard` makes the first part mechanical.
-- **Codex writes, Claude reviews.** Coders delegate code to Codex and verify it; the reviewer is a different agent with its own judgment; Codex on GitHub adds an external second opinion. Nobody approves their own work.
-- **Ownership by files.** Each coder owns a set of globs; anything outside is restored and sent back. Two teammates never edit the same file.
-- **Cost discipline.** The coordinator runs on the most capable model and is the most expensive agent, because every turn rereads its whole context; so it does not read code or full diffs, waits without polling, batches messages and gives teammates only the plan lines they need. Teammates run on a cheaper model with a one-hour prompt cache (`subagentPromptCacheTtl`); reports also go to a file so they are never lost.
+- **One coordinator, one git author, one voice.** Only the main session commits, pushes, opens PRs and asks the person. A teammate's message is never the person's permission. Claude’s `team-guard` checks teammate Git calls.
+- **Independent review.** A different agent reviews the implementation. Codex on GitHub adds an external review where configured.
+- **Ownership by files.** Each coder has assigned files. The coordinator checks the returned scope and serializes tasks that share a file.
+- **Cost discipline.** The coordinator batches independent work and gives teammates only the relevant plan lines. Choose models by role with [`configure-agents`](docs/guides/CONFIGURE_AGENTS.md).
 - **Stop rules.** Two failures on the same task, two teammates needing the same file, a limit running out, a design change, or a hook block → stop and tell the person.
-- **Resumable.** Teammates do not survive `/resume`, but the plan's «Status» table and `git log` do: a new session with the same command continues where it stopped.
+- **Resumable.** Open either client again with the same plan, issue or PR. Rebuild the task list from the plan, Git and the PR.
 
 ## 7. The issue loop
 
@@ -396,12 +397,12 @@ No single layer is trusted on its own:
 
 1. **Instructions** say what to do and why (`AGENTS.md`).
 2. **Skills** make the right path the easy path.
-3. **Hooks** block the dangerous actions inside Claude Code.
+3. **Hooks** guard supported local calls in each client.
 4. **Permissions** deny secrets and pushes to protected branches, and pre-approve only safe commands.
 5. **Ownership checks**: the coordinator inspects `git status`/`git diff --stat` after every task, because Codex runs outside the hooks.
 6. **Independent review** with written severity rules (P0/P1 lists in every `AGENTS.md`).
 7. **CI** re-runs the same `verify.sh` areas and checks the plan rule.
-8. **GitHub branch protection** on `main` and `dev` (configure it: required checks, no direct pushes). This is the only layer that also covers people and tools outside Claude Code.
+8. **GitHub branch protection** on `main` and `dev` (configure it: required checks, no direct pushes). This is the only layer that also covers direct GitHub API and terminal calls.
 
 ## 10. Adopting it in your project
 
@@ -413,7 +414,7 @@ No single layer is trusted on its own:
 6. **Generated files:** list them in `CONFIG` of `.claude/hooks/generated-guard.mjs`.
 7. **Regression and platform rules:** name your slow scripts `scripts/e2e-*.sh`, `scripts/integration-*.sh` or `scripts/regression-*.sh` (or change the pattern in `team-guard.mjs`); adjust the mobile toolchain list if you have other heavy platforms.
 8. **Onboarding:** add your toolchain to the table in `onboarding/SKILL.md` and to `onboarding/scripts/check.sh`. After a few runs of the issue loop, calibrate its cut (250k tokens / 5 PRs) for your repository (section 7).
-9. **Codex (optional):** install the Codex CLI and the `codex@openai-codex` plugin for Claude Code. Without it, coders implement directly and say so; the rest of the harness is unchanged. The Codex model and effort are set in `coder.md` and `briefs.md`.
+9. **Coordinator and models:** choose Claude Code or Codex and run [`configure-agents`](docs/guides/CONFIGURE_AGENTS.md). Install the Codex plugin only if you want Claude coders to delegate implementation.
 10. **Check the harness:** `npm run test:harness` and `scripts/verify.sh docs`.
 
 ## 11. File inventory
@@ -429,7 +430,9 @@ PROJECT_MAP.md                 paths and validation commands
   hooks/                       git-guard, team-guard, generated-guard, task-gate, session-context (+ tests)
   agents/                      coder, documenter, qa, pr-reviewer, db-security-reviewer, contract-reviewer, reference-explorer
   skills/                      feature-plan (+template), new-branch, close-increment, onboarding (+check.sh),
-                               orchestrate-team (+briefs), resolve-issues, verify-ui, reference-parity
+                               orchestrate-team, configure-agents, resolve-issues, verify-ui, reference-parity
+.agents/skills/                Codex orchestrate-team and configure-agents entry points
+.codex/                        Codex team role definitions and hooks
 .github/
   workflows/ci.yml             CI by areas (calls scripts/verify.sh)
   workflows/plan.yml           rule 4: PRs bring a plan or «No plan: <reason>»
@@ -456,7 +459,7 @@ apps/web, apps/mobile, backend, packages/ui, shared/   monorepo skeleton, each w
 ## 12. Limits and honest caveats
 
 - **Agent teams are an experimental Claude Code feature**; the skill falls back to sequential subagents when teams are not available.
-- **Hooks are local guardrails, not security boundaries.** Anything that runs outside Claude Code (Codex, a terminal, another agent) is only covered by review, CI and branch protection.
+- **Hooks are local guardrails, not security boundaries.** Coverage varies by client and tool. Rely on review, CI and GitHub branch protection for remote changes.
 - **The Codex review on GitHub** requires the Codex GitHub integration (`chatgpt-codex-connector`); without it, the PR still gets the in-team `pr-reviewer`.
 - **Cost** scales with the number of teammates and the coordinator's context length. Use a single session or the issue loop for small changes; teams pay off on multi-area milestones.
 - **The harness does not make agents infallible.** It makes their mistakes visible (every claim comes with a command and a result) and keeps the irreversible steps in human hands.

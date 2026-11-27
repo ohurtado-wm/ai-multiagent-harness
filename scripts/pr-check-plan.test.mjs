@@ -6,7 +6,7 @@ import { check } from "./pr-check-plan.mjs";
 const SCRIPT = new URL("./pr-check-plan.mjs", import.meta.url).pathname;
 
 test("code without a plan on a work branch fails, for every watched prefix", () => {
-  for (const branch of ["feature/phase-3-milestone-2-web", "fix/x", "chore/x"]) {
+  for (const branch of ["feature/phase-3-milestone-2-web", "fix/x", "chore/x", "codex/x"]) {
     const r = check({ branch, files: ["apps/web/src/page.tsx"], body: "" });
     assert.equal(r.ok, false, branch);
     assert.match(r.reason, /No plan:/);
@@ -38,12 +38,13 @@ test("without code changes no plan is required", () => {
 test("docs/ branches and dev → main PRs are not checked", () => {
   assert.equal(check({ branch: "docs/x", files: ["apps/web/A.tsx"] }).ok, true);
   assert.equal(check({ branch: "dev", files: ["apps/web/A.tsx"] }).ok, true);
-  assert.equal(check({ branch: "codex/something", files: ["apps/web/A.tsx"] }).ok, true);
 });
 
-test("scripts/ and .claude/ count as code", () => {
+test("harness scripts, skills and client configuration count as code", () => {
   assert.equal(check({ branch: "chore/x", files: ["scripts/verify.sh"] }).ok, false);
   assert.equal(check({ branch: "chore/x", files: [".claude/hooks/a.mjs"] }).ok, false);
+  assert.equal(check({ branch: "codex/x", files: [".codex/agents/coder.toml"] }).ok, false);
+  assert.equal(check({ branch: "codex/x", files: [".agents/skills/configure-agents/SKILL.md"] }).ok, false);
 });
 
 test("CLI: environment variables and exit code", () => {

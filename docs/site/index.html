@@ -419,6 +419,7 @@
     .ring { opacity: 1; transform: none; }
   }
 </style>
+<link rel="stylesheet" href="client-view.css">
 </head>
 <body>
 <div id="progress"></div>
@@ -428,16 +429,20 @@
     <a class="brand" href="#top">AI Multi-Agent Harness<span>.</span></a>
     <nav class="links" aria-label="Sections">
       <a href="#why">Why</a>
-      <a href="#claude">Claude Code</a>
+      <a href="#coordinator" data-codex-text="Codex">Claude Code</a>
       <a href="#blocks">Building blocks</a>
       <a href="#github">GitHub Issues</a>
       <a href="#lifecycle">Lifecycle</a>
       <a href="#teams">Teams</a>
-      <a href="#loop">Issue loop</a>
+      <a href="#loop" data-codex-text="Issues &amp; PRs">Issue loop</a>
       <a href="#safety">Safety</a>
       <a href="#adopt">Adopt</a>
     </nav>
-    <a class="btn primary small" href="presentation.html"><span class="play"></span>Presentation</a>
+    <nav class="client-switch" aria-label="Coordinator view">
+      <a href="?client=claude" data-client-choice="claude" aria-current="page">Claude Code</a>
+      <a href="?client=codex" data-client-choice="codex">Codex</a>
+    </nav>
+    <a class="btn primary small" href="presentation.html" data-keep-client><span class="play"></span>Presentation</a>
   </div>
 </header>
 
@@ -447,15 +452,15 @@
 <section class="hero">
   <div class="wrap">
     <div>
-      <span class="eyebrow reveal"><i></i>Claude Code · Codex · GitHub</span>
+      <span class="eyebrow reveal"><i></i><span data-codex-text="Codex · GitHub">Claude Code · Codex · GitHub</span></span>
       <h1 class="reveal" style="--d:.1s">Turn coding agents into a <em>predictable team</em>.</h1>
-      <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles, <strong style="color:#fff">built on Claude Code</strong>. People decide. The harness enforces.</p>
+      <p class="sub reveal" style="--d:.2s">A harness of rules, hooks, skills and roles, <strong style="color:#fff" data-codex-text="with Codex as coordinator">with Claude Code or Codex as coordinator</strong>. People decide. The harness enforces.</p>
       <div class="ctas reveal" style="--d:.3s">
         <a class="btn ghost" href="#why">Explore how it works ↓</a>
       </div>
     </div>
     <div class="hero-visual reveal zoom" style="--d:.2s">
-      <svg viewBox="0 0 560 460" role="img" aria-label="The coordinator connected to the owner, Codex, the reviewer, hooks and GitHub Issues">
+      <svg viewBox="0 0 560 460" role="img" aria-label="The coordinator connected to the owner, Codex, the reviewer, hooks and GitHub Issues" data-codex-label="The Codex coordinator connects the owner, coder, reviewer, hooks and GitHub Issues">
         <defs>
           <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0047FF" stop-opacity=".55"/><stop offset="100%" stop-color="#0047FF" stop-opacity="0"/></radialGradient>
         </defs>
@@ -471,23 +476,23 @@
         </g>
         <circle class="pulse" cx="280" cy="230" r="70" fill="none" stroke="#F900D3" stroke-width="3"/>
         <circle cx="280" cy="230" r="70" fill="#FFFFFF"/>
-        <text x="280" y="214" text-anchor="middle" font-size="12" font-weight="800" fill="#F900D3" letter-spacing="1.5">CLAUDE CODE</text>
+        <text x="280" y="214" text-anchor="middle" font-size="12" font-weight="800" fill="#F900D3" letter-spacing="1.5" data-codex-text="CODEX">CLAUDE CODE</text>
         <text x="280" y="237" text-anchor="middle" font-size="19" font-weight="800" fill="#070154">Coordinator</text>
         <text x="280" y="256" text-anchor="middle" font-size="12" fill="#50658E">one git author</text>
         <g class="float"><rect x="205" y="26" width="150" height="54" rx="14" fill="#F900D3"/><text x="280" y="52" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Owner</text><text x="280" y="70" text-anchor="middle" font-size="12" fill="#fff">decides · merges</text></g>
-        <g class="float b"><rect x="15" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="90" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Codex</text><text x="90" y="177" text-anchor="middle" font-size="12" fill="#50658E">writes the code</text></g>
-        <g class="float c"><rect x="395" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="470" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Reviewer</text><text x="470" y="177" text-anchor="middle" font-size="12" fill="#50658E">Claude reviews</text></g>
+        <g class="float b"><rect x="15" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="90" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154" data-codex-text="Coder">Codex</text><text x="90" y="177" text-anchor="middle" font-size="12" fill="#50658E">writes the code</text></g>
+        <g class="float c"><rect x="395" y="133" width="150" height="54" rx="14" fill="#fff"/><text x="470" y="159" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Reviewer</text><text x="470" y="177" text-anchor="middle" font-size="12" fill="#50658E" data-codex-text="independent review">Claude reviews</text></g>
         <g class="float d"><rect x="25" y="345" width="170" height="54" rx="14" fill="#fff" stroke="#F900D3" stroke-width="3"/><text x="110" y="371" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">GitHub Issues</text><text x="110" y="389" text-anchor="middle" font-size="12" fill="#50658E">coordination</text></g>
-        <g class="float e"><rect x="377" y="345" width="150" height="54" rx="14" fill="#fff"/><text x="452" y="371" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Hooks</text><text x="452" y="389" text-anchor="middle" font-size="12" fill="#50658E">enforce the rules</text></g>
+        <g class="float e"><rect x="377" y="345" width="150" height="54" rx="14" fill="#fff"/><text x="452" y="371" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">Hooks</text><text x="452" y="389" text-anchor="middle" font-size="12" fill="#50658E" data-codex-text="check local actions">enforce the rules</text></g>
       </svg>
     </div>
   </div>
   <div class="stats">
     <div class="wrap">
-      <div class="stat reveal"><b data-count="8">0</b><span>skills (procedures)</span></div>
-      <div class="stat reveal" style="--d:.08s"><b data-count="7">0</b><span>agents and roles</span></div>
-      <div class="stat reveal" style="--d:.16s"><b data-count="5">0</b><span>enforcing hooks</span></div>
-      <div class="stat reveal" style="--d:.24s"><b data-count="70">0</b><span>unit tests on the harness</span></div>
+      <div class="stat reveal"><b data-count="8" data-codex-count="2">0</b><span>skills (procedures)</span></div>
+      <div class="stat reveal" style="--d:.08s"><b data-count="7" data-codex-count="4">0</b><span>agents and roles</span></div>
+      <div class="stat reveal" style="--d:.16s"><b data-count="5" data-codex-count="2">0</b><span>enforcing hooks</span></div>
+      <div class="stat reveal" style="--d:.24s"><b data-count="70" data-codex-count="75">0</b><span>unit tests on the harness</span></div>
       <div class="stat hl reveal" style="--d:.32s"><b data-count="5">0</b><span>uses of GitHub Issues</span></div>
     </div>
   </div>
@@ -505,7 +510,7 @@
       <div class="card reveal" style="--d:.12s"><span class="problem">Follows rules only when it remembers them</span><span class="arrow"></span><span class="fix"><b>Hooks</b> enforce the critical rules mechanically.</span></div>
       <div class="card reveal" style="--d:.18s"><span class="problem">Inconsistent output</span><span class="arrow"></span><span class="fix"><b>Skills</b> turn recurring workflows into fixed procedures.</span></div>
       <div class="card reveal" style="--d:.24s"><span class="problem">One huge, expensive context</span><span class="arrow"></span><span class="fix"><b>Subagents and teams:</b> narrow roles, own context, cheaper models.</span></div>
-      <div class="card reveal" style="--d:.3s"><span class="problem">Reviews its own work</span><span class="arrow"></span><span class="fix"><b>Codex writes, Claude reviews,</b> a person merges.</span></div>
+      <div class="card reveal" style="--d:.3s"><span class="problem">Reviews its own work</span><span class="arrow"></span><span class="fix"><b data-codex-text="An independent reviewer checks the work,">Codex writes, Claude reviews,</b> a person merges.</span></div>
       <div class="card reveal" style="--d:.36s"><span class="problem">"All tests pass", with no proof</span><span class="arrow"></span><span class="fix"><b>One validation entry point</b> (<code>scripts/verify.sh</code>) for agents and CI.</span></div>
       <div class="card hotcard reveal" style="--d:.42s"><span class="problem">Work and findings get lost in chat</span><span class="arrow"></span><span class="fix"><b>GitHub Issues</b> tracks every plan, every deferred finding and the agents' work queue.</span></div>
     </div>
@@ -529,6 +534,9 @@
           <li>Plans in <code>docs/plans/</code> with a <code>status:</code> header</li>
           <li>Status per area and a generated plan tree</li>
           <li>Hooks, skills and roles in <code>.claude/</code></li>
+<template data-codex-variant>
+<li>Skills in <code>.agents/skills/</code> and roles and hooks in <code>.codex/</code></li>
+</template>
         </ul>
       </div>
       <div class="bridge reveal" style="--d:.2s">
@@ -555,12 +563,13 @@
 </section>
 
 <!-- ================= CLAUDE CODE ================= -->
-<section id="claude" class="cc-section">
+<section id="coordinator" class="cc-section">
+  <span id="claude" aria-hidden="true"></span>
   <div class="wrap">
     <span class="cc-badge reveal"><i>✦</i>Powered by Claude Code</span>
-    <p class="kicker reveal">03 · Built on Claude Code</p>
-    <h2 class="reveal">The harness is configuration. Claude Code is the engine.</h2>
-    <p class="lead reveal">Every agent runs in its <strong>own context window</strong>; none of them shares a conversation. Claude Code is what connects them: it loads the same project memory into each one, gives teams a <strong>shared task list and a mailbox</strong>, runs the hooks on every tool call and keeps memory between sessions.</p>
+    <p class="kicker reveal">03 · Claude Code example</p>
+    <h2 class="reveal">Both clients share the same team workflow.</h2>
+    <p class="lead reveal">Every agent runs in its <strong>own context window</strong>; none of them shares a conversation. In this Claude Code example, the client loads the same project memory into each one, gives teams a <strong>shared task list and a mailbox</strong>, runs the hooks on every tool call and keeps memory between sessions.</p>
     <div class="diagram reveal zoom">
         <svg viewBox="0 0 1200 600" role="img" aria-label="Claude Code loads project memory into every agent, shares a task list and mailbox while they work, and keeps durable memory across sessions">
           <defs>
@@ -617,6 +626,60 @@
     <div class="note reveal"><span class="num m">!</span><span>Why the rules live in the repository: Claude Code's auto memory is <b>per machine</b>. Anything the whole team must follow goes into <b>AGENTS.md</b>, which Claude Code loads into every agent on every machine.</span></div>
   </div>
 </section>
+<template data-codex-variant>
+<section id="coordinator" class="cc-section">
+  <span id="claude" aria-hidden="true"></span>
+  <div class="wrap">
+    <h2 class="reveal">Codex coordinates the team.</h2>
+    <p class="lead reveal">The coordinator delegates independent work to native subagents and assembles their results using the repository’s rules.</p>
+    <div class="diagram reveal zoom"><svg viewBox="0 0 1200 600" role="img" aria-label="Codex uses AGENTS.md, delegates to native subagents and resumes from plans, Git and GitHub.">
+          <defs>
+            <marker id="cb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="cm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+          </defs>
+          <!-- top band: loaded into every context -->
+          <rect x="10" y="10" width="1180" height="84" rx="18" fill="#E8EEF8" stroke="#0047FF" stroke-width="2"/>
+          <text x="34" y="44" font-size="15" font-weight="800" fill="#0047FF" letter-spacing="2">PROJECT INSTRUCTIONS</text>
+          <text x="34" y="74" font-size="21" font-weight="700" fill="#070154">AGENTS.md  ·  folder rules  ·  project skills</text>
+          <!-- arrows down -->
+          <path class="edge flow" d="M150,96 L150,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M450,96 L450,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M750,96 L750,176" marker-end="url(#cb)"/>
+          <path class="edge flow" d="M1050,96 L1050,176" marker-end="url(#cb)"/>
+          <!-- hooks frame -->
+          <rect x="10" y="150" width="1180" height="196" rx="20" fill="none" stroke="#50658E" stroke-width="2" stroke-dasharray="7 7"/>
+          <rect x="842" y="139" width="330" height="24" rx="12" fill="#FFFFFF"/>
+          <text x="1007" y="156" text-anchor="middle" font-size="13" font-weight="800" fill="#50658E" letter-spacing="1">SUPPORTED LOCAL HOOKS</text>
+          <!-- agents -->
+          <g class="node"><rect x="30" y="180" width="240" height="140" rx="18" fill="#070154"/><text x="150" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">Lead session</text><text x="150" y="262" text-anchor="middle" font-size="16" fill="#CED7E6">Codex · coordinator</text><text x="150" y="292" text-anchor="middle" font-size="15" fill="#CED7E6">own context window</text></g>
+          <g class="node"><rect x="330" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="450" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Subagent</text><text x="450" y="262" text-anchor="middle" font-size="16" fill="#50658E">coder · documenter</text><text x="450" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="630" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#0047FF" stroke-width="3"/><text x="750" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Subagent</text><text x="750" y="262" text-anchor="middle" font-size="16" fill="#50658E">qa · reviewer</text><text x="750" y="292" text-anchor="middle" font-size="15" fill="#50658E">own context window</text></g>
+          <g class="node"><rect x="930" y="180" width="240" height="140" rx="18" fill="#fff" stroke="#CED7E6" stroke-width="2"/><text x="1050" y="232" text-anchor="middle" font-size="24" font-weight="800" fill="#070154">Subagent</text><text x="1050" y="262" text-anchor="middle" font-size="16" fill="#50658E">reviewer role</text><text x="1050" y="292" text-anchor="middle" font-size="15" fill="#50658E">returns a summary</text></g>
+          <!-- shared while working -->
+          <path class="edge-m flow" d="M150,322 L150,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M450,322 L450,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <path class="edge-m flow" d="M750,322 L750,398" marker-start="url(#cm)" marker-end="url(#cm)"/>
+          <rect x="10" y="402" width="890" height="84" rx="18" fill="#fff" stroke="#F900D3" stroke-width="3"/>
+          <text x="34" y="436" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">COORDINATOR SESSION</text>
+          <text x="34" y="466" font-size="20" font-weight="700" fill="#070154">task list  ·  assigned files  ·  verification results</text>
+          <path class="edge flow" d="M1050,322 L1050,398" marker-end="url(#cb)"/>
+          <rect x="930" y="402" width="260" height="84" rx="18" fill="#E8EEF8" stroke="#CED7E6" stroke-width="2"/>
+          <text x="1060" y="438" text-anchor="middle" font-size="17" font-weight="800" fill="#070154">summary back</text>
+          <text x="1060" y="464" text-anchor="middle" font-size="15" fill="#50658E">to whoever called it</text>
+          <!-- durable -->
+          <rect x="10" y="512" width="1180" height="78" rx="18" fill="#070154"/>
+          <text x="34" y="545" font-size="15" font-weight="800" fill="#F900D3" letter-spacing="2">DURABLE ACROSS SESSIONS</text>
+          <text x="34" y="574" font-size="20" font-weight="700" fill="#fff">plans in the repository  ·  Git branches  ·  GitHub issues and PRs</text>
+        </svg></div>
+    <div class="cc-map"><div class="card reveal"><h3>Repository instructions</h3><p>Start with <code>AGENTS.md</code> and read the rules for each area you touch.</p></div>
+<div class="card reveal"><h3>Project skills</h3><p>Select <code>$orchestrate-team</code> or <code>$configure-agents</code>. The repository provides both under <code>.agents/skills/</code>.</p></div>
+<div class="card reveal"><h3>Native subagents</h3><p>The coordinator gives each assigned role its files, dependencies and verification command.</p></div>
+<div class="card reveal"><h3>Model selection</h3><p>Use Sol as a coordinator example. Role models inherit Codex settings until the owner chooses overrides.</p></div>
+<div class="card reveal"><h3>Local hooks</h3><p>A trusted checkout registers Git and whole-file edit checks in <code>.codex/hooks.json</code>.</p></div>
+<div class="card reveal"><h3>Cross-session handoff</h3><p>Start with a plan, issue or PR. Git and GitHub carry the record as sessions change.</p></div></div>
+  </div>
+</section>
+</template>
 
 <!-- ================= BUILDING BLOCKS ================= -->
 <section id="blocks">
@@ -651,6 +714,12 @@
             <div class="item"><h4>PROJECT_MAP.md<small>before changing anything</small></h4><p>Where things are and how to validate them. Short on purpose.</p></div>
           </div>
         </div>
+<template data-codex-variant>
+<div class="panel active" role="tabpanel" id="p-instr" aria-labelledby="t-instr">
+          <h3>Rule files</h3>
+          <div class="list"><div class="item"><h4>AGENTS.md<small>repository</small></h4><p>Branch rules, plans, tests and review criteria for every agent.</p></div><div class="item"><h4>Folder AGENTS.md<small>area-specific rules</small></h4><p>Read the instructions and review criteria for each area the diff touches.</p></div><div class="item"><h4>PROJECT_MAP.md<small>validation</small></h4><p>Find the relevant paths and checks before starting work.</p></div></div>
+        </div>
+</template>
 
         <div class="panel" role="tabpanel" id="p-skills" aria-labelledby="t-skills">
           <h3>Skills: fixed procedures</h3>
@@ -660,10 +729,17 @@
             <div class="item"><h4>new-branch<small>starting work, after a merge</small></h4><p>Clean branch from an up-to-date <code>dev</code>; never carries uncommitted work silently.</p></div>
             <div class="item"><h4>close-increment<small>"open the PR"</small></h4><p>Validation with real numbers, «Result» in the plan, status updated, PR to <code>dev</code> with what was <b>not</b> verified.</p></div>
             <div class="item"><h4>orchestrate-team<small>/orchestrate-team &lt;plan&gt;</small></h4><p>A coordinated agent team takes a milestone to a green, reviewed PR.</p></div>
+            <div class="item"><h4>configure-agents<small>/configure-agents</small></h4><p>Choose the coordinator and role models, including the optional coding bridge.</p></div>
             <div class="item"><h4>resolve-issues<small>/loop /resolve-issues</small></h4><p>A self-paced loop that resolves <code>ai-queue</code> issues one PR at a time.</p></div>
             <div class="item"><h4>onboarding · verify-ui · reference-parity<small>setup and evidence</small></h4><p>Environment check; screenshots and texts from a running UI; differences against the reference app.</p></div>
           </div>
         </div>
+<template data-codex-variant>
+<div class="panel" role="tabpanel" id="p-skills" aria-labelledby="t-skills">
+          <h3>Codex skills</h3>
+          <div class="list"><div class="item"><h4>orchestrate-team<small>$orchestrate-team</small></h4><p>Start or resume team work from a plan, issue or PR.</p></div><div class="item"><h4>configure-agents<small>$configure-agents</small></h4><p>Choose the coordinator’s model and the model or effort for each role.</p></div></div>
+        </div>
+</template>
 
         <div class="panel" role="tabpanel" id="p-agents" aria-labelledby="t-agents">
           <h3>Subagents and team roles</h3>
@@ -687,6 +763,13 @@
             </div>
           </div>
         </div>
+<template data-codex-variant>
+<div class="panel" role="tabpanel" id="p-agents" aria-labelledby="t-agents">
+          <h3>Team roles</h3>
+          <p>Role definitions live in <code>.codex/agents/</code>. The coordinator handles Git and GitHub.</p>
+          <div class="list"><div class="item"><h4>documenter<small>plans and status</small></h4><p>Drafts the plan and records verification and decisions.</p></div><div class="item"><h4>coder<small>implementation</small></h4><p>Owns assigned files and runs focused checks.</p></div><div class="item"><h4>qa<small>acceptance criteria</small></h4><p>Collects evidence and reproduces failures.</p></div><div class="item"><h4>pr-reviewer<small>independent review</small></h4><p>Reads the diff and reports findings with severity and file references.</p></div></div>
+        </div>
+</template>
 
         <div class="panel" role="tabpanel" id="p-hooks" aria-labelledby="t-hooks">
           <h3>Hooks: rules that don't depend on memory</h3>
@@ -700,6 +783,13 @@
           </div>
           <div class="callout"><span class="badge">FAIL CLOSED</span><span>Safety hooks run with <code>onFailure: "block"</code> and <code>timeout: 30</code>: a crashed or timed-out hook blocks the action. Hooks only protect inside Claude Code, which is why review, CI and branch protection back them up.</span></div>
         </div>
+<template data-codex-variant>
+<div class="panel" role="tabpanel" id="p-hooks" aria-labelledby="t-hooks">
+          <h3>Codex hooks</h3>
+          <p>Trust the checkout to load <code>.codex/hooks.json</code>.</p>
+          <div class="list"><div class="item"><h4>git-guard<small>shell calls</small></h4><p>Checks protected-branch operations and PR targets.</p></div><div class="item"><h4>generated-guard<small>apply_patch</small></h4><p>Checks edits to whole generated files and points to their source.</p></div><div class="item"><h4>Coordinator<small>approval and scope</small></h4><p>Verifies assigned files, test results and owner approval for regression tests.</p></div></div>
+        </div>
+</template>
 
         <div class="panel" role="tabpanel" id="p-perms" aria-labelledby="t-perms">
           <h3>Permissions: a second, hard layer</h3>
@@ -724,6 +814,12 @@
             <p style="margin:10px 0 0; color:var(--gray-dark); font-size:15px">Coders often wait several minutes for Codex; with the longer cache they don't pay their whole context again.</p>
           </div>
         </div>
+<template data-codex-variant>
+<div class="panel" role="tabpanel" id="p-perms" aria-labelledby="t-perms">
+          <h3>Permissions and approvals</h3>
+          <div class="list"><div class="item"><h4>Codex session<small>local access</small></h4><p>The selected sandbox and approval settings govern tools and subagents.</p></div><div class="item"><h4>GitHub protection<small>remote enforcement</small></h4><p>Protect main and dev and require CI checks on PRs.</p></div></div>
+        </div>
+</template>
 
         <div class="panel" role="tabpanel" id="p-memory" aria-labelledby="t-memory">
           <h3>Memory: no agent remembers anything</h3>
@@ -747,7 +843,7 @@
           <p><code>scripts/verify.sh</code> maps the changed paths to areas and runs the same checks as CI. A missing tool is <b>SKIPPED with the reason</b>, never a silent pass.</p>
           <pre class="code term">$ scripts/verify.sh
 <span class="ok">OK</span>      docs links (0s)
-<span class="ok">OK</span>      docs Claude Code hooks (1s)
+<span class="ok">OK</span>      docs <span data-codex-text="client hooks">Claude Code hooks</span> (1s)
 <span class="ok">OK</span>      web design tokens up to date (0s)
 <span class="skip">SKIPPED</span> mobile tests — apps/mobile/package.json has no «test» script
 <span class="fail">FAIL</span>    backend tests (4s)
@@ -757,6 +853,9 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
             <div><p class="box-title">In CI</p><div class="chips"><span class="chip ok">--strict: skipped = fail</span><span class="chip ok">jobs only for changed areas</span><span class="chip mag">plan check: plan or «No plan: reason»</span></div></div>
           </div>
           <div class="callout"><span class="badge">SLOW TESTS</span><span>Fast and focused tests run on their own. Regression runs (end-to-end, simulator, integration) need the owner's explicit yes per batch; <code>team-guard</code> enforces it with <code>REGRESSIONS_APPROVED=1</code>.</span></div>
+<template data-codex-variant>
+<div class="callout"><span class="badge">SLOW TESTS</span><span>Focused tests run as needed. The coordinator asks the owner to approve each regression batch.</span></div>
+</template>
         </div>
       </div>
     </div>
@@ -771,6 +870,9 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
         <p class="kicker reveal"><span class="core">★ CORE</span>05 · GitHub Issues integration</p>
         <h2 class="reveal" style="color:#fff">Where people and agents meet.</h2>
         <p class="lead reveal">People see what exists, what is in progress and who is on it. Agents get a <strong>durable, shared queue of work</strong> that survives any session. Five uses, each a rule in <code>AGENTS.md</code> carried out by a skill.</p>
+<template data-codex-variant>
+<p class="lead reveal">GitHub tracks the plan, the issue and the PR so another session can pick up the same work.</p>
+</template>
       </div>
       <img class="gh-screenshot reveal zoom" src="assets/github-issues-list.png" alt="GitHub issues list with work queue labels" loading="lazy">
     </div>
@@ -780,6 +882,9 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <div class="use"><span class="num">3</span><h3>PRs close issues</h3><p><code>Closes #n</code>: milestone, the epic on the last one, each fixed finding.</p><span class="by">close-increment</span></div>
       <div class="use"><span class="num">4</span><h3>Threads are the record</h3><p>Each inline finding gets a reply with the fixing commit and is resolved.</p><span class="by">orchestrate-team</span></div>
       <div class="use"><span class="num">5</span><h3>Issues are a work queue</h3><p>Label <code>ai-queue</code>: an agent loop resolves it with one PR.</p><span class="by">resolve-issues</span></div>
+<template data-codex-variant>
+<div class="use"><span class="num">5</span><h3>Start from an issue</h3><p>Give the coordinator the issue number so it can find and reuse existing work.</p><span class="by">$orchestrate-team</span></div>
+</template>
     </div>
 
     <div class="gh-diagram">
@@ -798,7 +903,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <path class="edge-m flow" d="M690,320 L520,426" marker-end="url(#am)"/>
           <text class="t-label-m" x="560" y="372" text-anchor="end">owner defers it</text>
           <path class="edge-m flow" d="M560,475 L614,475" marker-end="url(#am)"/>
-          <text class="t-label-m" x="587" y="550" text-anchor="middle">+ ai-queue</text>
+          <text class="t-label-m" x="587" y="550" text-anchor="middle" data-codex-text="pick issue">+ ai-queue</text>
           <path class="edge flow" d="M870,475 L924,475" marker-end="url(#ah)"/>
           <path class="edge flow" d="M1050,430 L1050,324" marker-end="url(#ah)"/>
           <path class="edge flow" d="M870,75 L1050,75 L1050,226" marker-end="url(#ah)"/>
@@ -806,10 +911,10 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <g class="node"><rect class="n-box" x="10" y="30" width="240" height="90" rx="16"/><text class="t-title" x="130" y="70" text-anchor="middle">Plan written</text><text class="t-sub" x="130" y="96" text-anchor="middle">docs/plans/…  issue: n</text></g>
           <g class="node"><rect class="n-mag" x="304" y="30" width="256" height="90" rx="16"/><text class="t-title" x="432" y="70" text-anchor="middle">Epic / sub-issue</text><text class="t-sub" x="432" y="96" text-anchor="middle">thin · links the plan</text></g>
           <g class="node"><rect class="n-blue" x="614" y="30" width="256" height="90" rx="16"/><text class="t-title" x="742" y="70" text-anchor="middle">Milestone PR → dev</text><text class="t-sub" x="742" y="96" text-anchor="middle">Closes #n</text></g>
-          <g class="node"><rect class="n-soft" x="614" y="230" width="256" height="90" rx="16"/><text class="t-title" x="742" y="270" text-anchor="middle">Review finding</text><text class="t-sub" x="742" y="296" text-anchor="middle">reviewer · Codex · a person</text></g>
+          <g class="node"><rect class="n-soft" x="614" y="230" width="256" height="90" rx="16"/><text class="t-title" x="742" y="270" text-anchor="middle">Review finding</text><text class="t-sub" x="742" y="296" text-anchor="middle" data-codex-text="reviewer · GitHub · owner">reviewer · Codex · a person</text></g>
           <g class="node"><rect class="n-mag" x="304" y="430" width="256" height="90" rx="16"/><text class="t-title" x="432" y="470" text-anchor="middle">Finding issue</text><text class="t-sub" x="432" y="496" text-anchor="middle">template · sub-issue of epic</text></g>
-          <g class="node"><rect class="n-mag" x="614" y="430" width="256" height="90" rx="16"/><text class="t-title" x="742" y="470" text-anchor="middle">resolve-issues loop</text><text class="t-sub" x="742" y="496" text-anchor="middle">takes it, opens a PR</text></g>
-          <g class="node"><rect class="n-blue" x="924" y="430" width="256" height="90" rx="16"/><text class="t-title" x="1052" y="470" text-anchor="middle">Loop PR → dev</text><text class="t-sub" x="1052" y="496" text-anchor="middle">Closes #finding</text></g>
+          <g class="node"><rect class="n-mag" x="614" y="430" width="256" height="90" rx="16"/><text class="t-title" x="742" y="470" text-anchor="middle" data-codex-text="Coordinate an issue">resolve-issues loop</text><text class="t-sub" x="742" y="496" text-anchor="middle">takes it, opens a PR</text></g>
+          <g class="node"><rect class="n-blue" x="924" y="430" width="256" height="90" rx="16"/><text class="t-title" x="1052" y="470" text-anchor="middle" data-codex-text="Issue PR → dev">Loop PR → dev</text><text class="t-sub" x="1052" y="496" text-anchor="middle">Closes #finding</text></g>
           <g class="node"><rect class="n-navy" x="924" y="230" width="256" height="90" rx="16"/><text class="t-title t-white" x="1052" y="270" text-anchor="middle">Merged into dev</text><text class="t-sub" x="1052" y="296" text-anchor="middle" style="fill:#CED7E6">issues closed by GitHub</text></g>
         </svg>
       </div>
@@ -819,12 +924,21 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
         <div class="lab reveal" style="--d:.3s"><span class="chip" style="border-color:#CED7E6">ai-escalated</span><p>Left out of the queue by the loop, with the reason (too large, regression-only, skipped).</p></div>
         <p class="reveal" style="--d:.4s; margin:0; color:var(--gray-mid); font-size:14px">Plus <code>epic</code>, <code>enhancement</code>, <code>bug</code>, <code>documentation</code> · all created by <code>scripts/setup-github-labels.sh</code>.</p>
       </div>
+<template data-codex-variant>
+<div class="labels">
+  <div class="lab reveal"><span class="chip">$orchestrate-team issue #42</span><p>Start from a specific issue.</p></div>
+  <div class="lab reveal"><span class="chip">$orchestrate-team PR #17</span><p>Resume the branch and review in the existing PR.</p></div>
+</div>
+</template>
     </div>
 
     <div class="principles">
       <div class="p reveal"><h4>Thin issues, rich plans</h4><p>An issue never copies tasks or status: title, goal and a link. Status lives in the plan header; the issue is only open or closed.</p></div>
       <div class="p reveal" style="--d:.1s"><h4>Epics mirror the plan tree</h4><p><code>parent:</code> in the plan and GitHub sub-issues express the same hierarchy, so an epic shows everything still open for a phase.</p></div>
-      <div class="p reveal" style="--d:.2s"><h4>A deferred finding is a ready task</h4><p>The <code>finding</code> template (Origin, What, Where, Proposal, Severity) is exactly what the issue loop needs to resolve it later.</p></div>
+      <div class="p reveal" style="--d:.2s"><h4>A deferred finding is a ready task</h4><p>The <code>finding</code> template (Origin, What, Where, Proposal, Severity) is exactly what the issue loop needs to resolve it later.</p>
+<template data-codex-variant>
+<p>The <code>finding</code> template gives the coordinator the scope for a later issue.</p>
+</template></div>
     </div>
   </div>
 </section>
@@ -840,7 +954,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <div class="step"><div class="disc">2</div><h3>Branch</h3><span class="skill">new-branch</span><p>From an up-to-date <code>dev</code>; a phase and its first milestone share one.</p></div>
       <div class="step"><div class="disc">3</div><h3>Build</h3><span class="skill">you · subagent · team</span><p>Block by block: owner role, files, <code>Verification:</code>.</p></div>
       <div class="step"><div class="disc">4</div><h3>Close</h3><span class="skill">close-increment</span><p><code>verify.sh</code>, «Result» with what was not verified, PR with <code>Closes #n</code>.</p></div>
-      <div class="step"><div class="disc">5</div><h3>Review</h3><span class="skill">pr-reviewer + Codex</span><p>P0/P1/P2 with <code>file:line</code>, fixed on the same branch.</p></div>
+      <div class="step"><div class="disc">5</div><h3>Review</h3><span class="skill" data-codex-text="pr-reviewer + GitHub review">pr-reviewer + Codex</span><p>P0/P1/P2 with <code>file:line</code>, fixed on the same branch.</p></div>
       <div class="step human"><div class="disc">6</div><h3>Merge</h3><span class="skill">a person</span><p>Into <code>dev</code>; a person also promotes <code>dev</code> → <code>main</code>.</p></div>
     </div>
     <div class="loopnote reveal"><span class="spin">↻</span><span><b>Review ↔ Close loop:</b> every finding is a task on the same branch; each inline thread gets a reply with the fixing commit and is resolved. Only the owner can defer a finding, which then becomes a <code>finding</code> issue.</span></div>
@@ -852,10 +966,13 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
   <div class="wrap">
     <p class="kicker reveal">07 · Agent teams</p>
     <h2 class="reveal">One coordinator, one git author, one voice.</h2>
-    <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. <strong>Opus</strong> coordinates, <strong>Sonnet</strong> teammates do the narrow work and <strong>Codex</strong> writes the code.</p>
+    <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. Codex has the same team skill. The diagram shows Claude Code with the optional Codex writer.</p>
+<template data-codex-variant>
+<p class="lead reveal">Use <code>$orchestrate-team &lt;plan&gt;</code> to take a milestone to a reviewed PR. The coordinator delegates to Codex subagents. Sol is the coordinator example shown here.</p>
+</template>
     <div class="team-layout">
       <div class="diagram reveal zoom">
-        <svg viewBox="0 0 1100 560" role="img" aria-label="Owner, coordinator and team roles">
+        <svg viewBox="0 0 1100 560" role="img" aria-label="Owner, coordinator and team roles" data-codex-label="Codex team model suggestions. Sol for the coordinator and coders. Terra for the documenter, QA and reviewer.">
           <defs>
             <marker id="tb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
             <marker id="tm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
@@ -864,7 +981,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <g class="node"><rect class="n-mag" x="400" y="8" width="300" height="70" rx="16"/><text class="t-title" x="550" y="40" text-anchor="middle">Owner (a person)</text><text class="t-sub" x="550" y="64" text-anchor="middle">decides · approves · merges</text></g>
           <path class="edge-m flow" d="M550,82 L550,140" marker-start="url(#tm)" marker-end="url(#tm)"/>
           <text class="t-label-m" x="566" y="118">questions ↑  decisions ↓</text>
-          <g class="node"><rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/><text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · Claude Code</text><text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">main session · only git author · only voice</text></g>
+          <g class="node"><rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/><text class="t-title t-white" x="550" y="182" text-anchor="middle" data-codex-text="Coordinator · Codex">Coordinator · Claude Code</text><text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">main session · only git author · only voice</text></g>
           <path class="edge" d="M550,240 L550,286"/>
           <path class="edge flow" d="M140,286 L960,286"/>
           <path class="edge" d="M140,286 L140,322" marker-end="url(#tb)"/>
@@ -877,28 +994,28 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <g class="node"><rect class="n-box" x="567" y="326" width="240" height="96" rx="16"/><text class="t-title" x="687" y="364" text-anchor="middle">qa</text><text class="t-sub" x="687" y="392" text-anchor="middle">verify.sh · UI · acceptance</text></g>
           <g class="node"><rect class="n-box" x="840" y="326" width="240" height="96" rx="16"/><text class="t-title" x="960" y="364" text-anchor="middle">reviewer</text><text class="t-sub" x="960" y="392" text-anchor="middle">read-only · P0/P1/P2</text></g>
           <path class="edge flow" d="M413,422 L413,476" marker-end="url(#tb)"/>
-          <text class="t-label" x="428" y="455">delegates the code</text>
-          <g class="node"><rect class="n-soft" x="293" y="480" width="240" height="70" rx="16"/><text class="t-title" x="413" y="512" text-anchor="middle">Codex</text><text class="t-sub" x="413" y="536" text-anchor="middle">writes code · never reviews</text></g>
+          <text class="t-label" x="428" y="455" data-codex-text="focused checks">delegates the code</text>
+          <g class="node"><rect class="n-soft" x="293" y="480" width="240" height="70" rx="16"/><text class="t-title" x="413" y="512" text-anchor="middle" data-codex-text="Focused tests">Codex</text><text class="t-sub" x="413" y="536" text-anchor="middle" data-codex-text="command · result">writes code · never reviews</text></g>
           <path class="edge-g" d="M600,422 C600,470 560,470 537,470" marker-end="url(#tg)"/>
           <text class="t-sub" x="610" y="470">failures → tasks</text>
           <path class="edge-g" d="M960,422 C960,520 700,520 537,520" marker-end="url(#tg)"/>
           <text class="t-sub" x="800" y="545" text-anchor="middle">P0/P1 findings → tasks</text>
           <!-- model badges -->
           <g font-weight="800" text-anchor="middle">
-            <rect x="684" y="131" width="98" height="26" rx="13" fill="#F900D3"/><text x="733" y="149" font-size="14" fill="#fff">Opus</text>
-            <rect x="170" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="212" y="331" font-size="14" fill="#fff">Sonnet</text>
-            <rect x="443" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="485" y="331" font-size="14" fill="#fff">Sonnet</text>
-            <rect x="717" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="759" y="331" font-size="14" fill="#fff">Sonnet</text>
-            <rect x="990" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="1032" y="331" font-size="14" fill="#fff">Sonnet</text>
-            <rect x="397" y="531" width="130" height="26" rx="13" fill="#070154"/><text x="462" y="549" font-size="14" fill="#fff">gpt-6.1-sol</text>
+            <rect x="684" y="131" width="98" height="26" rx="13" fill="#F900D3"/><text x="733" y="149" font-size="14" fill="#fff" data-codex-text="Sol">Opus</text>
+            <rect x="170" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="212" y="331" font-size="14" fill="#fff" data-codex-text="Terra">Sonnet</text>
+            <rect x="443" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="485" y="331" font-size="14" fill="#fff" data-codex-text="Sol">Sonnet</text>
+            <rect x="717" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="759" y="331" font-size="14" fill="#fff" data-codex-text="Terra">Sonnet</text>
+            <rect x="990" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="1032" y="331" font-size="14" fill="#fff" data-codex-text="Terra">Sonnet</text>
+            <g data-codex-remove><rect x="397" y="531" width="130" height="26" rx="13" fill="#070154"/><text x="462" y="549" font-size="14" fill="#fff">gpt-6.1-sol</text></g>
           </g>
         </svg>
       </div>
       <ol class="flowlist reveal" style="--d:.15s">
-        <li class="owner"><span><b>Owner</b> runs <code>/orchestrate-team phase N</code>.</span></li>
+        <li class="owner"><span><b>Owner</b> runs <code data-codex-text="$orchestrate-team phase N">/orchestrate-team phase N</code>.</span></li>
         <li><span><b>Documenter</b> writes the plan; open questions go to the owner.</span></li>
         <li><span><b>Coordinator</b> commits the plan and hands out tasks per block.</span></li>
-        <li><span><b>Coders</b> brief Codex, check the diff and run the focused test.</span></li>
+        <li><span><b>Coders</b> <span data-codex-text="implement assigned blocks and run focused tests.">brief Codex, check the diff and run the focused test.</span></span></li>
         <li><span><b>QA</b> runs verify.sh, UI and parity; failures become tasks.</span></li>
         <li><span><b>Reviewer</b> returns P0/P1/P2 with <code>file:line</code>.</span></li>
         <li><span><b>Coordinator</b> commits by layer, opens the PR, asks <code>@codex review</code>.</span></li>
@@ -909,17 +1026,28 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <h3>Which model runs each role, and why</h3>
       <p>The most capable model only where judgment matters; a cheaper one for narrow, well-briefed work; and a different model family to write the code that Claude reviews.</p>
       <div class="model-grid">
-        <div class="model"><span class="pill opus">Opus</span><h4>Coordinator</h4><span class="who">your main session</span><p><b>Most capable, used sparingly.</b> It plans, decides with the owner, judges reviews and owns git. It is also the most expensive agent (every turn re-reads its whole context), so it never reads code and waits without polling.</p></div>
-        <div class="model"><span class="pill">Sonnet</span><h4>Team roles</h4><span class="who">documenter · coder · qa · reviewer</span><p><b>Narrow tasks with a precise brief.</b> Each teammate gets only its plan block, files and verification command. Claude Code's cost guide recommends Sonnet for teammates: team cost grows with every member.</p></div>
+        <div class="model"><span class="pill opus" data-codex-text="Sol">Opus</span><h4>Coordinator</h4><span class="who">your main session</span><p><b>Most capable, used sparingly.</b> It plans, decides with the owner, judges reviews and owns git. It is also the most expensive agent (every turn re-reads its whole context), so it never reads code and waits without polling.</p></div>
+        <div class="model"><span class="pill" data-codex-text="Role model">Sonnet</span><h4>Team roles</h4><span class="who">documenter · coder · qa · reviewer</span><p><b>Narrow tasks with a precise brief.</b> Each teammate gets only its plan block, files and verification command. Claude Code's cost guide recommends Sonnet for teammates: team cost grows with every member.</p></div>
         <div class="model"><span class="pill codex">gpt-6.1-sol · high</span><h4>Codex</h4><span class="who">called by each coder</span><p><b>Writes the code, never reviews it.</b> A different model family writes and Claude reviews, so the review is independent. High effort because the code must pass focused tests first time; it is charged to the Codex limit, not Claude's.</p></div>
-        <div class="model"><span class="pill">Sonnet</span><h4>Read-only reviewers</h4><span class="who">db-security · contract · reference-explorer</span><p><b>Read, compare, cite.</b> Their tools are limited to Read, Grep and Glob. For very simple searches, Haiku is a cheaper option.</p></div>
+        <div class="model"><span class="pill" data-codex-text="Role model">Sonnet</span><h4>Read-only reviewers</h4><span class="who">db-security · contract · reference-explorer</span><p><b>Read, compare, cite.</b> Their tools are limited to Read, Grep and Glob. For very simple searches, Haiku is a cheaper option.</p></div>
       </div>
-      <p class="where">Where it is set: <code>model:</code> in each <code>.claude/agents/*.md</code>, the Codex model and effort in <code>coder.md</code> and <code>briefs.md</code>, and the coordinator is whatever model your session runs (start it on the most capable one).</p>
+      <p class="where">Use <code>/configure-agents</code> to choose the coordinator and role models, or to adjust the optional Codex writer.</p>
     </div>
+<template data-codex-variant>
+<div class="models reveal">
+  <h3>Suggested models by role</h3>
+  <div class="model-grid codex-model-grid">
+    <div class="model"><span class="pill opus">Sol</span><h4>Coordinator</h4><p>Plans the work, delegates tasks and manages the branch and PR.</p></div>
+    <div class="model"><span class="pill codex">Sol</span><h4>Coders</h4><p>Implement assigned blocks and run focused tests.</p></div>
+    <div class="model"><span class="pill">Terra</span><h4>Documenter, QA and reviewer</h4><p>Write plans, verify acceptance criteria and review the diff.</p></div>
+  </div>
+  <p class="where">Run <code>$configure-agents</code> to apply these suggestions or choose a different model for any role.</p>
+</div>
+</template>
     <div class="grid g4" style="margin-top:24px">
-      <div class="card reveal"><span class="num b">1</span><h3 style="margin-top:12px">Codex writes, Claude reviews</h3><p>Nobody approves their own work; Codex on GitHub adds an external opinion.</p></div>
+      <div class="card reveal"><span class="num b">1</span><h3 style="margin-top:12px" data-codex-text="Independent review">Codex writes, Claude reviews</h3><p>Nobody approves their own work; Codex on GitHub adds an external opinion.</p></div>
       <div class="card reveal" style="--d:.08s"><span class="num b">2</span><h3 style="margin-top:12px">Ownership by files</h3><p>Each coder owns globs; anything outside is restored and sent back.</p></div>
-      <div class="card reveal" style="--d:.16s"><span class="num b">3</span><h3 style="margin-top:12px">Cost discipline</h3><p>≤ 4 Sonnet teammates, plans read by line ranges, waits without polling, 1 h cache.</p></div>
+      <div class="card reveal" style="--d:.16s"><span class="num b">3</span><h3 style="margin-top:12px">Cost discipline</h3><p data-codex-text="Run independent blocks in parallel and give each agent only the plan context it needs.">≤ 4 Sonnet teammates, plans read by line ranges, waits without polling, 1 h cache.</p></div>
       <div class="card reveal" style="--d:.24s"><span class="num b">4</span><h3 style="margin-top:12px">Stop rules, resumable</h3><p>Two failures, a file clash or a design change: ask. The plan's «Status» resumes a new session.</p></div>
     </div>
   </div>
@@ -1031,6 +1159,24 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
     </div>
   </div>
 </section>
+<template data-codex-variant>
+<section id="loop" class="white">
+  <div class="wrap">
+    <h2 class="reveal">Take an issue from plan to PR.</h2>
+    <p class="lead reveal">Start with an issue number. The plan, the branch and the PR keep the context for the team.</p>
+    <div class="grid g3"><div class="card reveal"><h3>Pick an issue</h3><p>Run <code>$orchestrate-team issue #42</code>. The coordinator looks for an existing plan and PR.</p></div>
+<div class="card reveal"><h3>Verify and review</h3><p>The coder implements the approved scope. Focused tests, an independent reviewer and CI verify the change.</p></div>
+<div class="card reveal"><h3>Review the PR</h3><p>The coordinator prepares the PR against <code>dev</code>. The owner merges when the findings and checks are ready.</p></div></div>
+    <div class="why-cut" id="why-cut">
+      <h3 class="reveal">Resume an existing PR</h3>
+      <p class="reveal">Run <code>$orchestrate-team PR #17</code> to take over the same work.</p>
+      <div class="grid g3"><div class="card reveal"><h3>Check the branch</h3><p>Confirm the local branch matches the latest published PR commit.</p></div>
+<div class="card reveal"><h3>Read the PR</h3><p>Use the plan and review threads to identify what remains. Reuse the existing PR.</p></div>
+<div class="card reveal"><h3>Check readiness</h3><p>Verify CI, mergeability and review status, then report what still needs attention.</p></div></div>
+    </div>
+  </div>
+</section>
+</template>
 
 <!-- ================= HUMANS ================= -->
 <section id="humans" class="decide">
@@ -1043,10 +1189,19 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <div class="card reveal" style="--d:.05s"><span class="who">Owner</span><h3>Phase plan approval</h3><p>The team stops until the plan is approved.</p></div>
       <div class="card reveal" style="--d:.1s"><span class="who">Owner</span><h3>Slow regression tests</h3><p>Asked per batch; a no becomes «not verified» in the PR.</p></div>
       <div class="card reveal" style="--d:.15s"><span class="who">Owner</span><h3>Deferring a finding</h3><p>Otherwise it is fixed in the same PR.</p></div>
-      <div class="card reveal" style="--d:.2s"><span class="who">Owner</span><h3>DB reset, remote deploys</h3><p>Always asked; teammates are blocked by a hook.</p></div>
-      <div class="card reveal" style="--d:.25s"><span class="who">Owner</span><h3>Queueing work</h3><p>Adding <code>ai-queue</code> and, optionally, <code>ai-merge</code>.</p></div>
-      <div class="card reveal" style="--d:.3s"><span class="who">Owner</span><h3>Merge into dev</h3><p>Or the opt-in <code>ai-merge</code> label for the issue loop.</p></div>
-      <div class="card never reveal" style="--d:.35s"><span class="who">Always a person</span><h3>Promote dev → main</h3><p>Never an agent: <code>git-guard</code> and the deny rules block it.</p></div>
+      <div class="card reveal" style="--d:.2s"><span class="who">Owner</span><h3>DB reset, remote deploys</h3><p data-codex-text="Ask the owner before resetting the database or deploying.">Always asked; teammates are blocked by a hook.</p></div>
+      <div class="card reveal" style="--d:.25s"><span class="who">Owner</span><h3 data-codex-text="Choosing an issue">Queueing work</h3><p>Adding <code>ai-queue</code> and, optionally, <code>ai-merge</code>.</p>
+<template data-codex-variant>
+<p>Give the coordinator the issue number and any scope decisions.</p>
+</template></div>
+      <div class="card reveal" style="--d:.3s"><span class="who">Owner</span><h3>Merge into dev</h3><p>Or the opt-in <code>ai-merge</code> label for the issue loop.</p>
+<template data-codex-variant>
+<p>The owner merges the reviewed PR into dev.</p>
+</template></div>
+      <div class="card never reveal" style="--d:.35s"><span class="who">Always a person</span><h3>Promote dev → main</h3><p>Never an agent: <code>git-guard</code> and the deny rules block it.</p>
+<template data-codex-variant>
+<p>A person promotes dev to main. GitHub branch protection enforces the remote rule.</p>
+</template></div>
     </div>
   </div>
 </section>
@@ -1056,7 +1211,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
   <div class="wrap">
     <p class="kicker reveal">10 · Defense in depth</p>
     <h2 class="reveal">No single layer is trusted on its own.</h2>
-    <p class="lead reveal">Hover a layer to find it in the rings. The outermost one is the only layer that also covers people and tools outside Claude Code.</p>
+    <p class="lead reveal" data-codex-text="Hover a layer to find it in the rings. GitHub branch protection applies to remote actions by people and agents.">Hover a layer to find it in the rings. The outermost one is the only layer that also covers people and tools outside Claude Code.</p>
     <div class="depth">
       <div class="rings">
         <svg viewBox="0 0 480 480" role="img" aria-label="Eight concentric protection layers">
@@ -1078,9 +1233,9 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
         <li class="outer reveal" data-layer="8"><span class="k">8</span><div><b>GitHub branch protection</b><span>required checks, no direct pushes to main and dev</span></div></li>
         <li class="reveal" data-layer="7" style="--d:.05s"><span class="k">7</span><div><b>CI</b><span>re-runs verify.sh by area and the plan check</span></div></li>
         <li class="reveal" data-layer="6" style="--d:.1s"><span class="k">6</span><div><b>Independent review</b><span>written P0/P1 rules in every AGENTS.md</span></div></li>
-        <li class="reveal" data-layer="5" style="--d:.15s"><span class="k">5</span><div><b>Ownership checks</b><span>git status / diff after every task (Codex runs outside the hooks)</span></div></li>
-        <li class="reveal" data-layer="4" style="--d:.2s"><span class="k">4</span><div><b>Permissions</b><span>deny secrets and protected pushes</span></div></li>
-        <li class="reveal" data-layer="3" style="--d:.25s"><span class="k">3</span><div><b>Hooks</b><span>block dangerous actions inside Claude Code, fail closed</span></div></li>
+        <li class="reveal" data-layer="5" style="--d:.15s"><span class="k">5</span><div><b>Ownership checks</b><span data-codex-text="the coordinator checks git status and diff after each task">git status / diff after every task (Codex runs outside the hooks)</span></div></li>
+        <li class="reveal" data-layer="4" style="--d:.2s"><span class="k">4</span><div><b>Permissions</b><span data-codex-text="local sandbox and approval settings">deny secrets and protected pushes</span></div></li>
+        <li class="reveal" data-layer="3" style="--d:.25s"><span class="k">3</span><div><b>Hooks</b><span data-codex-text="check supported local shell calls and whole-file edits">block dangerous actions inside Claude Code, fail closed</span></div></li>
         <li class="reveal" data-layer="2" style="--d:.3s"><span class="k">2</span><div><b>Skills</b><span>make the right path the easy path</span></div></li>
         <li class="reveal" data-layer="1" style="--d:.35s"><span class="k">1</span><div><b>Instructions</b><span>say what to do and why</span></div></li>
       </ul>
@@ -1107,11 +1262,20 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
       <button class="check hot reveal" aria-pressed="false" style="--d:.05s"><span class="box"><span>2</span></span><p><b>GitHub Issues.</b> The setup script created the labels; enable sub-issues and read the guide. Don't skip it.</p></button>
       <button class="check reveal" aria-pressed="false" style="--d:.1s"><span class="box"><span>3</span></span><p><b>Project context</b> in <code>AGENTS.md</code>; declare the reference app, if any.</p></button>
       <button class="check reveal" aria-pressed="false" style="--d:.15s"><span class="box"><span>4</span></span><p><b>Areas and commands:</b> plug your stack into <code>scripts/verify.sh</code>, its test and CI.</p></button>
-      <button class="check reveal" aria-pressed="false" style="--d:.2s"><span class="box"><span>5</span></span><p><b>Folder rules:</b> each <code>AGENTS.md</code> (+ <code>CLAUDE.md</code>) with its Code Review Rules.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.2s"><span class="box"><span>5</span></span><p><b>Folder rules:</b> each <code>AGENTS.md</code> (+ <code>CLAUDE.md</code>) with its Code Review Rules.</p>
+<template data-codex-variant>
+<p><b>Folder rules:</b> add Code Review Rules to each folder’s <code>AGENTS.md</code>.</p>
+</template></button>
       <button class="check reveal" aria-pressed="false" style="--d:.25s"><span class="box"><span>6</span></span><p><b>Generated files:</b> list them in <code>generated-guard.mjs</code>.</p></button>
       <button class="check reveal" aria-pressed="false" style="--d:.3s"><span class="box"><span>7</span></span><p><b>Slow tests:</b> name them <code>e2e-*</code>, <code>integration-*</code> or <code>regression-*</code>.</p></button>
-      <button class="check reveal" aria-pressed="false" style="--d:.35s"><span class="box"><span>8</span></span><p><b>Onboarding:</b> add your toolchain to <code>check.sh</code> and its table.</p></button>
-      <button class="check reveal" aria-pressed="false" style="--d:.4s"><span class="box"><span>9</span></span><p><b>Codex (optional):</b> CLI + Claude Code plugin; without it, coders implement directly.</p></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.35s"><span class="box"><span>8</span></span><p><b>Onboarding:</b> add your toolchain to <code>check.sh</code> and its table.</p>
+<template data-codex-variant>
+<p><b>Open Codex:</b> open the repository root and trust it to load project settings and hooks.</p>
+</template></button>
+      <button class="check reveal" aria-pressed="false" style="--d:.4s"><span class="box"><span>9</span></span><p><b>Choose models:</b> run <code>/configure-agents</code> for the coordinator and team roles. The Codex writer is optional.</p>
+<template data-codex-variant>
+<p><b>Choose models:</b> run <code>$configure-agents</code> for the coordinator and team roles.</p>
+</template></button>
       <button class="check reveal" aria-pressed="false" style="--d:.45s"><span class="box"><span>10</span></span><p><b>Check it:</b> <code>npm run test:harness</code> and <code>scripts/verify.sh docs</code>.</p></button>
     </div>
     <div class="meter reveal"><span id="meterText">0 / 10 done</span><div class="bar"><i id="meterBar" style="width:0"></i></div></div>
@@ -1124,19 +1288,28 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
     <p class="kicker reveal">12 · What's in the box</p>
     <h2 class="reveal">File inventory.</h2>
     <div class="inventory">
-      <div class="card reveal"><h3>root</h3><ul><li><code>AGENTS.md</code> rules for every agent</li><li><code>CLAUDE.md</code> → <code>@AGENTS.md</code></li><li><code>HARNESS.md</code> how it works</li><li><code>PROJECT_MAP.md</code> paths, commands</li></ul></div>
+      <div class="card reveal"><h3>root</h3><ul><li><code>AGENTS.md</code> rules for every agent</li><li><code>CLAUDE.md</code> → <code>@AGENTS.md</code></li>
+<template data-codex-variant>
+
+</template><li><code>HARNESS.md</code> how it works</li><li><code>PROJECT_MAP.md</code> paths, commands</li></ul></div>
       <div class="card reveal" style="--d:.08s"><h3>.claude/</h3><ul><li><code>settings.json</code> hooks, permissions</li><li><code>hooks/</code> 5 hooks + tests</li><li><code>agents/</code> 7 roles</li><li><code>skills/</code> 8 skills</li></ul></div>
+<template data-codex-variant>
+<div class="card reveal"><h3>Codex configuration</h3><ul><li><code>.agents/skills/</code> entry points</li><li><code>.codex/agents/</code> role definitions</li><li><code>.codex/hooks.json</code> local checks</li></ul></div>
+</template>
       <div class="card reveal" style="--d:.16s"><h3>scripts/ · .github/</h3><ul><li><code>verify.sh</code> validation by area</li><li><code>plan-status.mjs</code> plan tree</li><li><code>setup-github-labels.sh</code></li><li>CI, plan check, PR and <code>finding</code> templates</li></ul></div>
-      <div class="card reveal" style="--d:.24s"><h3>docs/ · apps/</h3><ul><li><code>plans/</code>, <code>status/</code>, <code>guides/</code></li><li><code>apps/web</code>, <code>apps/mobile</code></li><li><code>backend</code>, <code>packages/ui</code>, <code>shared</code></li><li>each with <code>AGENTS.md</code> + <code>CLAUDE.md</code></li></ul></div>
+      <div class="card reveal" style="--d:.24s"><h3>docs/ · apps/</h3><ul><li><code>plans/</code>, <code>status/</code>, <code>guides/</code></li><li><code>apps/web</code>, <code>apps/mobile</code></li><li><code>backend</code>, <code>packages/ui</code>, <code>shared</code></li><li>each with <code>AGENTS.md</code> + <code>CLAUDE.md</code></li>
+<template data-codex-variant>
+<li>each with <code>AGENTS.md</code></li>
+</template></ul></div>
     </div>
 
     <p class="kicker reveal" style="margin-top:72px">13 · Honest caveats</p>
     <h2 class="reveal">What it does not do.</h2>
     <div class="grid g5">
-      <div class="card reveal"><h3>Teams are experimental</h3><p>The skill falls back to sequential subagents.</p></div>
-      <div class="card reveal" style="--d:.06s"><h3>Hooks are local</h3><p>Codex and terminals rely on review, CI and branch protection.</p></div>
+      <div class="card reveal"><h3 data-codex-text="Choose narrow roles">Teams are experimental</h3><p data-codex-text="Delegate work by file ownership and run dependent blocks in order.">The skill falls back to sequential subagents.</p></div>
+      <div class="card reveal" style="--d:.06s"><h3>Hooks are local</h3><p data-codex-text="Review, CI and branch protection cover changes to the remote repository.">Codex and terminals rely on review, CI and branch protection.</p></div>
       <div class="card reveal" style="--d:.12s"><h3>Codex on GitHub</h3><p>Needs its GitHub integration; the in-team reviewer still runs.</p></div>
-      <div class="card reveal" style="--d:.18s"><h3>Cost grows with teams</h3><p>Use one session or the issue loop for small changes.</p></div>
+      <div class="card reveal" style="--d:.18s"><h3>Cost grows with teams</h3><p data-codex-text="Use one session for small changes.">Use one session or the issue loop for small changes.</p></div>
       <div class="card reveal" style="--d:.24s"><h3>Not infallible</h3><p>It makes mistakes visible and keeps irreversible steps human.</p></div>
     </div>
   </div>
@@ -1151,7 +1324,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
         <p>The same story in 17 slides that fit any screen: arrow keys to navigate, F for full screen, P to save as PDF.</p>
       </div>
       <div class="actions">
-        <a class="btn hot" href="presentation.html"><span class="play"></span>Open the presentation</a>
+        <a class="btn hot" href="presentation.html" data-keep-client><span class="play"></span>Open the presentation</a>
         <a class="btn ghost" href="../../HARNESS.md">Read HARNESS.md</a>
       </div>
     </div>
@@ -1162,12 +1335,13 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
 <footer>
   <div class="wrap">
     <span><b style="color:var(--navy)">AI Multi-Agent Harness</b> · people decide, the harness enforces.</span>
-    <span><a href="presentation.html">Presentation</a><a href="../../HARNESS.md">HARNESS.md</a><a href="../../AGENTS.md">AGENTS.md</a><a href="../guides/GITHUB_ISSUES.md">GitHub Issues guide</a></span>
+    <span><a href="presentation.html" data-keep-client>Presentation</a><a href="../../HARNESS.md">HARNESS.md</a><a href="../../AGENTS.md">AGENTS.md</a><a href="../guides/GITHUB_ISSUES.md">GitHub Issues guide</a></span>
   </div>
 </footer>
 
 <button id="toTop" type="button" aria-label="Back to top">↑</button>
 
+<script src="client-view.js"></script>
 <script>
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 

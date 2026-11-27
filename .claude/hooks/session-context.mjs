@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// SessionStart hook: adds to the context, in a few lines, what would otherwise require reading the full
+// SessionStart hook (its text is written as facts, not orders: imperative hook context can trigger
+// Claude's prompt-injection defenses): adds to the context, in a few lines, what would otherwise require reading the full
 // status: the current branch (with a warning if it is main or dev), the branch's open PR, the plans the
 // branch modified against dev, whether there are uncommitted changes and the summary of the active plans
 // (scripts/plan-status.mjs --summary: in progress, waiting for the owner and what comes next). Everything is
@@ -22,9 +23,9 @@ export function format({ branch, commit, pr, plans = [], uncommitted = 0, plansS
   const lines = [];
   if (!branch) {
     // Detached HEAD (for example, a PR's CI): there is no branch or PR to show.
-    lines.push(`Detached HEAD at ${commit}: you are not on a branch. Create a work branch before committing.`);
+    lines.push(`Detached HEAD at ${commit}: there is no current branch; commits go on a work branch.`);
   } else if (branch === "main" || branch === "dev") {
-    lines.push(`Current branch: ${branch}. Do not commit here: create a work branch from an up-to-date dev (git switch -c <type>/<topic>).`);
+    lines.push(`Current branch: ${branch}, a protected branch: commits go on a work branch created from an up-to-date dev (git switch -c <type>/<topic>).`);
   } else {
     lines.push(`Current branch: ${branch}.`);
   }
@@ -33,7 +34,7 @@ export function format({ branch, commit, pr, plans = [], uncommitted = 0, plansS
   if (plans.length) lines.push(`Plans touched by this branch: ${plans.join(", ")}.`);
   if (uncommitted > 0) lines.push(`Uncommitted changes: ${uncommitted} file(s).`);
   if (plansSummary) lines.push(plansSummary);
-  lines.push("Reading the project status is not mandatory: look at docs/status/ only if you need to know what is done in an area.");
+  lines.push("Reading the project status is optional: docs/status/ describes what is done in each area.");
   return lines.join("\n");
 }
 

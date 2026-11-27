@@ -59,7 +59,7 @@ flowchart TB
 |---|---|---|
 | [`AGENTS.md`](AGENTS.md) | Every agent, every session | Repository rules (branches, plans, findings, tests), owner criteria and the root **Code Review Rules**. The single source of truth. |
 | [`CLAUDE.md`](CLAUDE.md) | Claude Code | One line: `@AGENTS.md`. Claude and Codex never drift apart. |
-| `<folder>/AGENTS.md` | Agents working in that folder, and reviewers | Area-specific rules and the area's **Code Review Rules** (what counts as P0/P1 there). |
+| `<folder>/AGENTS.md` (+ `<folder>/CLAUDE.md` with `@AGENTS.md`) | Agents working in that folder, and reviewers | Area-specific rules and the area's **Code Review Rules** (what counts as P0/P1 there). The one-line `CLAUDE.md` makes Claude Code load it in every version (it reads a nested `AGENTS.md` on its own only from v2.1.277). |
 | [`PROJECT_MAP.md`](PROJECT_MAP.md) | Agents before changing anything | Where things are and how to validate them. Short on purpose. |
 
 Rules are written as **mandatory statements with the reason and the correct alternative**, so an agent that is blocked knows what to do instead.
@@ -104,7 +104,7 @@ How to use them, read their reports and write new ones: [`docs/guides/SUBAGENTS.
 
 ### 2.4 Hooks (enforcement)
 
-Hooks are small Node scripts that Claude Code runs before a tool call (or on session/task events). Exit code `2` blocks the call and the message on stderr is shown to the agent, which then follows it. Every hook **fails open** on a parsing error (a broken hook must not stall the work) and has unit tests.
+Hooks are small Node scripts that Claude Code runs before a tool call (or on session/task events). Exit code `2` blocks the call and the message on stderr is shown to the agent, which then follows it. Every hook has unit tests. The three safety hooks (`git-guard`, `team-guard`, `generated-guard`) are registered with `"onFailure": "block"` and `"timeout": 30`, so if one **crashes or times out, the action is blocked** instead of going ahead (Claude Code v2.1.295+; older versions ignore the field). Inside the scripts, input that is not valid JSON is still let through with a warning, so a malformed event cannot stall the work. The session hook writes its context as **facts, not orders**: imperative hook text can trigger Claude's prompt-injection defenses.
 
 | Hook | Event | Blocks |
 |---|---|---|
@@ -120,7 +120,7 @@ The parser in `git-guard` understands quoting, chained commands (`&&`, `;`, `|`)
 
 ### 2.5 Permissions
 
-[`.claude/settings.json`](.claude/settings.json) (versioned, shared by the team) registers the hooks, enables agent teams, pre-approves read-only and validation commands (`git status`, `git diff`, `scripts/verify.sh`, `node --test`…) so agents do not stall on prompts, and **denies** reading or editing `.env*` files. Personal preferences go in `.claude/settings.local.json` (git-ignored).
+[`.claude/settings.json`](.claude/settings.json) (versioned, shared by the team) registers the hooks, enables agent teams, pre-approves read-only and validation commands (`git status`, `git diff`, `scripts/verify.sh`, `node --test`…) so agents do not stall on prompts, and **denies** reading or editing `.env*` files. It also **denies pushes to `main` and `dev`, forced pushes (`--force`, `-f`; `--force-with-lease` stays allowed), `--all` and `--mirror`**: the docs recommend the permission system for hard denies, deny rules apply to every subcommand of a chained command and no allow rule can override them. `git-guard` remains the first layer because it also understands `git -C`, `cd` and `bash -c` forms the rule syntax cannot see. `"subagentPromptCacheTtl": "1h"` keeps the prompt cache of subagents and teammates for an hour instead of five minutes, so a coder waiting several minutes for Codex does not pay its whole context again. Personal preferences go in `.claude/settings.local.json` (git-ignored).
 
 ### 2.6 Memory: plans, status and GitHub
 
@@ -294,7 +294,7 @@ The key design choices:
 - **One coordinator, one git author, one voice.** Only the main session commits, pushes, opens PRs and asks the person. A teammate's message is never the person's permission. `team-guard` makes the first part mechanical.
 - **Codex writes, Claude reviews.** Coders delegate code to Codex and verify it; the reviewer is a different agent with its own judgment; Codex on GitHub adds an external second opinion. Nobody approves their own work.
 - **Ownership by files.** Each coder owns a set of globs; anything outside is restored and sent back. Two teammates never edit the same file.
-- **Cost discipline.** The coordinator runs on the most capable model and is the most expensive agent, because every turn rereads its whole context; so it does not read code or full diffs, waits without polling, batches messages and gives teammates only the plan lines they need. Teammates run on a cheaper model; reports also go to a file so they are never lost.
+- **Cost discipline.** The coordinator runs on the most capable model and is the most expensive agent, because every turn rereads its whole context; so it does not read code or full diffs, waits without polling, batches messages and gives teammates only the plan lines they need. Teammates run on a cheaper model with a one-hour prompt cache (`subagentPromptCacheTtl`); reports also go to a file so they are never lost.
 - **Stop rules.** Two failures on the same task, two teammates needing the same file, a limit running out, a design change, or a hook block → stop and tell the person.
 - **Resumable.** Teammates do not survive `/resume`, but the plan's «Status» table and `git log` do: a new session with the same command continues where it stopped.
 
@@ -347,7 +347,7 @@ No single layer is trusted on its own:
 1. **Instructions** say what to do and why (`AGENTS.md`).
 2. **Skills** make the right path the easy path.
 3. **Hooks** block the dangerous actions inside Claude Code.
-4. **Permissions** deny secrets and pre-approve only safe commands.
+4. **Permissions** deny secrets and pushes to protected branches, and pre-approve only safe commands.
 5. **Ownership checks**: the coordinator inspects `git status`/`git diff --stat` after every task, because Codex runs outside the hooks.
 6. **Independent review** with written severity rules (P0/P1 lists in every `AGENTS.md`).
 7. **CI** re-runs the same `verify.sh` areas and checks the plan rule.
@@ -370,7 +370,7 @@ No single layer is trusted on its own:
 
 ```
 AGENTS.md                      rules for every agent (single source)
-CLAUDE.md                      @AGENTS.md
+CLAUDE.md                      @AGENTS.md (each folder has one too, importing its own AGENTS.md)
 HARNESS.md                     this document
 PROJECT_MAP.md                 paths and validation commands
 .claude/
@@ -399,7 +399,7 @@ docs/
   status/                      plans.md (generated) and one file per area
   guides/                      GITHUB_ISSUES.md, SUBAGENTS.md, AGENT_TEAMS.md, RESOLVE_ISSUES.md
   architecture/                ARCHITECTURE.md
-apps/web, apps/mobile, backend, packages/ui, shared/   monorepo skeleton, each with its AGENTS.md
+apps/web, apps/mobile, backend, packages/ui, shared/   monorepo skeleton, each with its AGENTS.md and CLAUDE.md
 ```
 
 ## 11. Limits and honest caveats

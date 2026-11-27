@@ -11,7 +11,7 @@ A **team** is several Claude Code sessions working at once: a **coordinator** (y
 | A milestone with pieces in different files (database, web, tests, documentation). | A small or single-file change: a normal session is faster and cheaper. For small issues, the [`resolve-issues`](RESOLVE_ISSUES.md) loop. |
 | Someone independent reviewing what another wrote. | Steps that depend on each other with nothing in parallel. |
 
-It costs more than one session: every teammate spends its own budget. That is why the team uses **the most capable model only for the coordinator**, a **cheaper model** (Sonnet) for the teammates, and delegates the **code to Codex**, which is charged to your Codex limit.
+It costs more than one session: every teammate spends its own budget (Anthropic's cost guide puts teams at several times the tokens of a single session, roughly in proportion to team size). That is why the team uses **the most capable model only for the coordinator**, a **cheaper model** (Sonnet) for the teammates, and delegates the **code to Codex**, which is charged to your Codex limit. `.claude/settings.json` sets `"subagentPromptCacheTtl": "1h"`: by default a teammate's prompt cache lasts five minutes, and coders often wait longer than that for Codex.
 
 ## The team
 

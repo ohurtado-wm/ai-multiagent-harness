@@ -16,7 +16,7 @@ Status, order and hierarchy of the plans in `docs/plans/`, taken from the header
 
 **Waiting for the owner** (`in-validation`: implemented; it still needs validation, a remote rollout or an owner step):
 
-- Nothing.
+- [Harness: AI-first repository](../plans/harness/PLAN_HARNESS.md): [Harness: hardening after the review against the official docs](../plans/harness/PLAN_HARNESS_REVIEW_HARDENING.md)
 
 **What comes next:**
 
@@ -27,6 +27,7 @@ Status, order and hierarchy of the plans in `docs/plans/`, taken from the header
 Nested by `parent`; siblings follow the `previous`/`next` order and loose ones (improvements, adjustments) go last.
 
 - [Harness: AI-first repository](../plans/harness/PLAN_HARNESS.md) · closed
+  - [Harness: hardening after the review against the official docs](../plans/harness/PLAN_HARNESS_REVIEW_HARDENING.md) · in-validation
 - [Product](../plans/product/PLAN_PRODUCT.md) · draft
 
 <!-- plans:end -->

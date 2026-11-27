@@ -3,9 +3,9 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { format, summarizePlans } from "./session-context.mjs";
 
-test("on dev it warns not to commit", () => {
+test("on dev it states that the branch is protected", () => {
   const t = format({ branch: "dev", plans: [], uncommitted: 0 });
-  assert.match(t, /Current branch: dev\. Do not commit here/);
+  assert.match(t, /Current branch: dev, a protected branch: commits go on a work branch/);
   assert.doesNotMatch(t, /has no open PR/);
 });
 
@@ -19,7 +19,7 @@ test("work branch with PR, plans and uncommitted changes", () => {
   assert.match(t, /Open PR: #55 «Context» against dev \(https:\/\/github\.com\/o\/r\/pull\/55\)/);
   assert.match(t, /Plans touched by this branch: PLAN_HARNESS\.md/);
   assert.match(t, /Uncommitted changes: 3 file/);
-  assert.match(t, /not mandatory/);
+  assert.match(t, /project status is optional/);
 });
 
 test("a work branch without a PR says so; without a branch it returns nothing", () => {
@@ -41,7 +41,7 @@ test("CLI: exits 0 and prints the branch, even with invalid input", () => {
 
 test("adds the active plans summary before the final notice", () => {
   const t = format({ branch: "fix/x", plansSummary: "Plans in progress: phase 3 (F3.md)." });
-  assert.match(t, /Plans in progress: phase 3 \(F3\.md\)\.\nReading the project status is not mandatory/);
+  assert.match(t, /Plans in progress: phase 3 \(F3\.md\)\.\nReading the project status is optional/);
 });
 
 test("summarizePlans reads the repository's real plans and does not fail outside it", async () => {

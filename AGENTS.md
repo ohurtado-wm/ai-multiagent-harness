@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Instructions for AI agents working in this repository (Claude Code, Codex and others). This is the single source of truth: `CLAUDE.md` only imports it. Anything about hooks, skills, subagents or `/onboarding` applies to Claude Code; the repository and review rules apply to every agent. Each main folder has its own `AGENTS.md`, which adds to this one.
+Instructions for AI agents working in this repository (Claude Code, Codex and others). This is the single source of truth: `CLAUDE.md` only imports it. Anything about hooks, skills, subagents or `/onboarding` applies to Claude Code; the repository and review rules apply to every agent. Each main folder has its own `AGENTS.md`, which adds to this one, and a one-line `CLAUDE.md` (`@AGENTS.md`) so Claude Code loads it in every version. A new folder with an `AGENTS.md` gets its `CLAUDE.md` too.
 
 If you are going to **review a PR**, go straight to [Code Review Rules](#code-review-rules) at the end of this file and to the section with the same name in the `AGENTS.md` of each folder the PR changes.
 

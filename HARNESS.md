@@ -1,6 +1,6 @@
 # How this agent harness works
 
-This document explains, for people, how the harness in this repository turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md).
+This document explains, for people, how the harness in this repository turns AI coding agents into a predictable team: what each piece does, how a piece of work flows from an idea to a merged PR, where humans decide, and how to adapt it to your project. The rules the agents themselves follow live in [`AGENTS.md`](AGENTS.md). For a visual summary to present to a team, open the slide deck [`docs/site/index.html`](docs/site/index.html) in a browser.
 
 ## 1. What a harness is, and why
 

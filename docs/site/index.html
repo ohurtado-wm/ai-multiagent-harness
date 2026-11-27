@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Multi-Agent Harness</title>
+<style>
+  :root {
+    --canvas: #F8F8F8;
+    --white: #FFFFFF;
+    --navy: #070154;
+    --magenta: #F900D3;
+    --blue: #0047FF;
+    --gray-dark: #50658E;
+    --gray-mid: #CED7E6;
+    --gray-light: #E8EEF8;
+    --font: "Inter", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--gray-light);
+    color: var(--navy);
+    font-family: var(--font);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Stage: a fixed 1600x900 canvas scaled to the window ---------- */
+  #stage {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1600px; height: 900px;
+    transform-origin: center center;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    width: 1600px; height: 900px;
+    background: var(--canvas);
+    padding: 64px 96px 88px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(7, 1, 84, .12);
+  }
+  .slide.active { display: flex; }
+  body.ready .slide.active { animation: enter .35s ease-out; }
+  @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .slide.active { animation: none; } }
+
+  .slide::after { /* footer rule */
+    content: ""; position: absolute; left: 96px; right: 96px; bottom: 56px;
+    height: 1px; background: var(--gray-mid);
+  }
+  .foot {
+    position: absolute; left: 96px; right: 96px; bottom: 22px;
+    display: flex; justify-content: space-between;
+    font-size: 16px; color: var(--gray-dark); letter-spacing: .02em;
+  }
+  .foot b { color: var(--navy); font-weight: 600; }
+
+  /* ---------- Typography ---------- */
+  .kicker {
+    font-size: 18px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--blue); margin: 0 0 10px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .kicker .core {
+    background: var(--magenta); color: var(--white);
+    padding: 4px 12px; border-radius: 999px; letter-spacing: .08em; font-size: 15px;
+  }
+  h2 { font-size: 54px; line-height: 1.08; margin: 0 0 12px; letter-spacing: -.02em; font-weight: 800; }
+  .lead { font-size: 24px; line-height: 1.45; color: var(--gray-dark); margin: 0 0 32px; max-width: 1200px; }
+  .lead strong, p strong { color: var(--navy); }
+  code, .mono { font-family: var(--mono); font-size: .86em; background: var(--gray-light); padding: 1px 7px; border-radius: 6px; color: var(--navy); }
+  .body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  /* ---------- Components ---------- */
+  .grid { display: grid; gap: 22px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g5 { grid-template-columns: repeat(5, 1fr); }
+  .card {
+    background: var(--white); border: 1px solid var(--gray-mid); border-radius: 18px;
+    padding: 24px 26px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 25px; letter-spacing: -.01em; }
+  .card p { margin: 0; font-size: 19px; line-height: 1.45; color: var(--gray-dark); }
+  .card.accent { border-top: 6px solid var(--blue); }
+  .card.hot { border-top: 6px solid var(--magenta); }
+  .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--navy); color: var(--white); font-weight: 800; font-size: 19px; flex: none;
+  }
+  .num.m { background: var(--magenta); }
+  .num.b { background: var(--blue); }
+  .chip {
+    display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 17px; font-weight: 600;
+    background: var(--gray-light); color: var(--navy); border: 1px solid var(--gray-mid); margin: 0 8px 8px 0;
+    font-family: var(--mono);
+  }
+  .chip.blue { background: var(--blue); color: var(--white); border-color: var(--blue); }
+  .chip.mag { background: var(--white); color: var(--navy); border: 2px solid var(--magenta); }
+  .muted { color: var(--gray-dark); }
+
+  /* ---------- Title slide ---------- */
+  .title-slide { background: var(--navy); color: var(--white); justify-content: center; }
+  .title-slide::after { background: rgba(255, 255, 255, .18); }
+  .title-slide .foot, .title-slide .foot b { color: var(--gray-mid); }
+  .title-slide .bar { width: 120px; height: 8px; background: var(--magenta); border-radius: 4px; margin-bottom: 36px; }
+  .title-slide h1 { font-size: 104px; line-height: 1; margin: 0 0 24px; letter-spacing: -.035em; font-weight: 800; }
+  .title-slide h1 span { color: var(--magenta); }
+  .title-slide .sub { font-size: 30px; line-height: 1.4; color: var(--gray-mid); max-width: 1100px; margin: 0 0 64px; }
+  .stats { display: flex; gap: 22px; }
+  .stat { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .18); border-radius: 18px; padding: 22px 28px; min-width: 230px; }
+  .stat b { display: block; font-size: 60px; line-height: 1; font-weight: 800; color: var(--white); }
+  .stat span { font-size: 19px; color: var(--gray-mid); }
+  .stat.hl { border-color: var(--magenta); }
+
+  /* ---------- Problem / fix rows ---------- */
+  .pf { display: grid; grid-template-columns: 1fr 64px 1.35fr; gap: 14px 0; align-items: stretch; }
+  .pf .p, .pf .f { border-radius: 14px; padding: 14px 22px; font-size: 20px; line-height: 1.4; display: flex; align-items: center; }
+  .pf .p { background: var(--gray-light); color: var(--gray-dark); }
+  .pf .f { background: var(--white); border: 1px solid var(--gray-mid); }
+  .pf .f.hot { border: 2px solid var(--magenta); }
+  .pf .arrow { display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 30px; font-weight: 700; }
+  .pf .head { font-size: 16px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gray-dark); padding: 0 4px; }
+
+  /* ---------- Pillars ---------- */
+  .pillars { display: grid; grid-template-columns: 1fr 200px 1fr; align-items: center; flex: 1; }
+  .pillar { border-radius: 24px; padding: 36px 40px; height: 100%; display: flex; flex-direction: column; }
+  .pillar.repo { background: var(--white); border: 2px solid var(--blue); }
+  .pillar.gh { background: var(--navy); color: var(--white); border: 2px solid var(--navy); position: relative; }
+  .pillar.gh::before { content: "CORE"; position: absolute; top: -16px; right: 32px; background: var(--magenta); color: var(--white); font-weight: 800; font-size: 15px; letter-spacing: .14em; padding: 6px 14px; border-radius: 999px; }
+  .pillar .tag { font-size: 18px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+  .pillar.gh .tag { color: var(--magenta); }
+  .pillar h3 { font-size: 46px; margin: 8px 0 6px; letter-spacing: -.02em; }
+  .pillar .what { font-size: 24px; color: var(--gray-dark); margin-bottom: 24px; }
+  .pillar.gh .what { color: var(--gray-mid); }
+  .pillar ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+  .pillar li { font-size: 21px; line-height: 1.35; padding-left: 30px; position: relative; }
+  .pillar li::before { content: ""; position: absolute; left: 0; top: 10px; width: 12px; height: 12px; border-radius: 3px; background: var(--blue); }
+  .pillar.gh li::before { background: var(--magenta); }
+  .pillar.gh code { background: rgba(255, 255, 255, .12); color: var(--white); }
+  .bridge { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 17px; color: var(--gray-dark); text-align: center; font-weight: 600; }
+  .bridge svg { width: 160px; height: 70px; }
+
+  /* ---------- Layers ---------- */
+  .layers { display: grid; gap: 12px; flex: 1; }
+  .layer { display: grid; grid-template-columns: 70px 330px 1fr; align-items: center; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 16px; padding: 12px 22px; }
+  .layer .n { font-size: 34px; font-weight: 800; color: var(--blue); }
+  .layer h3 { margin: 0; font-size: 26px; }
+  .layer h3 small { display: block; font-size: 17px; font-weight: 500; color: var(--gray-dark); margin-top: 2px; }
+  .layer .chips .chip { margin-bottom: 4px; font-size: 16px; }
+  .layer.l3 { border-left: 8px solid var(--navy); }
+  .layer.l4 { border-left: 8px solid var(--magenta); }
+
+  /* ---------- Lists ---------- */
+  .roster { display: grid; gap: 12px; }
+  .row { display: flex; gap: 16px; align-items: flex-start; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 14px 20px; }
+  .row h4 { margin: 0; font-size: 21px; font-family: var(--mono); }
+  .row p { margin: 2px 0 0; font-size: 18px; color: var(--gray-dark); line-height: 1.4; }
+  .col-title { font-size: 20px; font-weight: 800; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .col-title .dot { width: 14px; height: 14px; border-radius: 4px; background: var(--blue); }
+  .col-title .dot.m { background: var(--magenta); }
+  .col-title .dot.n { background: var(--navy); }
+
+  /* ---------- Hooks ---------- */
+  .hook { display: flex; flex-direction: column; gap: 10px; }
+  .hook .when { font-size: 15px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+  .hook h3 { font-family: var(--mono); font-size: 22px; margin: 0; }
+  .hook ul { margin: 0; padding-left: 20px; font-size: 18px; line-height: 1.45; color: var(--gray-dark); }
+  .banner { margin-top: 22px; display: flex; gap: 18px; align-items: center; background: var(--navy); color: var(--white); border-radius: 16px; padding: 18px 26px; font-size: 20px; line-height: 1.4; }
+  .banner b { color: var(--white); }
+  .banner .badge { background: var(--magenta); color: var(--white); font-weight: 800; border-radius: 10px; padding: 6px 12px; font-size: 16px; letter-spacing: .08em; white-space: nowrap; }
+  .banner code { background: rgba(255, 255, 255, .14); color: var(--white); }
+
+  /* ---------- Use cards (GitHub) ---------- */
+  .use { display: flex; flex-direction: column; gap: 12px; }
+  .use .who { margin-top: auto; font-size: 16px; color: var(--gray-dark); border-top: 1px solid var(--gray-light); padding-top: 10px; }
+  .use .who b { color: var(--navy); }
+
+  /* ---------- Diagrams ---------- */
+  .diagram { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .diagram svg { width: 100%; height: 100%; }
+  svg text { font-family: var(--font); }
+  .n-box { fill: var(--white); stroke: var(--gray-mid); stroke-width: 2; }
+  .n-blue { fill: var(--white); stroke: var(--blue); stroke-width: 3; }
+  .n-navy { fill: var(--navy); stroke: var(--navy); }
+  .n-mag { fill: var(--white); stroke: var(--magenta); stroke-width: 3; }
+  .n-soft { fill: var(--gray-light); stroke: var(--gray-mid); stroke-width: 2; }
+  .t-title { font-size: 24px; font-weight: 800; fill: var(--navy); }
+  .t-sub { font-size: 17px; fill: var(--gray-dark); }
+  .t-white { fill: var(--white); }
+  .t-label { font-size: 16px; font-weight: 700; fill: var(--blue); }
+  .t-label-m { font-size: 16px; font-weight: 700; fill: var(--magenta); }
+  .edge { fill: none; stroke: var(--blue); stroke-width: 3; }
+  .edge-m { fill: none; stroke: var(--magenta); stroke-width: 3; }
+  .edge-g { fill: none; stroke: var(--gray-dark); stroke-width: 2.5; stroke-dasharray: 8 7; }
+
+  /* ---------- Lifecycle stepper ---------- */
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin-top: 8px; }
+  .step { position: relative; padding: 0 10px; }
+  .step .disc { width: 74px; height: 74px; border-radius: 50%; background: var(--white); border: 3px solid var(--blue); color: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; position: relative; z-index: 1; }
+  .step.human .disc { border-color: var(--magenta); background: var(--magenta); color: var(--white); }
+  .step:not(:last-child)::before { content: ""; position: absolute; top: 36px; left: 84px; right: -4px; height: 3px; background: var(--blue); }
+  .step h3 { margin: 18px 0 6px; font-size: 24px; }
+  .step .skill { font-family: var(--mono); font-size: 16px; color: var(--blue); font-weight: 700; }
+  .step p { font-size: 18px; line-height: 1.45; color: var(--gray-dark); margin: 8px 0 0; }
+  .legend { display: flex; gap: 28px; font-size: 18px; color: var(--gray-dark); margin-top: auto; align-items: center; }
+  .legend i { display: inline-block; width: 18px; height: 18px; border-radius: 50%; vertical-align: -3px; margin-right: 8px; border: 3px solid var(--blue); background: var(--white); }
+  .legend i.h { background: var(--magenta); border-color: var(--magenta); }
+  .loopnote { margin-top: 34px; display: flex; gap: 16px; align-items: center; background: var(--white); border: 2px dashed var(--blue); border-radius: 16px; padding: 16px 22px; font-size: 20px; line-height: 1.4; }
+
+  /* ---------- Decisions ---------- */
+  .decide { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .decide .card { display: flex; flex-direction: column; gap: 10px; padding: 22px; }
+  .decide .card h3 { font-size: 22px; }
+  .decide .how { font-size: 17px; color: var(--gray-dark); line-height: 1.4; }
+  .decide .who { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--magenta); }
+  .decide .card.never { background: var(--navy); border-color: var(--navy); }
+  .decide .card.never h3, .decide .card.never .how { color: var(--white); }
+
+  /* ---------- Defense in depth ---------- */
+  .depth { display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 1; justify-content: center; }
+  .ring { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 14px; border-radius: 14px; padding: 11px 22px; background: var(--white); border: 1px solid var(--gray-mid); font-size: 20px; }
+  .ring .k { font-weight: 800; color: var(--blue); font-size: 24px; }
+  .ring b { font-size: 21px; }
+  .ring .tagr { font-size: 15px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-dark); }
+  .ring.outer { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .ring.outer .k { color: var(--magenta); }
+  .ring.outer .tagr { color: var(--magenta); }
+
+  /* ---------- Adopt checklist ---------- */
+  .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 26px; }
+  .check { display: flex; gap: 16px; align-items: flex-start; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 14px; padding: 14px 18px; }
+  .check p { margin: 0; font-size: 19px; line-height: 1.4; color: var(--gray-dark); }
+  .check p b { color: var(--navy); }
+  .check.hot { border: 2px solid var(--magenta); }
+
+  /* ---------- Closing ---------- */
+  .limits { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .limits .card { padding: 20px; }
+  .limits .card h3 { font-size: 21px; }
+  .limits .card p { font-size: 17px; }
+  .links { margin-top: 36px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .links a { display: block; background: var(--navy); color: var(--white); text-decoration: none; border-radius: 16px; padding: 20px 22px; font-size: 20px; font-weight: 700; }
+  .links a span { display: block; font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--gray-mid); margin-top: 6px; }
+  .links a:hover, .links a:focus-visible { background: var(--blue); outline: none; }
+  .quote { margin-top: 30px; font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
+  .quote span { color: var(--magenta); }
+
+  /* ---------- Controls (outside the scaled stage) ---------- */
+  #progress { position: fixed; top: 0; left: 0; height: 5px; background: var(--magenta); transition: width .3s; z-index: 10; }
+  .ctrl { position: fixed; bottom: 18px; right: 18px; display: flex; gap: 8px; z-index: 10; transition: opacity .3s; }
+  body.idle .ctrl { opacity: 0; pointer-events: none; }
+  .ctrl button { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--gray-mid); background: var(--white); color: var(--navy); font-size: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 18px rgba(7, 1, 84, .12); }
+  .ctrl button:hover, .ctrl button:focus-visible { background: var(--blue); color: var(--white); border-color: var(--blue); outline: none; }
+  .hint { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); font-size: 14px; color: var(--white); background: var(--navy); padding: 8px 16px; border-radius: 999px; z-index: 10; transition: opacity .6s; box-shadow: 0 6px 18px rgba(7, 1, 84, .2); }
+  .hint.gone { opacity: 0; pointer-events: none; }
+
+  @media print {
+    @page { size: 1600px 900px; margin: 0; }
+    body { overflow: visible; background: var(--white); }
+    #stage { position: static; transform: none !important; width: 1600px; height: auto; }
+    .slide { display: flex !important; position: relative; break-after: page; box-shadow: none; animation: none; }
+    #progress, .ctrl, .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<main id="stage" aria-live="polite">
+
+  <!-- 1 · Title -->
+  <section class="slide title-slide" data-title="Title">
+    <div class="bar"></div>
+    <h1>AI Multi-Agent<br>Harness<span>.</span></h1>
+    <p class="sub">Rules, hooks, skills and roles that turn Claude Code and Codex into a predictable engineering team: <strong style="color:#fff">people decide, the harness enforces.</strong></p>
+    <div class="stats">
+      <div class="stat"><b>8</b><span>skills (procedures)</span></div>
+      <div class="stat"><b>7</b><span>agents and roles</span></div>
+      <div class="stat"><b>5</b><span>enforcing hooks</span></div>
+      <div class="stat"><b>70</b><span>unit tests on the harness</span></div>
+      <div class="stat hl"><b>1</b><span>coordination backbone: GitHub Issues</span></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · how it works</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 2 · Why -->
+  <section class="slide" data-title="Why a harness">
+    <p class="kicker">01 · Why</p>
+    <h2>A capable agent is not a reliable team</h2>
+    <p class="lead">A harness is everything <strong>around</strong> the model that makes its work repeatable and safe.</p>
+    <div class="body">
+      <div class="pf">
+        <div class="head">Bare agent</div><div></div><div class="head">With the harness</div>
+        <div class="p">Forgets yesterday's decisions</div><div class="arrow">→</div><div class="f"><span><b>The repository is the memory:</b> plans with a status header, generated status page, context injected at session start</span></div>
+        <div class="p">Follows rules only when it remembers them</div><div class="arrow">→</div><div class="f"><span><b>Hooks</b> block the critical actions mechanically</span></div>
+        <div class="p">Different output every time</div><div class="arrow">→</div><div class="f"><span><b>Skills</b> turn recurring workflows into fixed procedures</span></div>
+        <div class="p">One huge, expensive context</div><div class="arrow">→</div><div class="f"><span><b>Subagents and teams:</b> narrow roles, own context, cheaper models</span></div>
+        <div class="p">Reviews its own work</div><div class="arrow">→</div><div class="f"><span><b>Codex writes, Claude reviews,</b> a person merges</span></div>
+        <div class="p">"All tests pass", with no proof</div><div class="arrow">→</div><div class="f"><span><b>One validation entry point</b> (<code>scripts/verify.sh</code>) for agents and CI</span></div>
+        <div class="p">Work and findings get lost in chat</div><div class="arrow">→</div><div class="f hot"><span><b>GitHub Issues</b> tracks every plan, every deferred finding and the agents' work queue</span></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · why</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 3 · Two pillars -->
+  <section class="slide" data-title="Two pillars">
+    <p class="kicker">02 · The idea</p>
+    <h2>Two pillars: detail and coordination</h2>
+    <p class="lead">Agents read and write both. Neither one duplicates the other.</p>
+    <div class="pillars">
+      <div class="pillar repo">
+        <span class="tag">Repository</span>
+        <h3>The detail</h3>
+        <span class="what">What must be built, and how</span>
+        <ul>
+          <li><code>AGENTS.md</code>: one set of rules for every agent</li>
+          <li>Plans in <code>docs/plans/</code> with a <code>status:</code> header</li>
+          <li>Status per area, generated plan tree</li>
+          <li>Hooks, skills and roles in <code>.claude/</code></li>
+        </ul>
+      </div>
+      <div class="bridge">
+        <svg viewBox="0 0 160 70" aria-hidden="true">
+          <defs><marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker></defs>
+          <line x1="12" y1="22" x2="148" y2="22" stroke="#0047FF" stroke-width="4" marker-end="url(#ab)"/>
+          <line x1="148" y1="50" x2="12" y2="50" stroke="#F900D3" stroke-width="4" marker-end="url(#ab)"/>
+        </svg>
+        <span><code>issue: 42</code> in the plan<br><code>Closes #42</code> in the PR</span>
+      </div>
+      <div class="pillar gh">
+        <span class="tag">GitHub Issues</span>
+        <h3>The coordination</h3>
+        <span class="what">What exists, who is on it, what closed it</span>
+        <ul>
+          <li>An issue for every plan: epics and sub-issues</li>
+          <li>An issue for every deferred finding</li>
+          <li>PRs close their issues on merge into <code>dev</code></li>
+          <li>Labeled issues are a queue agents resolve alone</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · two pillars</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 4 · Building blocks -->
+  <section class="slide" data-title="Building blocks">
+    <p class="kicker">03 · Architecture</p>
+    <h2>Five layers</h2>
+    <p class="lead">From what agents <strong>read</strong> to what <strong>proves</strong> the work is done.</p>
+    <div class="layers">
+      <div class="layer"><span class="n">1</span><h3>Instructions<small>what agents read</small></h3><div class="chips"><span class="chip">AGENTS.md</span><span class="chip">CLAUDE.md → @AGENTS.md</span><span class="chip">folder AGENTS.md + Code Review Rules</span><span class="chip">PROJECT_MAP.md</span></div></div>
+      <div class="layer"><span class="n">2</span><h3>Procedures<small>how work is done</small></h3><div class="chips"><span class="chip">8 skills</span><span class="chip">7 subagents / team roles</span><span class="chip">briefs per role</span></div></div>
+      <div class="layer l3"><span class="n">3</span><h3>Enforcement<small>what cannot happen</small></h3><div class="chips"><span class="chip">5 hooks (fail closed)</span><span class="chip">permission deny rules</span><span class="chip">.env* denied</span></div></div>
+      <div class="layer l4"><span class="n">4</span><h3>Memory<small>where state lives</small></h3><div class="chips"><span class="chip">plans + status header</span><span class="chip">docs/status/plans.md</span><span class="chip mag">GitHub issues, labels, PR threads</span></div></div>
+      <div class="layer"><span class="n">5</span><h3>Verification<small>proof, not claims</small></h3><div class="chips"><span class="chip">scripts/verify.sh</span><span class="chip">CI by area</span><span class="chip">plan check on every PR</span></div></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · building blocks</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 5 · Skills and agents -->
+  <section class="slide" data-title="Skills and agents">
+    <p class="kicker">04 · Procedures</p>
+    <h2>Skills say how. Agents say who.</h2>
+    <p class="lead">A skill is a fixed procedure triggered by a request or <code>/name</code>. An agent is a role with its own tools and model.</p>
+    <div class="body">
+      <div class="grid g2" style="gap:36px; flex:1;">
+        <div>
+          <p class="col-title"><span class="dot"></span>Skills</p>
+          <div class="grid g2" style="gap:12px;">
+            <div class="row"><div><h4>feature-plan</h4><p>Plan in a fixed shape + GitHub issue</p></div></div>
+            <div class="row"><div><h4>new-branch</h4><p>Clean branch from an up-to-date dev</p></div></div>
+            <div class="row"><div><h4>close-increment</h4><p>Verify, Result, status, PR to dev</p></div></div>
+            <div class="row"><div><h4>orchestrate-team</h4><p>A team takes a milestone to a green PR</p></div></div>
+            <div class="row"><div><h4>resolve-issues</h4><p>Loop over <code>ai-queue</code> issues</p></div></div>
+            <div class="row"><div><h4>onboarding</h4><p>Repo summary + environment check</p></div></div>
+            <div class="row"><div><h4>verify-ui</h4><p>Screenshots and texts from a running UI</p></div></div>
+            <div class="row"><div><h4>reference-parity</h4><p>Diff against the reference app</p></div></div>
+          </div>
+        </div>
+        <div>
+          <p class="col-title"><span class="dot n"></span>Team roles <span class="muted" style="font-weight:500;font-size:17px">edit or run, never touch git history</span></p>
+          <div class="roster" style="margin-bottom:22px;">
+            <div class="row"><div><h4>coder-*</h4><p>Owns an area's files · Codex writes the code, the coder verifies it</p></div></div>
+            <div class="row"><div><h4>documenter · qa · pr-reviewer</h4><p>Plans and status · acceptance and UI checks · P0/P1/P2 review</p></div></div>
+          </div>
+          <p class="col-title"><span class="dot m"></span>Read-only reviewers <span class="muted" style="font-weight:500;font-size:17px">Read, Grep, Glob only</span></p>
+          <div class="roster">
+            <div class="row"><div><h4>db-security-reviewer</h4><p>Migrations, access policies, tenant isolation</p></div></div>
+            <div class="row"><div><h4>contract-reviewer · reference-explorer</h4><p>Schema compatibility · origin of a screen or rule</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · skills and agents</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 6 · Hooks -->
+  <section class="slide" data-title="Hooks">
+    <p class="kicker">05 · Enforcement</p>
+    <h2>Hooks: rules that don't depend on memory</h2>
+    <p class="lead">Small Node scripts that run before a tool call. Exit code <code>2</code> blocks it and tells the agent what to do instead.</p>
+    <div class="grid g5" style="flex:1;">
+      <div class="card accent hook"><span class="when">Before Bash · everyone</span><h3>git-guard</h3><ul><li>Commit or push to <code>main</code> / <code>dev</code></li><li>PR not against <code>dev</code></li><li><code>rm -rf</code> outside build folders</li><li>Reading <code>.env</code></li></ul></div>
+      <div class="card accent hook"><span class="when">Subagents only</span><h3>team-guard</h3><ul><li>Any git history change</li><li>Editing harness config</li><li>Local DB reset</li><li>Slow tests without the owner's yes</li></ul></div>
+      <div class="card accent hook"><span class="when">Before edits</span><h3>generated-guard</h3><ul><li>Hand-editing generated files</li><li>Says which source to edit and which command to run</li></ul></div>
+      <div class="card accent hook"><span class="when">Task created / done</span><h3>task-gate</h3><ul><li>Plan tasks need a <code>Verification:</code> command</li></ul></div>
+      <div class="card hook" style="border-top:6px solid var(--gray-dark)"><span class="when" style="color:var(--gray-dark)">Session start</span><h3>session-context</h3><ul><li>Injects branch, open PR, touched plans and active plans, written as facts</li></ul></div>
+    </div>
+    <div class="banner"><span class="badge">FAIL CLOSED</span><span>Safety hooks run with <code>onFailure: "block"</code>: if one crashes or times out, the action is <b>blocked</b>, not allowed. <b>Permission deny rules</b> back them up for pushes to <code>main</code>/<code>dev</code>.</span></div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · hooks</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 7 · GitHub Issues: five uses -->
+  <section class="slide" data-title="GitHub Issues: five uses">
+    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
+    <h2>Where people and agents meet</h2>
+    <p class="lead">Five uses, each one a rule in <code>AGENTS.md</code> carried out by a skill.</p>
+    <div class="grid g5" style="flex:1;">
+      <div class="card hot use"><span class="num m">1</span><h3>Every plan has an issue</h3><p>Phase → <b>epic</b>, milestone → <b>sub-issue</b>. Thin: title, goal, link to the plan.</p><div class="who">by <b>feature-plan</b></div></div>
+      <div class="card hot use"><span class="num m">2</span><h3>Deferred findings become issues</h3><p>Only when the owner leaves a review finding for later. Template <code>finding</code>, no secrets.</p><div class="who">by <b>close-increment</b></div></div>
+      <div class="card hot use"><span class="num m">3</span><h3>PRs close issues</h3><p><code>Closes #n</code> for the milestone, the epic on the last one, and every fixed finding.</p><div class="who">by <b>close-increment</b></div></div>
+      <div class="card hot use"><span class="num m">4</span><h3>Review threads are the record</h3><p>Every inline finding gets a reply with the fixing commit, then it is resolved.</p><div class="who">by <b>orchestrate-team</b></div></div>
+      <div class="card hot use"><span class="num m">5</span><h3>Issues are a work queue</h3><p>Label <code>ai-queue</code> and an agent loop resolves it with one PR to <code>dev</code>.</p><div class="who">by <b>resolve-issues</b></div></div>
+    </div>
+    <div class="banner"><span class="badge">THIN ISSUES</span><span>The issue never copies tasks or status. <b>Status lives in the plan header</b>; on GitHub an issue is only open or closed.</span></div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · GitHub Issues</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 8 · GitHub Issues: full circle -->
+  <section class="slide" data-title="GitHub Issues: the full circle">
+    <p class="kicker"><span class="core">★ CORE</span>06 · GitHub Issues integration</p>
+    <h2>The full circle</h2>
+    <p class="lead">Nothing that matters stays only in a chat: a deferred finding is, by construction, a ready-to-queue task.</p>
+    <div class="body" style="flex-direction:row; gap:28px;">
+      <div class="diagram" style="flex:1;">
+        <svg viewBox="0 0 1220 560" role="img" aria-label="Plan to issue to PR to finding to queue to closed issues">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+          </defs>
+          <!-- edges -->
+          <path class="edge" d="M250,75 L304,75" marker-end="url(#ah)"/>
+          <path class="edge" d="M560,75 L614,75" marker-end="url(#ah)"/>
+          <path class="edge" d="M740,120 L740,226" marker-end="url(#ah)"/>
+          <path class="edge" d="M614,290 C530,290 530,100 612,100" marker-end="url(#ah)"/>
+          <text class="t-label" x="515" y="200" text-anchor="end">fixed in the same PR</text>
+          <text class="t-label" x="515" y="222" text-anchor="end">(the default)</text>
+          <path class="edge-m" d="M690,320 L520,426" marker-end="url(#am)"/>
+          <text class="t-label-m" x="560" y="372" text-anchor="end">owner defers it</text>
+          <path class="edge-m" d="M560,475 L614,475" marker-end="url(#am)"/>
+          <text class="t-label-m" x="587" y="550" text-anchor="middle">+ ai-queue</text>
+          <path class="edge" d="M870,475 L924,475" marker-end="url(#am)"/>
+          <path class="edge" d="M1050,430 L1050,324" marker-end="url(#ah)"/>
+          <path class="edge" d="M870,75 L1050,75 L1050,226" marker-end="url(#ah)"/>
+          <text class="t-label" x="960" y="62" text-anchor="middle">merge closes #n</text>
+          <!-- nodes -->
+          <rect class="n-box" x="10" y="30" width="240" height="90" rx="16"/>
+          <text class="t-title" x="130" y="70" text-anchor="middle">Plan written</text>
+          <text class="t-sub" x="130" y="96" text-anchor="middle">docs/plans/…  issue: n</text>
+          <rect class="n-mag" x="304" y="30" width="256" height="90" rx="16"/>
+          <text class="t-title" x="432" y="70" text-anchor="middle">Epic / sub-issue</text>
+          <text class="t-sub" x="432" y="96" text-anchor="middle">thin · links the plan</text>
+          <rect class="n-blue" x="614" y="30" width="256" height="90" rx="16"/>
+          <text class="t-title" x="742" y="70" text-anchor="middle">Milestone PR → dev</text>
+          <text class="t-sub" x="742" y="96" text-anchor="middle">Closes #n</text>
+          <rect class="n-soft" x="614" y="230" width="256" height="90" rx="16"/>
+          <text class="t-title" x="742" y="270" text-anchor="middle">Review finding</text>
+          <text class="t-sub" x="742" y="296" text-anchor="middle">reviewer · Codex · a person</text>
+          <rect class="n-mag" x="304" y="430" width="256" height="90" rx="16"/>
+          <text class="t-title" x="432" y="470" text-anchor="middle">Finding issue</text>
+          <text class="t-sub" x="432" y="496" text-anchor="middle">template · sub-issue of epic</text>
+          <rect class="n-mag" x="614" y="430" width="256" height="90" rx="16"/>
+          <text class="t-title" x="742" y="470" text-anchor="middle">resolve-issues loop</text>
+          <text class="t-sub" x="742" y="496" text-anchor="middle">takes it, opens a PR</text>
+          <rect class="n-blue" x="924" y="430" width="256" height="90" rx="16"/>
+          <text class="t-title" x="1052" y="470" text-anchor="middle">Loop PR → dev</text>
+          <text class="t-sub" x="1052" y="496" text-anchor="middle">Closes #finding</text>
+          <rect class="n-navy" x="924" y="230" width="256" height="90" rx="16"/>
+          <text class="t-title t-white" x="1052" y="270" text-anchor="middle">Merged into dev</text>
+          <text class="t-sub" x="1052" y="296" text-anchor="middle" fill="#CED7E6" style="fill:#CED7E6">issues closed by GitHub</text>
+        </svg>
+      </div>
+      <div style="width:330px; display:flex; flex-direction:column; gap:14px; justify-content:center;">
+        <p class="col-title" style="margin:0"><span class="dot m"></span>Labels</p>
+        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip mag" style="align-self:flex-start">ai-queue</span><p>Added by a person. The label <b>is</b> the authorization to open a PR.</p></div>
+        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip mag" style="align-self:flex-start">ai-merge</span><p>Only a person adds it: the agent may merge into <code>dev</code> once everything is green.</p></div>
+        <div class="row" style="flex-direction:column; gap:6px;"><span class="chip" style="align-self:flex-start">ai-escalated</span><p>Left out of the queue by the loop, with the reason.</p></div>
+        <p class="muted" style="font-size:16px; margin:0">Plus <code>epic</code>, <code>enhancement</code>, <code>bug</code>, <code>documentation</code> · created by <code>scripts/setup-github-labels.sh</code></p>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · GitHub Issues</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 9 · Lifecycle -->
+  <section class="slide" data-title="Lifecycle of the work">
+    <p class="kicker">07 · Workflow</p>
+    <h2>From idea to merge</h2>
+    <p class="lead">Every piece of work follows the same path; only the two pink steps belong to a person.</p>
+    <div class="body">
+      <div class="steps">
+        <div class="step"><div class="disc">1</div><h3>Plan</h3><span class="skill">feature-plan</span><p>Fixed structure, owner answers open questions, thin GitHub issue. No PR yet.</p></div>
+        <div class="step"><div class="disc">2</div><h3>Branch</h3><span class="skill">new-branch</span><p>From an up-to-date <code>dev</code>. Never on <code>main</code> or <code>dev</code>.</p></div>
+        <div class="step"><div class="disc">3</div><h3>Build</h3><span class="skill">you · subagent · team</span><p>Block by block: owner role, files, <code>Verification:</code>.</p></div>
+        <div class="step"><div class="disc">4</div><h3>Close</h3><span class="skill">close-increment</span><p><code>verify.sh</code>, «Result» with what was <b>not</b> verified, PR to <code>dev</code>.</p></div>
+        <div class="step"><div class="disc">5</div><h3>Review</h3><span class="skill">pr-reviewer + Codex</span><p>P0/P1/P2 with <code>file:line</code>. Fixed on the same branch.</p></div>
+        <div class="step human"><div class="disc">6</div><h3>Merge</h3><span class="skill" style="color:var(--magenta)">a person</span><p>Merges into <code>dev</code>. A person also promotes <code>dev</code> → <code>main</code>.</p></div>
+      </div>
+      <div class="loopnote"><span class="num b">↺</span><span><b>Review → Close loop:</b> every finding is a task on the same branch, each inline thread gets a reply with the fixing commit and is resolved. Only the owner can defer one, and then it becomes a <code>finding</code> issue.</span></div>
+      <div class="legend"><span><i></i>agent step</span><span><i class="h"></i>human step</span><span>Branch flow: <code>work branch → dev → main</code></span></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · lifecycle</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 10 · Agent team -->
+  <section class="slide" data-title="Agent teams">
+    <p class="kicker">08 · Agent teams</p>
+    <h2>One coordinator, one git author, one voice</h2>
+    <p class="lead"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR.</p>
+    <div class="body" style="flex-direction:row; gap:28px;">
+      <div class="diagram" style="flex:1;">
+        <svg viewBox="0 0 1100 560" role="img" aria-label="Owner, coordinator and team roles">
+          <defs>
+            <marker id="tb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="tm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+            <marker id="tg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#50658E"/></marker>
+          </defs>
+          <!-- owner -->
+          <rect class="n-mag" x="400" y="8" width="300" height="70" rx="16"/>
+          <text class="t-title" x="550" y="40" text-anchor="middle">Owner (a person)</text>
+          <text class="t-sub" x="550" y="64" text-anchor="middle">decides · approves · merges</text>
+          <path class="edge-m" d="M550,82 L550,140" marker-start="url(#tm)" marker-end="url(#tm)"/>
+          <text class="t-label-m" x="566" y="118">questions ↑  decisions ↓</text>
+          <!-- coordinator -->
+          <rect class="n-navy" x="330" y="144" width="440" height="96" rx="18"/>
+          <text class="t-title t-white" x="550" y="182" text-anchor="middle">Coordinator · main session</text>
+          <text class="t-sub" x="550" y="212" text-anchor="middle" style="fill:#CED7E6">only git author · only voice · most capable model</text>
+          <!-- bus -->
+          <path class="edge" d="M550,240 L550,286"/>
+          <path class="edge" d="M140,286 L960,286"/>
+          <path class="edge" d="M140,286 L140,322" marker-end="url(#tb)"/>
+          <path class="edge" d="M413,286 L413,322" marker-end="url(#tb)"/>
+          <path class="edge" d="M687,286 L687,322" marker-end="url(#tb)"/>
+          <path class="edge" d="M960,286 L960,322" marker-end="url(#tb)"/>
+          <text class="t-label" x="570" y="276">briefs: files · plan line ranges · Verification:</text>
+          <!-- roles -->
+          <rect class="n-box" x="20" y="326" width="240" height="96" rx="16"/>
+          <text class="t-title" x="140" y="364" text-anchor="middle">documenter</text>
+          <text class="t-sub" x="140" y="392" text-anchor="middle">plans · status · Result</text>
+          <rect class="n-blue" x="293" y="326" width="240" height="96" rx="16"/>
+          <text class="t-title" x="413" y="364" text-anchor="middle">coder-*</text>
+          <text class="t-sub" x="413" y="392" text-anchor="middle">own files · verifies</text>
+          <rect class="n-box" x="567" y="326" width="240" height="96" rx="16"/>
+          <text class="t-title" x="687" y="364" text-anchor="middle">qa</text>
+          <text class="t-sub" x="687" y="392" text-anchor="middle">verify.sh · UI · acceptance</text>
+          <rect class="n-box" x="840" y="326" width="240" height="96" rx="16"/>
+          <text class="t-title" x="960" y="364" text-anchor="middle">reviewer</text>
+          <text class="t-sub" x="960" y="392" text-anchor="middle">read-only · P0/P1/P2</text>
+          <!-- codex -->
+          <path class="edge" d="M413,422 L413,476" marker-end="url(#tb)"/>
+          <text class="t-label" x="428" y="455">delegates the code</text>
+          <rect class="n-soft" x="293" y="480" width="240" height="70" rx="16"/>
+          <text class="t-title" x="413" y="512" text-anchor="middle">Codex</text>
+          <text class="t-sub" x="413" y="536" text-anchor="middle">writes code · never reviews</text>
+          <!-- feedback -->
+          <path class="edge-g" d="M600,422 C600,470 560,470 537,470" marker-end="url(#tg)"/>
+          <text class="t-sub" x="610" y="470">failures → tasks</text>
+          <path class="edge-g" d="M960,422 C960,520 700,520 537,520" marker-end="url(#tg)"/>
+          <text class="t-sub" x="800" y="545" text-anchor="middle">P0/P1 findings → tasks</text>
+        </svg>
+      </div>
+      <div style="width:360px; display:flex; flex-direction:column; gap:12px; justify-content:center;">
+        <div class="row"><span class="num b">1</span><div><h4 style="font-family:var(--font)">Codex writes, Claude reviews</h4><p>Nobody approves their own work.</p></div></div>
+        <div class="row"><span class="num b">2</span><div><h4 style="font-family:var(--font)">Ownership by files</h4><p>Two teammates never edit the same file.</p></div></div>
+        <div class="row"><span class="num b">3</span><div><h4 style="font-family:var(--font)">Cost discipline</h4><p>Sonnet teammates, ≤ 4 at a time, plans read by line ranges, 1 h prompt cache.</p></div></div>
+        <div class="row"><span class="num b">4</span><div><h4 style="font-family:var(--font)">Stop rules</h4><p>Two failures, a file clash, a limit or a design change → ask the owner.</p></div></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · agent teams</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 11 · Issue loop -->
+  <section class="slide" data-title="The issue loop">
+    <p class="kicker"><span class="core">★ CORE</span>09 · The issue loop</p>
+    <h2>Label an issue, get a PR</h2>
+    <p class="lead"><code>/loop /resolve-issues</code> resolves <code>ai-queue</code> issues one PR at a time, stateless and safe for several developers.</p>
+    <div class="body" style="flex-direction:row; gap:28px;">
+      <div class="diagram" style="flex:1;">
+        <svg viewBox="0 0 1180 540" role="img" aria-label="Issue loop: pick, classify, fix, PR, merge">
+          <defs>
+            <marker id="lb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0047FF"/></marker>
+            <marker id="lm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F900D3"/></marker>
+            <marker id="lg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#50658E"/></marker>
+          </defs>
+          <!-- return to start -->
+          <path class="edge-m" d="M1085,200 L1085,40 L105,40 L105,196" marker-end="url(#lm)"/>
+          <text class="t-label-m" x="595" y="30" text-anchor="middle">next issue</text>
+          <!-- PR -> fix loop -->
+          <path class="edge-g" d="M805,200 C805,128 625,128 625,196" marker-end="url(#lg)"/>
+          <text class="t-sub" x="715" y="118" text-anchor="middle">CI red · conflict · finding</text>
+          <!-- main row -->
+          <path class="edge" d="M200,250 L244,250" marker-end="url(#lb)"/>
+          <path class="edge" d="M436,250 L480,250" marker-end="url(#lb)"/>
+          <path class="edge" d="M672,250 L716,250" marker-end="url(#lb)"/>
+          <path class="edge" d="M908,250 L952,250" marker-end="url(#lb)"/>
+          <rect class="n-mag" x="10" y="200" width="190" height="100" rx="16"/>
+          <text class="t-title" x="105" y="240" text-anchor="middle">Pick</text>
+          <text class="t-sub" x="105" y="266" text-anchor="middle">ai-queue · severity</text>
+          <text class="t-sub" x="105" y="288" text-anchor="middle">assign to me</text>
+          <rect class="n-box" x="246" y="200" width="190" height="100" rx="16"/>
+          <text class="t-title" x="341" y="240" text-anchor="middle">Classify</text>
+          <text class="t-sub" x="341" y="266" text-anchor="middle">small · medium ·</text>
+          <text class="t-sub" x="341" y="288" text-anchor="middle">with plan · large</text>
+          <rect class="n-blue" x="482" y="200" width="190" height="100" rx="16"/>
+          <text class="t-title" x="577" y="240" text-anchor="middle">Fix</text>
+          <text class="t-sub" x="577" y="266" text-anchor="middle">coder → Codex</text>
+          <text class="t-sub" x="577" y="288" text-anchor="middle">reviewer · verify.sh</text>
+          <rect class="n-blue" x="718" y="200" width="190" height="100" rx="16"/>
+          <text class="t-title" x="813" y="240" text-anchor="middle">PR → dev</text>
+          <text class="t-sub" x="813" y="266" text-anchor="middle">no confirmation:</text>
+          <text class="t-sub" x="813" y="288" text-anchor="middle">the label authorizes</text>
+          <rect class="n-navy" x="954" y="200" width="200" height="100" rx="16"/>
+          <text class="t-title t-white" x="1054" y="240" text-anchor="middle">Merge</text>
+          <text class="t-sub" x="1054" y="266" text-anchor="middle" style="fill:#CED7E6">a person, or</text>
+          <text class="t-sub" x="1054" y="288" text-anchor="middle" style="fill:#CED7E6">ai-merge label</text>
+          <!-- branches -->
+          <path class="edge" d="M380,300 L380,420 L398,420" marker-end="url(#lb)"/>
+          <rect class="n-soft" x="402" y="380" width="240" height="84" rx="16"/>
+          <text class="t-title" x="522" y="414" text-anchor="middle">Short plan</text>
+          <text class="t-sub" x="522" y="440" text-anchor="middle">two areas · reuses the issue</text>
+          <path class="edge" d="M622,380 L622,304" marker-end="url(#lb)"/>
+          <path class="edge-g" d="M300,300 L300,420 L254,420" marker-end="url(#lg)"/>
+          <rect class="n-soft" x="10" y="380" width="240" height="84" rx="16"/>
+          <text class="t-title" x="130" y="414" text-anchor="middle">ai-escalated</text>
+          <text class="t-sub" x="130" y="440" text-anchor="middle">large → team · regression-only</text>
+          <text class="t-sub" x="10" y="500">Large: the owner picks team, here, or skip</text>
+        </svg>
+      </div>
+      <div style="width:330px; display:flex; flex-direction:column; gap:12px; justify-content:center;">
+        <div class="row"><span class="num m">A</span><div><h4 style="font-family:var(--font)">Assignment is the lock</h4><p>Several developers share the queue without collisions.</p></div></div>
+        <div class="row"><span class="num m">B</span><div><h4 style="font-family:var(--font)">Stateless</h4><p>Every turn re-reads GitHub and git; a new session resumes.</p></div></div>
+        <div class="row"><span class="num m">C</span><div><h4 style="font-family:var(--font)">Comments are data</h4><p>A comment asking to merge does not count. Only the label.</p></div></div>
+        <div class="row"><span class="num m">D</span><div><h4 style="font-family:var(--font)">Self-limiting</h4><p>Cuts at ~250k tokens or 5 merged PRs and proposes a fresh session.</p></div></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · issue loop</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 12 · Humans decide -->
+  <section class="slide" data-title="Where humans decide">
+    <p class="kicker">10 · Human in the loop</p>
+    <h2>People decide. The harness enforces.</h2>
+    <p class="lead">A person steps in for <strong>decisions</strong>, never for <strong>enforcement</strong>.</p>
+    <div class="decide" style="flex:1; align-content:start;">
+      <div class="card"><span class="who">Owner</span><h3>Plan questions</h3><p class="how">Concrete options, recommendation first; answers recorded in «Owner decisions».</p></div>
+      <div class="card"><span class="who">Owner</span><h3>Phase plan approval</h3><p class="how">The team stops until it is approved.</p></div>
+      <div class="card"><span class="who">Owner</span><h3>Slow regression tests</h3><p class="how">«Do you want the regression tests to run?» per batch. A no becomes «not verified».</p></div>
+      <div class="card"><span class="who">Owner</span><h3>Deferring a finding</h3><p class="how">Otherwise it is fixed in the same PR.</p></div>
+      <div class="card"><span class="who">Owner</span><h3>DB reset, remote deploys</h3><p class="how">Always asked; teammates are blocked by a hook.</p></div>
+      <div class="card"><span class="who">Owner</span><h3>Queueing work</h3><p class="how">Adding <code>ai-queue</code>, and optionally <code>ai-merge</code>.</p></div>
+      <div class="card"><span class="who">Owner</span><h3>Merge into dev</h3><p class="how">Or the opt-in <code>ai-merge</code> label for the issue loop.</p></div>
+      <div class="card never"><span class="who">Always a person</span><h3>Promote dev → main</h3><p class="how">Never an agent. <code>git-guard</code> and the deny rules block it.</p></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · humans decide</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 13 · Defense in depth -->
+  <section class="slide" data-title="Defense in depth">
+    <p class="kicker">11 · Safety</p>
+    <h2>Defense in depth</h2>
+    <p class="lead">No single layer is trusted on its own.</p>
+    <div class="depth">
+      <div class="ring outer" style="width:100%"><span class="k">8</span><b>GitHub branch protection on main and dev</b><span class="tagr">also covers people and tools outside Claude Code</span></div>
+      <div class="ring" style="width:96%"><span class="k">7</span><b>CI re-runs verify.sh by area + the plan check</b><span class="tagr">every PR</span></div>
+      <div class="ring" style="width:92%"><span class="k">6</span><b>Independent review with written P0/P1 rules</b><span class="tagr">pr-reviewer · Codex on GitHub</span></div>
+      <div class="ring" style="width:88%"><span class="k">5</span><b>Ownership check: git status / diff after every task</b><span class="tagr">Codex runs outside the hooks</span></div>
+      <div class="ring" style="width:84%"><span class="k">4</span><b>Permissions: deny secrets and protected pushes</b><span class="tagr">settings.json</span></div>
+      <div class="ring" style="width:80%"><span class="k">3</span><b>Hooks block dangerous actions, fail closed</b><span class="tagr">inside Claude Code</span></div>
+      <div class="ring" style="width:76%"><span class="k">2</span><b>Skills make the right path the easy path</b><span class="tagr">procedures</span></div>
+      <div class="ring" style="width:72%"><span class="k">1</span><b>Instructions say what and why</b><span class="tagr">AGENTS.md</span></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · defense in depth</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 14 · Adopt -->
+  <section class="slide" data-title="Adopt it">
+    <p class="kicker">12 · Adoption</p>
+    <h2>Adopt it in ten steps</h2>
+    <p class="lead">The apps are placeholders: replace them with your project and keep the harness.</p>
+    <div class="checklist">
+      <div class="check"><span class="num">1</span><p><b>Copy the repo.</b> Create <code>dev</code>, make it the default branch, protect <code>main</code> and <code>dev</code>.</p></div>
+      <div class="check hot"><span class="num m">2</span><p><b>GitHub Issues.</b> Run <code>scripts/setup-github-labels.sh</code>, enable sub-issues, read the guide.</p></div>
+      <div class="check"><span class="num">3</span><p><b>Project context</b> in <code>AGENTS.md</code>; declare the reference app, if any.</p></div>
+      <div class="check"><span class="num">4</span><p><b>Areas and commands:</b> plug your stack into <code>scripts/verify.sh</code> and CI.</p></div>
+      <div class="check"><span class="num">5</span><p><b>Folder rules:</b> each <code>AGENTS.md</code> (+ <code>CLAUDE.md</code>) with its Code Review Rules.</p></div>
+      <div class="check"><span class="num">6</span><p><b>Generated files:</b> list them in <code>generated-guard.mjs</code>.</p></div>
+      <div class="check"><span class="num">7</span><p><b>Slow tests:</b> name them <code>e2e-*</code>, <code>integration-*</code>, <code>regression-*</code>.</p></div>
+      <div class="check"><span class="num">8</span><p><b>Onboarding:</b> add your toolchain to <code>check.sh</code>.</p></div>
+      <div class="check"><span class="num">9</span><p><b>Codex (optional):</b> CLI + Claude Code plugin; without it, coders implement directly.</p></div>
+      <div class="check"><span class="num">10</span><p><b>Check it:</b> <code>npm run test:harness</code> and <code>scripts/verify.sh docs</code>.</p></div>
+    </div>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · adoption</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 15 · Limits and links -->
+  <section class="slide" data-title="Limits and next steps">
+    <p class="kicker">13 · Honest caveats</p>
+    <h2>What it does not do</h2>
+    <p class="lead">It does not make agents infallible: it makes their mistakes <strong>visible</strong> and keeps irreversible steps in <strong>human hands</strong>.</p>
+    <div class="limits">
+      <div class="card"><h3>Teams are experimental</h3><p>Falls back to sequential subagents.</p></div>
+      <div class="card"><h3>Hooks are local</h3><p>Codex and terminals rely on review, CI and branch protection.</p></div>
+      <div class="card"><h3>Codex on GitHub</h3><p>Needs its GitHub integration; the in-team reviewer still runs.</p></div>
+      <div class="card"><h3>Cost grows with teams</h3><p>Use a single session or the issue loop for small changes.</p></div>
+      <div class="card"><h3>Version-dependent</h3><p>Fail-closed hooks and the 1 h cache need a recent Claude Code.</p></div>
+    </div>
+    <div class="links">
+      <a href="../../HARNESS.md">How it works<span>HARNESS.md</span></a>
+      <a href="../../AGENTS.md">Rules for agents<span>AGENTS.md</span></a>
+      <a href="../guides/GITHUB_ISSUES.md">GitHub Issues guide<span>docs/guides/GITHUB_ISSUES.md</span></a>
+      <a href="../guides/AGENT_TEAMS.md">Agent teams guide<span>docs/guides/AGENT_TEAMS.md</span></a>
+    </div>
+    <p class="quote">People decide<span>.</span> The harness enforces<span>.</span></p>
+    <div class="foot"><span><b>AI Multi-Agent Harness</b> · caveats</span><span class="pg"></span></div>
+  </section>
+
+</main>
+
+<div class="ctrl" aria-label="Slide navigation">
+  <button id="prev" type="button" aria-label="Previous slide">←</button>
+  <button id="next" type="button" aria-label="Next slide">→</button>
+</div>
+<div class="hint" id="hint">← → or Space to navigate · F full screen · P print / PDF</div>
+
+<script>
+  const stage = document.getElementById("stage");
+  const slides = [...document.querySelectorAll(".slide")];
+  const progress = document.getElementById("progress");
+  let current = 0;
+
+  slides.forEach((s, i) => {
+    const pg = s.querySelector(".pg");
+    if (pg) pg.textContent = `${i + 1} / ${slides.length}`;
+  });
+
+  function fit() {
+    const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle("active", k === current));
+    progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+    document.title = `${current + 1}. ${slides[current].dataset.title} · AI Multi-Agent Harness`;
+    history.replaceState(null, "", `#${current + 1}`);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); show(current + 1); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); show(current - 1); }
+    else if (e.key === "Home") show(0);
+    else if (e.key === "End") show(slides.length - 1);
+    else if (e.key.toLowerCase() === "f") { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
+    else if (e.key.toLowerCase() === "p") window.print();
+  });
+  document.getElementById("prev").addEventListener("click", () => show(current - 1));
+  document.getElementById("next").addEventListener("click", () => show(current + 1));
+
+  let touchX = null;
+  document.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+    touchX = null;
+  });
+
+  // Presenter-friendly chrome: the hint fades after a few seconds and the buttons hide while idle.
+  const hint = document.getElementById("hint");
+  setTimeout(() => hint.classList.add("gone"), 4000);
+  let idleTimer;
+  function wake() {
+    document.body.classList.remove("idle");
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => document.body.classList.add("idle"), 2500);
+  }
+  ["mousemove", "touchstart", "focusin"].forEach((ev) => document.addEventListener(ev, wake, { passive: true }));
+  wake();
+
+  window.addEventListener("resize", fit);
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+  requestAnimationFrame(() => document.body.classList.add("ready")); // animate only on slide changes
+</script>
+</body>
+</html>

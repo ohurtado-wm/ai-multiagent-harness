@@ -360,6 +360,23 @@
   .starter .after { margin: 18px 0 0; font-size: 14px; color: var(--gray-mid); position: relative; z-index: 1; }
   .starter .after code { background: rgba(255, 255, 255, .12); color: var(--white); }
 
+  /* Models per role (Teams) */
+  .models { margin-top: 28px; background: var(--white); border: 1px solid var(--gray-mid); border-radius: 22px; padding: 28px; }
+  .models h3 { margin: 0 0 4px; font-size: 26px; letter-spacing: -.02em; }
+  .models > p { margin: 0 0 20px; color: var(--gray-dark); }
+  .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .model { border-radius: 16px; padding: 20px; background: var(--canvas); border: 1px solid var(--gray-light); display: flex; flex-direction: column; gap: 10px; transition: transform .3s var(--ease), box-shadow .3s; }
+  .model:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(7, 1, 84, .1); }
+  .model .pill { align-self: flex-start; border-radius: 999px; padding: 5px 14px; font-weight: 800; font-size: 14px; color: var(--white); background: var(--blue); }
+  .model .pill.opus { background: var(--magenta); }
+  .model .pill.codex { background: var(--navy); font-family: var(--mono); font-size: 13px; }
+  .model h4 { margin: 0; font-size: 18px; }
+  .model .who { font-size: 13px; color: var(--gray-dark); font-family: var(--mono); }
+  .model p { margin: 0; font-size: 15px; color: var(--gray-dark); }
+  .model p b { color: var(--navy); }
+  .models .where { margin-top: 18px; font-size: 14px; color: var(--gray-dark); }
+  @media (max-width: 1000px) { .model-grid { grid-template-columns: 1fr 1fr; } }
+
   /* Inventory */
   .inventory { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
   .inventory .card h3 { font-family: var(--mono); font-size: 16px; color: var(--blue); }
@@ -828,7 +845,7 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
   <div class="wrap">
     <p class="kicker reveal">07 · Agent teams</p>
     <h2 class="reveal">One coordinator, one git author, one voice.</h2>
-    <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. The most capable model coordinates; cheaper models do the narrow work.</p>
+    <p class="lead reveal"><code>/orchestrate-team &lt;plan&gt;</code> takes a multi-area milestone to a green, reviewed PR. <strong>Opus</strong> coordinates, <strong>Sonnet</strong> teammates do the narrow work and <strong>Codex</strong> writes the code.</p>
     <div class="team-layout">
       <div class="diagram reveal zoom">
         <svg viewBox="0 0 1100 560" role="img" aria-label="Owner, coordinator and team roles">
@@ -859,6 +876,15 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
           <text class="t-sub" x="610" y="470">failures → tasks</text>
           <path class="edge-g" d="M960,422 C960,520 700,520 537,520" marker-end="url(#tg)"/>
           <text class="t-sub" x="800" y="545" text-anchor="middle">P0/P1 findings → tasks</text>
+          <!-- model badges -->
+          <g font-weight="800" text-anchor="middle">
+            <rect x="684" y="131" width="98" height="26" rx="13" fill="#F900D3"/><text x="733" y="149" font-size="14" fill="#fff">Opus</text>
+            <rect x="170" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="212" y="331" font-size="14" fill="#fff">Sonnet</text>
+            <rect x="443" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="485" y="331" font-size="14" fill="#fff">Sonnet</text>
+            <rect x="717" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="759" y="331" font-size="14" fill="#fff">Sonnet</text>
+            <rect x="990" y="313" width="84" height="26" rx="13" fill="#0047FF"/><text x="1032" y="331" font-size="14" fill="#fff">Sonnet</text>
+            <rect x="397" y="531" width="130" height="26" rx="13" fill="#070154"/><text x="462" y="549" font-size="14" fill="#fff">gpt-6.1-sol</text>
+          </g>
         </svg>
       </div>
       <ol class="flowlist reveal" style="--d:.15s">
@@ -872,10 +898,21 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
         <li class="owner"><span><b>Owner</b> merges the green PR into <code>dev</code>.</span></li>
       </ol>
     </div>
+    <div class="models reveal">
+      <h3>Which model runs each role, and why</h3>
+      <p>The most capable model only where judgment matters; a cheaper one for narrow, well-briefed work; and a different model family to write the code that Claude reviews.</p>
+      <div class="model-grid">
+        <div class="model"><span class="pill opus">Opus</span><h4>Coordinator</h4><span class="who">your main session</span><p><b>Most capable, used sparingly.</b> It plans, decides with the owner, judges reviews and owns git. It is also the most expensive agent (every turn re-reads its whole context), so it never reads code and waits without polling.</p></div>
+        <div class="model"><span class="pill">Sonnet</span><h4>Team roles</h4><span class="who">documenter · coder · qa · reviewer</span><p><b>Narrow tasks with a precise brief.</b> Each teammate gets only its plan block, files and verification command. Claude Code's cost guide recommends Sonnet for teammates: team cost grows with every member.</p></div>
+        <div class="model"><span class="pill codex">gpt-6.1-sol · high</span><h4>Codex</h4><span class="who">called by each coder</span><p><b>Writes the code, never reviews it.</b> A different model family writes and Claude reviews, so the review is independent. High effort because the code must pass focused tests first time; it is charged to the Codex limit, not Claude's.</p></div>
+        <div class="model"><span class="pill">Sonnet</span><h4>Read-only reviewers</h4><span class="who">db-security · contract · reference-explorer</span><p><b>Read, compare, cite.</b> Their tools are limited to Read, Grep and Glob. For very simple searches, Haiku is a cheaper option.</p></div>
+      </div>
+      <p class="where">Where it is set: <code>model:</code> in each <code>.claude/agents/*.md</code>, the Codex model and effort in <code>coder.md</code> and <code>briefs.md</code>, and the coordinator is whatever model your session runs (start it on the most capable one).</p>
+    </div>
     <div class="grid g4" style="margin-top:24px">
       <div class="card reveal"><span class="num b">1</span><h3 style="margin-top:12px">Codex writes, Claude reviews</h3><p>Nobody approves their own work; Codex on GitHub adds an external opinion.</p></div>
       <div class="card reveal" style="--d:.08s"><span class="num b">2</span><h3 style="margin-top:12px">Ownership by files</h3><p>Each coder owns globs; anything outside is restored and sent back.</p></div>
-      <div class="card reveal" style="--d:.16s"><span class="num b">3</span><h3 style="margin-top:12px">Cost discipline</h3><p>≤ 4 cheaper teammates, plans read by line ranges, waits without polling, 1 h cache.</p></div>
+      <div class="card reveal" style="--d:.16s"><span class="num b">3</span><h3 style="margin-top:12px">Cost discipline</h3><p>≤ 4 Sonnet teammates, plans read by line ranges, waits without polling, 1 h cache.</p></div>
       <div class="card reveal" style="--d:.24s"><span class="num b">4</span><h3 style="margin-top:12px">Stop rules, resumable</h3><p>Two failures, a file clash or a design change: ask. The plan's «Status» resumes a new session.</p></div>
     </div>
   </div>

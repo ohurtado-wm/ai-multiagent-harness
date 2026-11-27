@@ -19,6 +19,8 @@ Make the configuration skill interactive in both clients. Let the owner choose o
 - Move catalog lookup to a bounded command that returns model IDs, names and supported effort levels. Reuse its result for the entire configuration session and allow a custom ID when it is unavailable.
 - Provide one command to update and validate the selected native settings, preserving existing role choices and unrelated settings.
 
+- Run Web and Backend CI without strict mode so optional template scripts can be skipped. Keep strict mode for Documentation and harness, and Contracts.
+
 ## Tests
 
 - Verify docs, skill frontmatter and the harness tests.
@@ -41,3 +43,5 @@ Both clients ask for the scope and the model for each role. The settings command
 The first interactive Codex run took 3 min 58 s, including 2 min 04 s before the first model question. Both skills now reuse one bounded catalog lookup per target and apply the chosen settings with one command. The native parsers preserve existing settings and validate each edit before any file is replaced. The Claude QA description needed quoting for its original frontmatter to parse.
 
 The live catalog and settings commands were exercised for both clients. With catalog access, inspection took approximately one second per team, and each five-role batch took under 50 ms to validate and save in a temporary copy. The docs checks and all 82 harness tests passed. A complete interactive rerun and its token count remain to be measured.
+
+The Web and Backend jobs now allow missing scripts in the template. Local validation reported eight skips and exited successfully. A backend test that deliberately exited with an error still failed validation. Docs and contracts both passed in strict mode.

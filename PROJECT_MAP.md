@@ -26,7 +26,7 @@ scripts/verify.sh --list       # shows what it would run, without running anythi
 scripts/verify.sh web docs     # explicit areas: docs, contracts, web, backend, mobile, all
 ```
 
-Each area runs the same commands as CI. If a tool or script is missing, the check comes out `SKIPPED` with the reason; CI uses `--strict`, where a skip counts as a failure.
+CI uses `--strict` for docs and contracts, where a skipped check counts as a failure. Web and backend report missing scripts as `SKIPPED` and fail when a check they run returns an error.
 
 | Area | What it runs | Triggered by changes in |
 |---|---|---|

@@ -2,6 +2,13 @@
 
 Real status of the agent harness, newest first. How it works: [`HARNESS.md`](../../HARNESS.md).
 
+## Interactive agent model selection
+
+Plan: [PLAN_CONFIGURE_AGENTS_PICKER.md](../plans/harness/PLAN_CONFIGURE_AGENTS_PICKER.md) (issue #11).
+
+- [Configure agent models](../guides/CONFIGURE_AGENTS.md) asks whether to configure a single role or the whole team. Each role gets its own model choice, including a custom ID, and defaults to high reasoning effort when supported.
+- The same setup command reads the catalog and current role settings, then validates and saves the selected models in one batch.
+
 ## Claude Code or Codex as team coordinator
 
 Plan: [PLAN_DUAL_ORCHESTRATOR.md](../plans/harness/PLAN_DUAL_ORCHESTRATOR.md) (issue #9).

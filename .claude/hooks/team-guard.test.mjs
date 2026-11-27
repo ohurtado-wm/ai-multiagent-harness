@@ -61,6 +61,10 @@ test("nobody outside the main session edits the harness configuration", () => {
   blocks(edit("/repo/.claude/settings.local.json", "qa", "Write"));
   blocks(edit(".claude/hooks/git-guard.mjs", "documenter"));
   allows(edit(".claude/agents/qa.md", "coder"));
+  blocks(bash("node scripts/configure-agents.mjs apply claude < choices.json"));
+  blocks(bash("/usr/bin/node /repo/scripts/configure-agents.mjs apply codex"));
+  allows(bash("node scripts/configure-agents.mjs inspect claude"));
+  allows({ tool_name: "Bash", tool_input: { command: "node scripts/configure-agents.mjs apply claude" } });
 });
 
 test("the documenter only edits its own files", () => {

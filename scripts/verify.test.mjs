@@ -55,6 +55,7 @@ test("harness configuration, CI and setup scripts → docs", () => {
   assert.deepEqual(areasFor([".codex/hooks.json", ".codex/agents/coder.toml"]), ["docs"]);
   assert.deepEqual(areasFor([".github/workflows/plan.yml"]), ["docs"]);
   assert.deepEqual(areasFor(["scripts/set-codeowners.mjs", "scripts/setup-new-repo.sh", "scripts/setup-github-labels.sh"]), ["docs"]);
+  assert.deepEqual(areasFor(["scripts/configure-agents.mjs", "scripts/configure-agents-catalog.mjs"]), ["docs"]);
 });
 
 test("changing the validation mechanism runs every CI area", () => {

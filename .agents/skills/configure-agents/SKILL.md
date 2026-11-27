@@ -1,8 +1,8 @@
 ---
 name: configure-agents
-description: Help the repository owner choose Codex or Claude Code models for the coordinator and team roles, including the optional Codex writer used by Claude.
+description: Interactively choose models for one agent or the whole team in Codex or Claude Code, with high reasoning effort by default.
 ---
 
 # Configure agent models
 
-Follow [Configure agent models](../../../docs/guides/CONFIGURE_AGENTS.md). Read the current repository configuration and ask in the chat for any missing choices. Edit the native settings for the requested client or clients, verify the diff, and report when a new session is needed.
+Follow [Configure agent models](../../../docs/guides/CONFIGURE_AGENTS.md). Ask about scope first. Use the structured user-input tool when available, or numbered choices in chat. Run the shared command once to inspect the selected roles and resolve their catalog. Ask one model question per role, then apply the collected choices with one command.

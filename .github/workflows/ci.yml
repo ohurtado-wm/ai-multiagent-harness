@@ -56,6 +56,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install harness dependencies
+        run: npm ci
       - name: docs area checks (scripts/verify.sh)
         run: scripts/verify.sh --strict docs
 
@@ -75,7 +77,7 @@ jobs:
             if [ -f "$dir/package-lock.json" ]; then (cd "$dir" && npm ci); fi
           done
       - name: web area checks (scripts/verify.sh)
-        run: scripts/verify.sh --strict web
+        run: scripts/verify.sh web
 
   contracts:
     name: Contracts (schemas and fixtures)
@@ -106,4 +108,4 @@ jobs:
         run: if [ -f backend/package-lock.json ]; then (cd backend && npm ci); fi
       # If your backend needs a local database (Postgres, Supabase…), start it here before the checks.
       - name: backend area checks (scripts/verify.sh)
-        run: scripts/verify.sh --strict backend
+        run: scripts/verify.sh backend

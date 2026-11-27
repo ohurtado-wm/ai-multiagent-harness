@@ -1,6 +1,6 @@
 ---
 name: qa
-description: Checks the work of a milestone: runs scripts/verify.sh for the diff areas, verifies the UI (verify-ui) and the parity with the functional reference (reference-parity), writes the acceptance tests and turns every failure into a task for the owning coder. Use it as a teammate in a phase team. It does not fix production code.
+description: "Checks the work of a milestone: runs scripts/verify.sh for the diff areas, verifies the UI (verify-ui) and the parity with the functional reference (reference-parity), writes the acceptance tests and turns every failure into a task for the owning coder. Use it as a teammate in a phase team. It does not fix production code."
 tools: Read, Grep, Glob, Edit, Write, Bash, Skill, Agent
 model: sonnet
 ---

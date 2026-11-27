@@ -190,7 +190,7 @@ Plans are written to be **read by line ranges** (about 30 KB, at most 6 self-con
 scripts/verify.sh            # auto: areas from the diff against origin/dev
 scripts/verify.sh --list     # what it would run
 scripts/verify.sh web docs   # explicit areas
-scripts/verify.sh --strict   # a SKIPPED check is a failure (CI)
+scripts/verify.sh --strict   # a SKIPPED check is a failure
 ```
 
 It maps changed paths to areas (`docs`, `contracts`, `web`, `backend`, `mobile`), runs each area's checks and prints `OK | FAIL | SKIPPED` per check. A missing tool or script is **SKIPPED with the reason**, never a silent pass. CI ([`ci.yml`](.github/workflows/ci.yml)) calls the same script per area, and only runs the jobs whose area changed. [`plan.yml`](.github/workflows/plan.yml) checks rule 4 on every PR: code changes must bring a plan or a `No plan: <reason>` line.

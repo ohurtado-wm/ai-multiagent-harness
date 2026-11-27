@@ -72,7 +72,7 @@
   .reveal.zoom.in { transform: none; }
 
   /* ---------- Hero ---------- */
-  .hero { background: var(--navy); color: var(--white); padding: 96px 0 0; overflow: hidden; }
+  .hero { background: var(--navy); color: var(--white); padding: 96px 0 0; overflow: hidden; overflow: clip; }
   .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; filter: blur(90px); opacity: .45; pointer-events: none; }
   .hero::before { width: 520px; height: 520px; background: var(--blue); top: -160px; right: -80px; animation: drift 14s ease-in-out infinite alternate; }
   .hero::after { width: 420px; height: 420px; background: var(--magenta); bottom: -120px; left: -120px; opacity: .3; animation: drift 18s ease-in-out infinite alternate-reverse; }
@@ -218,7 +218,7 @@
   .tree .lvl .arrowr { color: var(--blue); font-weight: 800; }
 
   /* GitHub section */
-  .gh-section { background: var(--navy); color: var(--white); overflow: hidden; }
+  .gh-section { background: var(--navy); color: var(--white); overflow: hidden; overflow: clip; }
   .gh-section::before { content: ""; position: absolute; width: 640px; height: 640px; border-radius: 50%; background: var(--magenta); filter: blur(140px); opacity: .18; top: -200px; right: -200px; }
   .gh-section .wrap { position: relative; }
   .gh-section .kicker { color: var(--magenta); }
@@ -335,6 +335,31 @@
   .meter .bar { flex: 1; margin: 0; }
   .meter .bar i { background: linear-gradient(90deg, var(--blue), var(--magenta)); }
 
+  /* Starter commands (Adopt) */
+  .starter { background: var(--navy); color: var(--white); border-radius: 22px; padding: 26px 28px 22px; margin-bottom: 26px; position: relative; overflow: hidden; overflow: clip; }
+  .starter::after { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: var(--magenta); filter: blur(110px); opacity: .22; right: -80px; top: -120px; pointer-events: none; }
+  .starter-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; position: relative; z-index: 1; }
+  .starter-head .dots { display: inline-flex; gap: 6px; }
+  .starter-head .dots i { display: block; width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+  .starter-head .dots i:first-child { background: var(--magenta); }
+  .starter-head h3 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+  .starter-head span.tag { margin-left: auto; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--magenta); }
+  .cmds { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: k; position: relative; z-index: 1; }
+  .cmds li { counter-increment: k; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px 14px; align-items: start; }
+  .cmds li::before { content: counter(k); grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; background: var(--magenta); color: var(--white); font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .cmds .what { font-size: 15px; color: var(--gray-mid); }
+  .cmds .what b { color: var(--white); }
+  .cmd { min-width: 0; display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); border-radius: 12px; padding: 10px 10px 10px 16px; transition: border-color .25s, background .25s; }
+  .cmd:hover { border-color: var(--magenta); background: rgba(255, 255, 255, .09); }
+  .cmd code { flex: 1; min-width: 0; background: none; color: var(--white); font-size: 14px; padding: 0; overflow-x: auto; white-space: nowrap; }
+  .cmd code::before { content: "$ "; color: var(--magenta); }
+  .cmd code .ph { color: #ff8af0; }
+  .copy { flex: none; border: 0; border-radius: 8px; background: var(--blue); color: var(--white); font: inherit; font-size: 13px; font-weight: 700; padding: 7px 12px; cursor: pointer; transition: background .2s, transform .2s var(--ease); }
+  .copy:hover { transform: translateY(-1px); }
+  .copy.done { background: var(--magenta); }
+  .starter .after { margin: 18px 0 0; font-size: 14px; color: var(--gray-mid); position: relative; z-index: 1; }
+  .starter .after code { background: rgba(255, 255, 255, .12); color: var(--white); }
+
   /* Inventory */
   .inventory { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
   .inventory .card h3 { font-family: var(--mono); font-size: 16px; color: var(--blue); }
@@ -343,7 +368,7 @@
   .inventory li code { font-size: 13px; }
 
   /* Closing */
-  .cta-band { background: linear-gradient(120deg, var(--navy) 0%, #12086e 60%, var(--navy) 100%); color: var(--white); border-radius: 28px; padding: 56px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; position: relative; overflow: hidden; }
+  .cta-band { background: linear-gradient(120deg, var(--navy) 0%, #12086e 60%, var(--navy) 100%); color: var(--white); border-radius: 28px; padding: 56px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; position: relative; overflow: hidden; overflow: clip; }
   .cta-band::after { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; background: var(--magenta); filter: blur(110px); opacity: .35; right: -80px; top: -120px; animation: drift 12s ease-in-out infinite alternate; }
   .cta-band > * { position: relative; z-index: 1; }
   .cta-band h2 { margin: 0 0 10px; color: var(--white); }
@@ -1024,9 +1049,19 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
   <div class="wrap">
     <p class="kicker reveal">11 · Adoption</p>
     <h2 class="reveal">Adopt it in ten steps.</h2>
-    <p class="lead reveal">The apps are placeholders: replace them with your project and keep the harness. Tick the steps as you go.</p>
+    <p class="lead reveal">The apps are placeholders: replace them with your project and keep the harness. Start from the template, then tick the steps as you go.</p>
+    <div class="starter reveal">
+      <div class="starter-head"><span class="dots"><i></i><i></i><i></i></span><h3>Start a new repository from the template</h3><span class="tag">GitHub CLI</span></div>
+      <ol class="cmds">
+        <li><span class="what"><b>Mark this repository as a template</b> (once, by its owner)</span><div class="cmd"><code>gh repo edit ohurtado-wm/ai-multiagent-harness --template</code><button class="copy" type="button" data-copy="gh repo edit ohurtado-wm/ai-multiagent-harness --template">Copy</button></div></li>
+        <li><span class="what"><b>Create your repository</b> from it; <code>--include-all-branches</code> copies <code>main</code> and <code>dev</code></span><div class="cmd"><code>gh repo create <span class="ph">&lt;owner&gt;/&lt;new-repo&gt;</span> --template ohurtado-wm/ai-multiagent-harness --include-all-branches --private --clone</code><button class="copy" type="button" data-copy="gh repo create <owner>/<new-repo> --template ohurtado-wm/ai-multiagent-harness --include-all-branches --private --clone">Copy</button></div></li>
+        <li><span class="what"><b>Make <code>dev</code> the default branch</b>, so <code>Closes #n</code> closes issues on merge</span><div class="cmd"><code>gh repo edit <span class="ph">&lt;owner&gt;/&lt;new-repo&gt;</span> --default-branch dev</code><button class="copy" type="button" data-copy="gh repo edit <owner>/<new-repo> --default-branch dev">Copy</button></div></li>
+        <li><span class="what"><b>Create the labels</b> from the new repository's folder (a template copies files, not labels)</span><div class="cmd"><code>scripts/setup-github-labels.sh <span class="ph">&lt;owner&gt;/&lt;new-repo&gt;</span></code><button class="copy" type="button" data-copy="scripts/setup-github-labels.sh <owner>/<new-repo>">Copy</button></div></li>
+      </ol>
+      <p class="after">Replace <code>&lt;owner&gt;/&lt;new-repo&gt;</code> and check <code>gh auth status</code> first. A template does not copy branch protection either: protect <code>main</code> and <code>dev</code> in <i>Settings → Branches</i>. Same steps in the <a href="../../README.md" style="color:#ff8af0">README</a>.</p>
+    </div>
     <div class="checklist">
-      <button class="check reveal" aria-pressed="false"><span class="box"><span>1</span></span><p><b>Copy the repo.</b> Create <code>dev</code>, make it the default branch, protect <code>main</code> and <code>dev</code>.</p></button>
+      <button class="check reveal" aria-pressed="false"><span class="box"><span>1</span></span><p><b>Start from the template.</b> Run the commands above, then protect <code>main</code> and <code>dev</code> on GitHub.</p></button>
       <button class="check hot reveal" aria-pressed="false" style="--d:.05s"><span class="box"><span>2</span></span><p><b>GitHub Issues.</b> Run <code>scripts/setup-github-labels.sh</code>, enable sub-issues, read the guide. Don't skip it.</p></button>
       <button class="check reveal" aria-pressed="false" style="--d:.1s"><span class="box"><span>3</span></span><p><b>Project context</b> in <code>AGENTS.md</code>; declare the reference app, if any.</p></button>
       <button class="check reveal" aria-pressed="false" style="--d:.15s"><span class="box"><span>4</span></span><p><b>Areas and commands:</b> plug your stack into <code>scripts/verify.sh</code>, its test and CI.</p></button>
@@ -1136,6 +1171,18 @@ Summary: 3 OK, 1 failed, 1 skipped (areas: docs web backend mobile)</pre>
     li.addEventListener("mouseenter", () => ring.classList.add("hl"));
     li.addEventListener("mouseleave", () => ring.classList.remove("hl"));
   });
+
+  // Copy buttons for the starter commands.
+  document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", async () => {
+    const text = b.dataset.copy;
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select();
+      document.execCommand("copy"); t.remove();
+    }
+    b.textContent = "Copied ✓"; b.classList.add("done");
+    setTimeout(() => { b.textContent = "Copy"; b.classList.remove("done"); }, 1800);
+  }));
 
   // Adoption checklist.
   const checks = [...document.querySelectorAll(".check")];

@@ -10,7 +10,7 @@
 | `packages/ui/` | Shared UI components; `src/tokens.css` is generated from `shared/design/tokens.json`. |
 | `shared/` | Design tokens (`design/`), contracts between apps (`schemas/`) and shared fixtures (`fixtures/`). |
 | `docs/` | Plans (`plans/`), status per area (`status/`), guides (`guides/`) and architecture (`architecture/`). |
-| `scripts/` | Validation and harness scripts: `verify.sh`, `plan-status.mjs`, `pr-check-plan.mjs`, `check-links.mjs`, `check-json.mjs`, `build-tokens.mjs`, `setup-github-labels.sh` (labels for the GitHub Issues integration). |
+| `scripts/` | Validation and harness scripts: `verify.sh`, `plan-status.mjs`, `pr-check-plan.mjs`, `check-links.mjs`, `check-json.mjs`, `build-tokens.mjs`, `setup-github-labels.sh` (labels for the GitHub Issues integration), `setup-new-repo.sh` and `set-codeowners.mjs` (one-time setup of a repository created from the template). |
 | `.claude/` | The agent harness: `settings.json`, `hooks/`, `agents/`, `skills/`, `launch.json`. Explained in [`HARNESS.md`](HARNESS.md). |
 | `.github/` | CI (`workflows/ci.yml`), plan check (`workflows/plan.yml`), PR template, `finding` issue template and `CODEOWNERS`. |
 

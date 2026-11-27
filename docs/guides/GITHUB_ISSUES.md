@@ -5,7 +5,7 @@ GitHub Issues is the **coordination backbone** of the harness: the place where p
 ## One-time setup
 
 1. The repository is on GitHub with `dev` as the **default branch** (so `Closes #<n>` closes issues when a PR is merged into `dev`).
-2. Create the labels (idempotent, safe to rerun):
+2. Create the labels (idempotent, safe to rerun). In a repository created from the template, `scripts/setup-new-repo.sh` already did this, together with `dev` as default branch and `CODEOWNERS`:
 
    ```bash
    scripts/setup-github-labels.sh

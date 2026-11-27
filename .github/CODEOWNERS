@@ -1,5 +1,5 @@
 # Sensitive paths: they mark who to request a review from.
-# If you created your repository from this template, replace @ohurtado-wm with your own user or team.
+# If you created your repository from this template, run scripts/setup-new-repo.sh: it puts your user (or --codeowner team) here.
 # Note: if agents open PRs with the owner's account, GitHub does not let that account approve its own PR,
 # so do not make CODEOWNERS approval mandatory in that setup.
 /backend/migrations/ @ohurtado-wm

@@ -1,0 +1,15 @@
+{
+  "name": "agent-harness-monorepo",
+  "private": true,
+  "description": "Monorepo skeleton wired with an AI agent harness (Claude Code + Codex). Replace the apps with your own.",
+  "scripts": {
+    "verify": "scripts/verify.sh",
+    "test:harness": "node --test .claude/hooks/*.test.mjs scripts/*.test.mjs",
+    "plans": "node scripts/plan-status.mjs",
+    "tokens": "node scripts/build-tokens.mjs",
+    "tokens:check": "node scripts/build-tokens.mjs --check"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

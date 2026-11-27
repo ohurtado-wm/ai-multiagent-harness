@@ -1,0 +1,35 @@
+name: PR plan
+
+# Rule 4 of AGENTS.md: a work PR that changes code brings its plan in docs/plans/
+# or declares «No plan: <reason>» in its description. A separate workflow so it can rerun
+# when the description is edited without repeating the whole CI. It warns; make it a required
+# check in branch protection if you want it to block the merge.
+on:
+  pull_request:
+    branches: [dev, main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: PR plan (rule 4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check that the PR brings its plan
+        env:
+          # Untrusted inputs: they go through environment variables, never interpolated into the script.
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          node scripts/pr-check-plan.mjs "${files[@]}"

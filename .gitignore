@@ -1,0 +1,16 @@
+.DS_Store
+
+# Node
+node_modules/
+*.tsbuildinfo
+
+# Local secrets (never committed; document variables in .env.example)
+.env
+.env.*
+!.env.example
+
+# Local UI-test screenshots
+.screenshots/
+
+# Personal Claude Code preferences
+.claude/settings.local.json

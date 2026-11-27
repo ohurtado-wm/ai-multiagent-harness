@@ -1,0 +1,9 @@
+# Sensitive paths: they mark who to request a review from. Replace @your-org/owners with your team or user.
+# Note: if agents open PRs with the owner's account, GitHub does not let that account approve its own PR,
+# so do not make CODEOWNERS approval mandatory in that setup.
+/backend/migrations/ @your-org/owners
+/shared/schemas/ @your-org/owners
+/.github/ @your-org/owners
+/.claude/ @your-org/owners
+/AGENTS.md @your-org/owners
+/CLAUDE.md @your-org/owners

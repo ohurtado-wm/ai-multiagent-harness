@@ -1,0 +1,109 @@
+name: CI
+
+# Continuous integration. Native mobile builds do not run here: they are checked locally (owner decision).
+# Each job calls scripts/verify.sh with its area, so the list of checks lives in a single place.
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Decides which areas need validation from the PR's files (scripts/verify.sh --areas), so a PR that
+  # only changes documentation does not spend minutes on database tests or web builds.
+  # On pushes to dev (after merging) everything runs.
+  changes:
+    name: Which areas changed
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.areas.outputs.web }}
+      contracts: ${{ steps.areas.outputs.contracts }}
+      backend: ${{ steps.areas.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Affected areas
+        id: areas
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            areas="web contracts backend"
+          else
+            files="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | tr '\n' ' ')"
+            areas="$(scripts/verify.sh --areas --files "$files" | tr '\n' ' ')"
+          fi
+          echo "Areas: ${areas:-none}"
+          for a in web contracts backend; do
+            case " $areas " in *" $a "*) echo "$a=true" >> "$GITHUB_OUTPUT" ;; *) echo "$a=false" >> "$GITHUB_OUTPUT" ;; esac
+          done
+
+  docs:
+    name: Documentation and harness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: docs area checks (scripts/verify.sh)
+        run: scripts/verify.sh --strict docs
+
+  web:
+    name: Web (tokens, types, lint, tests and build)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: |
+          for dir in . packages/ui apps/web; do
+            if [ -f "$dir/package-lock.json" ]; then (cd "$dir" && npm ci); fi
+          done
+      - name: web area checks (scripts/verify.sh)
+        run: scripts/verify.sh --strict web
+
+  contracts:
+    name: Contracts (schemas and fixtures)
+    needs: changes
+    if: needs.changes.outputs.contracts == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; fi
+      - name: contracts area checks (scripts/verify.sh)
+        run: scripts/verify.sh --strict contracts
+
+  backend:
+    name: Backend (tests)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: if [ -f backend/package-lock.json ]; then (cd backend && npm ci); fi
+      # If your backend needs a local database (Postgres, Supabase…), start it here before the checks.
+      - name: backend area checks (scripts/verify.sh)
+        run: scripts/verify.sh --strict backend

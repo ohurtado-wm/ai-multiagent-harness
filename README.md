@@ -46,7 +46,7 @@ Replace `<owner>/<new-repo>` with the account (or organization) and name of your
 
 4. **Protect `main` and `dev`** in *Settings → Branches* (no direct pushes, required CI checks). A template does not copy branch protection, and it is the only layer that also covers work done outside Claude Code.
 5. **Open Claude Code** in the repository root and run `/onboarding`.
-6. **Make it yours:** fill in «Project context» in [`AGENTS.md`](AGENTS.md), the folders' `AGENTS.md` and the `area_*` functions of [`scripts/verify.sh`](scripts/verify.sh) with your real stack, and replace the placeholder apps. Full checklist in [`HARNESS.md`](HARNESS.md), «Adopting it in your project».
+6. **Make it yours:** fill in «Project context» in [`AGENTS.md`](AGENTS.md), the folders' `AGENTS.md` and the `area_*` functions of [`scripts/verify.sh`](scripts/verify.sh) with your real stack, replace the placeholder apps, and put your own user or team in [`.github/CODEOWNERS`](.github/CODEOWNERS). Full checklist in [`HARNESS.md`](HARNESS.md), «Adopting it in your project».
 
 Check the harness itself at any time:
 
